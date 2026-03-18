@@ -1,0 +1,133 @@
+import { createOpenRouter } from "@openrouter/ai-sdk-provider";
+import { generateText } from "ai";
+
+interface EvaluateRequest {
+  responseText: string;
+  scenario: {
+    crimeDescription: string;
+    suspects: { name: string; background: string }[];
+    clues: string[];
+    correctCulprit: string;
+  };
+}
+
+interface EvaluateResult {
+  scores: { point: number; evidence: number; explain: number; link: number };
+  feedback: {
+    point: string;
+    evidence: string;
+    explain: string;
+    link: string;
+  };
+  grammarFlags: string[];
+  modelAnswer: string;
+}
+
+const SYSTEM_PROMPT = `You are an expert writing teacher evaluating a student's PEEL paragraph response to a mystery scenario.
+
+PEEL Framework:
+- Point (0-5): Did the student clearly state who the culprit is?
+- Evidence (0-5): Did the student cite specific clues from the scenario?
+- Explain (0-5): Did the student logically connect the evidence to their conclusion?
+- Link (0-5): Did the student tie their argument back to the original question/scenario?
+
+Scoring guide:
+- 0: Missing entirely
+- 1-2: Attempted but weak
+- 3-4: Adequate with minor issues
+- 5: Excellent, clear and specific
+
+Return ONLY valid JSON (no markdown code blocks) in this exact format:
+{
+  "scores": { "point": <0-5>, "evidence": <0-5>, "explain": <0-5>, "link": <0-5> },
+  "feedback": { "point": "<feedback>", "evidence": "<feedback>", "explain": "<feedback>", "link": "<feedback>" },
+  "grammarFlags": ["<issue1>", "<issue2>"],
+  "modelAnswer": "<a model PEEL paragraph answer>"
+}`;
+
+export async function POST(req: Request) {
+  let body: unknown;
+  try {
+    body = await req.json();
+  } catch {
+    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+  }
+
+  const data = body as Partial<EvaluateRequest>;
+
+  if (!data.responseText || !data.scenario) {
+    return Response.json(
+      { error: "Missing responseText or scenario" },
+      { status: 400 }
+    );
+  }
+
+  const apiKey = process.env.OPENROUTER_API_KEY;
+  if (!apiKey) {
+    return Response.json(
+      { error: "OpenRouter API key not configured" },
+      { status: 500 }
+    );
+  }
+
+  const openrouter = createOpenRouter({ apiKey });
+
+  const suspectsDescription = data.scenario.suspects
+    .map((s) => `- ${s.name}: ${s.background}`)
+    .join("\n");
+
+  const cluesDescription = data.scenario.clues
+    .map((c, i) => `${i + 1}. ${c}`)
+    .join("\n");
+
+  const userMessage = `Scenario:
+Crime Description: ${data.scenario.crimeDescription}
+
+Suspects:
+${suspectsDescription}
+
+Clues:
+${cluesDescription}
+
+Correct Culprit: ${data.scenario.correctCulprit}
+
+Student's Response:
+${data.responseText}`;
+
+  try {
+    const result = await generateText({
+      model: openrouter(process.env.OPENROUTER_MODEL || "anthropic/claude-sonnet-4-5"),
+      system: SYSTEM_PROMPT,
+      prompt: userMessage,
+    });
+
+    // Parse the AI response as JSON
+    const parsed = JSON.parse(result.text) as EvaluateResult;
+
+    // Validate the response structure
+    if (
+      !parsed.scores ||
+      typeof parsed.scores.point !== "number" ||
+      typeof parsed.scores.evidence !== "number" ||
+      typeof parsed.scores.explain !== "number" ||
+      typeof parsed.scores.link !== "number" ||
+      !parsed.feedback ||
+      !Array.isArray(parsed.grammarFlags) ||
+      typeof parsed.modelAnswer !== "string"
+    ) {
+      return Response.json(
+        { error: "Invalid AI response format" },
+        { status: 502 }
+      );
+    }
+
+    return Response.json(parsed);
+  } catch (error) {
+    const message =
+      error instanceof Error ? error.message : "Unknown evaluation error";
+    return Response.json(
+      { error: "Evaluation failed", details: message },
+      { status: 502 }
+    );
+  }
+}
