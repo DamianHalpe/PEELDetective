@@ -12,12 +12,12 @@ Extend the boilerplate's database schema with all PEEL-specific tables, add role
 
 ### Tasks
 
-- [ ] Extend `src/lib/schema.ts` with new columns on `user` and all new tables
+- [x] Extend `src/lib/schema.ts` with new columns on `user` and all new tables
 - [ ] Generate and run database migration
-- [ ] Add role-based middleware to protect `/teacher` and `/admin` routes
-- [ ] Update BetterAuth config to expose `role` in session
-- [ ] Apply crime-noir colour tokens to `src/app/globals.css`
-- [ ] Update `src/components/site-header.tsx` with PEEL Detective branding and nav links
+- [x] Add role-based middleware to protect `/teacher` and `/admin` routes
+- [x] Update BetterAuth config to expose `role` in session (config also includes Google OAuth via `socialProviders.google`)
+- [x] Apply crime-noir colour tokens to `src/app/globals.css`
+- [x] Update `src/components/site-header.tsx` with PEEL Detective branding and nav links
 
 ### Technical Details
 
@@ -194,7 +194,7 @@ Student's response:
 
 **Error handling:** If Claude times out (30s) or returns invalid JSON, update submission to `status: "failed"`, return error with `submissionId` so client can retry.
 
-**Environment variable:** `OPENROUTER_MODEL=anthropic/claude-sonnet-4-5`
+**Environment variables:** `OPENROUTER_MODEL=anthropic/claude-sonnet-4-5`, `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`
 
 **Key files to create:**
 - `src/app/api/scenarios/route.ts`

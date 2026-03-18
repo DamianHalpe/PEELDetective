@@ -7,6 +7,7 @@ Manual steps that must be completed by a human. These cannot be automated.
 - [ ] **Get OpenRouter API key** — Required for AI evaluation. Sign up at https://openrouter.ai/settings/keys and ensure the account has credits to access `anthropic/claude-sonnet-4-5`
 - [ ] **Provision PostgreSQL database** — Set up a PostgreSQL instance. Recommended: Supabase (free tier) or Railway. Copy the connection string.
 - [ ] **Generate BetterAuth secret** — Generate a 32-character random string for `BETTER_AUTH_SECRET` (e.g., `openssl rand -base64 32`)
+- [ ] **Get Google OAuth credentials** — Create a project in [Google Cloud Console](https://console.cloud.google.com/), enable the Google+ API, and create OAuth 2.0 credentials. Set authorised redirect URI to `http://localhost:3004/api/auth/callback/google` (dev) and your production URL. Copy Client ID and Client Secret.
 
 ## During Implementation
 
@@ -17,6 +18,8 @@ Manual steps that must be completed by a human. These cannot be automated.
   OPENROUTER_API_KEY=sk-or-v1-your-key
   OPENROUTER_MODEL=anthropic/claude-sonnet-4-5
   NEXT_PUBLIC_APP_URL=http://localhost:3000
+  GOOGLE_CLIENT_ID=your-google-client-id
+  GOOGLE_CLIENT_SECRET=your-google-client-secret
   ```
 - [ ] **Run database migrations** — After schema changes in Phase 1, run `pnpm run db:migrate` to apply the new tables
 - [ ] **Seed initial badge data** — After Phase 5 badge table is created, run the seed script to insert default badges

@@ -32,7 +32,8 @@ Each mystery has: crime description, suspect list (3–5 characters), clues, and
 ## Acceptance Criteria
 
 ### Authentication & Roles
-- [ ] Students can register and log in with email/password
+- [ ] Students can register and log in with email/password or Google OAuth
+- [ ] Users can sign in with Google OAuth (redirects to /dashboard on success)
 - [ ] Users have a role: `student`, `teacher`, or `admin`
 - [ ] Role-based access control: teacher and admin routes are protected
 - [ ] Session management persists across browser sessions

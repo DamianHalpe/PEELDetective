@@ -2,8 +2,8 @@ services:
   postgres:
     image: pgvector/pgvector:pg18
     environment:
-      POSTGRES_DB: postgres_dev
-      POSTGRES_USER: dev_user
-      POSTGRES_PASSWORD: dev_password
+      POSTGRES_DB: postgres_peel
+      POSTGRES_USER: peel_admin
+      POSTGRES_PASSWORD: peel_password
     ports:
       - "5432:5432"
