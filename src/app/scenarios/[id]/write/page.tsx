@@ -1,12 +1,13 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
+  CheckCircle2,
   Loader2,
   Send,
 } from "lucide-react";
@@ -69,6 +70,8 @@ export default function WritePage() {
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [guideOpen, setGuideOpen] = useState(true);
+  const [evalStep, setEvalStep] = useState(0);
+  const evalTimer = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const fetchScenario = useCallback(async () => {
     try {
@@ -95,10 +98,22 @@ export default function WritePage() {
     void fetchScenario();
   }, [session, isPending, router, fetchScenario]);
 
+  const evalSteps = [
+    { label: "Reading your case report…", done: false },
+    { label: "Analysing Point — who is the culprit?", done: false },
+    { label: "Checking Evidence — clues cited?", done: false },
+    { label: "Reviewing Explanation — logical connection?", done: false },
+    { label: "Evaluating Link — tied back to the question?", done: false },
+  ];
+
   async function handleSubmit() {
     if (!responseText.trim()) return;
     setSubmitting(true);
     setSubmitError(null);
+    setEvalStep(0);
+    evalTimer.current = setInterval(() => {
+      setEvalStep((s) => Math.min(s + 1, evalSteps.length - 1));
+    }, 1100);
 
     try {
       const res = await fetch("/api/submissions", {
@@ -123,7 +138,9 @@ export default function WritePage() {
     } catch {
       setSubmitError("Network error. Please check your connection and try again.");
     } finally {
+      if (evalTimer.current) clearInterval(evalTimer.current);
       setSubmitting(false);
+      setEvalStep(0);
     }
   }
 
@@ -190,6 +207,41 @@ export default function WritePage() {
             </div>
           )}
 
+          {submitting && (
+            <Card className="border-detective-amber/30 bg-card">
+              <CardContent className="p-4">
+                <div className="mb-3 flex items-center gap-2">
+                  <Loader2 className="h-4 w-4 animate-spin text-detective-amber" />
+                  <span className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
+                    AI Evaluation in Progress
+                  </span>
+                </div>
+                <div className="space-y-2">
+                  {evalSteps.map((step, i) => (
+                    <div key={i} className="flex items-center gap-2 text-sm">
+                      {i < evalStep ? (
+                        <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                      ) : i === evalStep ? (
+                        <Loader2 className="h-4 w-4 shrink-0 animate-spin text-detective-amber" />
+                      ) : (
+                        <div className="h-4 w-4 shrink-0 rounded-full border border-muted-foreground/30" />
+                      )}
+                      <span
+                        className={
+                          i <= evalStep
+                            ? "text-foreground"
+                            : "text-muted-foreground/50"
+                        }
+                      >
+                        {step.label}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
           <Button
             size="lg"
             className="w-full"
@@ -199,7 +251,7 @@ export default function WritePage() {
             {submitting ? (
               <>
                 <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Evaluating your response… (~5 seconds)
+                Evaluating…
               </>
             ) : (
               <>
