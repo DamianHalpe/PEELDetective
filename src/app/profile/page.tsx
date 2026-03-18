@@ -1,9 +1,22 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Mail, Calendar, User, Shield, ArrowLeft, Lock, Smartphone } from "lucide-react";
-import { toast } from "sonner";
+import {
+  Mail,
+  Calendar,
+  ArrowLeft,
+  Search,
+  Trophy,
+  Target,
+  TrendingUp,
+  Badge as BadgeIcon,
+  Eye,
+  Shield,
+  Star,
+  FileText,
+} from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -14,24 +27,129 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
-import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth-client";
+
+// --- Types ---
+
+interface ProfileSubmission {
+  id: string;
+  scenarioId: string;
+  scenarioTitle: string;
+  totalScore: number | null;
+  teacherOverrideScore: number | null;
+  status: string;
+  submittedAt: string;
+}
+
+interface ProfileBadge {
+  id: string;
+  badgeId: string;
+  name: string;
+  description: string;
+  iconName: string;
+  awardedAt: string;
+}
+
+interface ProfileData {
+  points: number;
+  submissions: ProfileSubmission[];
+  badges: ProfileBadge[];
+}
+
+// --- Icon mapping for badge iconName field ---
+
+const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
+  Badge: BadgeIcon,
+  Eye: Eye,
+  Shield: Shield,
+  Trophy: Trophy,
+  Star: Star,
+  Target: Target,
+  Search: Search,
+  FileText: FileText,
+};
+
+function BadgeIconComponent({
+  iconName,
+  className,
+}: {
+  iconName: string;
+  className?: string;
+}) {
+  const Icon = ICON_MAP[iconName] ?? BadgeIcon;
+  return <Icon className={className ?? ""} />;
+}
+
+// --- Helper: effective score for a submission ---
+
+function effectiveScore(sub: ProfileSubmission): number | null {
+  return sub.teacherOverrideScore ?? sub.totalScore;
+}
+
+// --- Status badge variant ---
+
+function StatusBadge({ status }: { status: string }) {
+  switch (status) {
+    case "evaluated":
+      return (
+        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-300 dark:border-green-700">
+          Evaluated
+        </Badge>
+      );
+    case "pending":
+      return (
+        <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-300 dark:border-amber-700">
+          Pending
+        </Badge>
+      );
+    case "failed":
+      return (
+        <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-300 dark:border-red-700">
+          Failed
+        </Badge>
+      );
+    default:
+      return <Badge variant="secondary">{status}</Badge>;
+  }
+}
+
+// --- Loading skeleton ---
+
+function ProfileSkeleton() {
+  return (
+    <div className="container max-w-4xl mx-auto py-8 px-4 space-y-6">
+      <Skeleton className="h-8 w-48" />
+      <Skeleton className="h-32 w-full" />
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <Skeleton className="h-28" />
+        <Skeleton className="h-28" />
+        <Skeleton className="h-28" />
+      </div>
+      <Skeleton className="h-64 w-full" />
+      <Skeleton className="h-48 w-full" />
+    </div>
+  );
+}
+
+// --- Main page component ---
 
 export default function ProfilePage() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
-  const [editProfileOpen, setEditProfileOpen] = useState(false);
-  const [securityOpen, setSecurityOpen] = useState(false);
-  const [emailPrefsOpen, setEmailPrefsOpen] = useState(false);
+  const [profileData, setProfileData] = useState<ProfileData | null>(null);
+  const [profileLoading, setProfileLoading] = useState(true);
+
+  const fetchProfile = useCallback(async () => {
+    try {
+      const res = await fetch("/api/profile");
+      if (!res.ok) return;
+      const data = (await res.json()) as ProfileData;
+      setProfileData(data);
+    } finally {
+      setProfileLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     if (!isPending && !session) {
@@ -39,12 +157,18 @@ export default function ProfilePage() {
     }
   }, [isPending, session, router]);
 
+  useEffect(() => {
+    if (session) {
+      fetchProfile();
+    }
+  }, [session, fetchProfile]);
+
   if (isPending || !session) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div>Loading...</div>
-      </div>
-    );
+    return <ProfileSkeleton />;
+  }
+
+  if (profileLoading) {
+    return <ProfileSkeleton />;
   }
 
   const user = session.user;
@@ -56,15 +180,35 @@ export default function ProfilePage() {
       })
     : null;
 
-  const handleEditProfileSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    // In a real app, this would call an API to update the user profile
-    toast.info("Profile updates require backend implementation");
-    setEditProfileOpen(false);
-  };
+  // Compute stats from submissions
+  const evaluatedSubmissions = (profileData?.submissions ?? []).filter(
+    (s) => s.status === "evaluated"
+  );
+
+  const totalCases = evaluatedSubmissions.length;
+
+  const scores = evaluatedSubmissions
+    .map((s) => effectiveScore(s))
+    .filter((s): s is number => s !== null);
+
+  const averageScore =
+    scores.length > 0
+      ? (scores.reduce((a, b) => a + b, 0) / scores.length).toFixed(1)
+      : null;
+
+  const bestScore = scores.length > 0 ? Math.max(...scores) : null;
+
+  // Role badge label
+  const roleLabel =
+    (user as Record<string, unknown>).role === "teacher"
+      ? "Teacher"
+      : (user as Record<string, unknown>).role === "admin"
+        ? "Admin"
+        : "Student";
 
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4">
+      {/* Back button + heading */}
       <div className="flex items-center gap-4 mb-8">
         <Button
           variant="ghost"
@@ -94,19 +238,22 @@ export default function ProfilePage() {
                 </AvatarFallback>
               </Avatar>
               <div className="space-y-2">
-                <h2 className="text-2xl font-semibold">{user.name}</h2>
+                <div className="flex items-center gap-3 flex-wrap">
+                  <h2 className="text-2xl font-semibold">{user.name}</h2>
+                  <Badge variant="outline" className="text-xs">
+                    {roleLabel}
+                  </Badge>
+                  <Badge
+                    variant="secondary"
+                    className="flex items-center gap-1"
+                  >
+                    <Search className="h-3 w-3" />
+                    {profileData?.points ?? 0} pts
+                  </Badge>
+                </div>
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="h-4 w-4" />
                   <span>{user.email}</span>
-                  {user.emailVerified && (
-                    <Badge
-                      variant="outline"
-                      className="text-green-600 border-green-600"
-                    >
-                      <Shield className="h-3 w-3 mr-1" />
-                      Verified
-                    </Badge>
-                  )}
                 </div>
                 {createdDate && (
                   <div className="flex items-center gap-2 text-muted-foreground text-sm">
@@ -119,298 +266,161 @@ export default function ProfilePage() {
           </CardHeader>
         </Card>
 
-        {/* Account Information */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Account Information</CardTitle>
-            <CardDescription>Your account details and settings</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">
-                  Full Name
-                </label>
-                <div className="p-3 border rounded-md bg-muted/10">
-                  {user.name || "Not provided"}
+        {/* Stats row */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-blue-100 dark:bg-blue-900/30 p-2">
+                  <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Cases</p>
+                  <p className="text-2xl font-bold">{totalCases}</p>
                 </div>
               </div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-muted-foreground">
-                  Email Address
-                </label>
-                <div className="p-3 border rounded-md bg-muted/10 flex items-center justify-between">
-                  <span>{user.email}</span>
-                  {user.emailVerified && (
-                    <Badge
-                      variant="outline"
-                      className="text-green-600 border-green-600"
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-amber-100 dark:bg-amber-900/30 p-2">
+                  <TrendingUp className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Average Score</p>
+                  <p className="text-2xl font-bold">
+                    {averageScore !== null ? `${averageScore}/20` : "--"}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-green-100 dark:bg-green-900/30 p-2">
+                  <Trophy className="h-5 w-5 text-green-600 dark:text-green-400" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">Best Score</p>
+                  <p className="text-2xl font-bold">
+                    {bestScore !== null ? `${bestScore}/20` : "--"}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Submission History */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Submission History</CardTitle>
+            <CardDescription>
+              Your past case investigations and scores
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {(profileData?.submissions ?? []).length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <FileText className="h-10 w-10 mx-auto mb-3 opacity-40" />
+                <p>No cases solved yet. Start with a scenario!</p>
+                <Button variant="outline" className="mt-4" asChild>
+                  <Link href="/">Browse Scenarios</Link>
+                </Button>
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {profileData!.submissions.map((sub) => {
+                  const score = effectiveScore(sub);
+                  const dateStr = new Date(sub.submittedAt).toLocaleDateString(
+                    "en-US",
+                    {
+                      year: "numeric",
+                      month: "short",
+                      day: "numeric",
+                    }
+                  );
+                  return (
+                    <div
+                      key={sub.id}
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
                     >
-                      Verified
-                    </Badge>
-                  )}
-                </div>
+                      <div className="flex-1 min-w-0 mr-4">
+                        <Link
+                          href={`/scenarios/${sub.scenarioId}`}
+                          className="font-medium hover:underline truncate block"
+                        >
+                          {sub.scenarioTitle}
+                        </Link>
+                        <p className="text-sm text-muted-foreground">
+                          {dateStr}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3 shrink-0">
+                        <span className="text-sm font-medium">
+                          {sub.status === "evaluated" && score !== null
+                            ? `${score}/20`
+                            : "Pending"}
+                        </span>
+                        <StatusBadge status={sub.status} />
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
-            </div>
-
-            <Separator />
-
-            <div className="space-y-4">
-              <h3 className="text-lg font-medium">Account Status</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="space-y-1">
-                    <p className="font-medium">Email Verification</p>
-                    <p className="text-sm text-muted-foreground">
-                      Email address verification status
-                    </p>
-                  </div>
-                  <Badge variant={user.emailVerified ? "default" : "secondary"}>
-                    {user.emailVerified ? "Verified" : "Unverified"}
-                  </Badge>
-                </div>
-                <div className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="space-y-1">
-                    <p className="font-medium">Account Type</p>
-                    <p className="text-sm text-muted-foreground">
-                      Your account access level
-                    </p>
-                  </div>
-                  <Badge variant="outline">Standard</Badge>
-                </div>
-              </div>
-            </div>
+            )}
           </CardContent>
         </Card>
 
-        {/* Account Activity */}
+        {/* Badges */}
         <Card>
           <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
+            <CardTitle>Badges</CardTitle>
             <CardDescription>
-              Your recent account activity and sessions
+              Awards earned through your detective work
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="space-y-4">
-              <div className="flex items-center justify-between p-4 border rounded-lg">
-                <div className="flex items-center space-x-3">
-                  <div className="h-2 w-2 bg-green-500 rounded-full"></div>
-                  <div>
-                    <p className="font-medium">Current Session</p>
-                    <p className="text-sm text-muted-foreground">Active now</p>
-                  </div>
-                </div>
-                <Badge
-                  variant="outline"
-                  className="text-green-600 border-green-600"
-                >
-                  Active
-                </Badge>
+            {(profileData?.badges ?? []).length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <Trophy className="h-10 w-10 mx-auto mb-3 opacity-40" />
+                <p>No badges yet. Keep solving cases!</p>
               </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Quick Actions</CardTitle>
-            <CardDescription>
-              Manage your account settings and preferences
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <Button
-                variant="outline"
-                className="justify-start h-auto p-4"
-                onClick={() => setEditProfileOpen(true)}
-              >
-                <User className="h-4 w-4 mr-2" />
-                <div className="text-left">
-                  <div className="font-medium">Edit Profile</div>
-                  <div className="text-xs text-muted-foreground">
-                    Update your information
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {profileData!.badges.map((b) => (
+                  <div
+                    key={b.id}
+                    className="flex items-start gap-3 p-4 border rounded-lg"
+                  >
+                    <div className="rounded-lg bg-primary/10 p-2 shrink-0">
+                      <BadgeIconComponent
+                        iconName={b.iconName}
+                        className="h-5 w-5 text-primary"
+                      />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="font-medium">{b.name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {b.description}
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(b.awardedAt).toLocaleDateString("en-US", {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                    </div>
                   </div>
-                </div>
-              </Button>
-              <Button
-                variant="outline"
-                className="justify-start h-auto p-4"
-                onClick={() => setSecurityOpen(true)}
-              >
-                <Shield className="h-4 w-4 mr-2" />
-                <div className="text-left">
-                  <div className="font-medium">Security Settings</div>
-                  <div className="text-xs text-muted-foreground">
-                    Manage security options
-                  </div>
-                </div>
-              </Button>
-              <Button
-                variant="outline"
-                className="justify-start h-auto p-4"
-                onClick={() => setEmailPrefsOpen(true)}
-              >
-                <Mail className="h-4 w-4 mr-2" />
-                <div className="text-left">
-                  <div className="font-medium">Email Preferences</div>
-                  <div className="text-xs text-muted-foreground">
-                    Configure notifications
-                  </div>
-                </div>
-              </Button>
-            </div>
+                ))}
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
-
-      {/* Edit Profile Dialog */}
-      <Dialog open={editProfileOpen} onOpenChange={setEditProfileOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Edit Profile</DialogTitle>
-            <DialogDescription>
-              Update your profile information. Changes will be saved to your
-              account.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleEditProfileSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Full Name</Label>
-              <Input
-                id="name"
-                defaultValue={user.name || ""}
-                placeholder="Enter your name"
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                defaultValue={user.email || ""}
-                disabled
-                className="bg-muted"
-              />
-              <p className="text-xs text-muted-foreground">
-                Email cannot be changed for OAuth accounts
-              </p>
-            </div>
-            <div className="flex justify-end gap-2 pt-4">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setEditProfileOpen(false)}
-              >
-                Cancel
-              </Button>
-              <Button type="submit">Save Changes</Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Security Settings Dialog */}
-      <Dialog open={securityOpen} onOpenChange={setSecurityOpen}>
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Security Settings</DialogTitle>
-            <DialogDescription>
-              Manage your account security and authentication options.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-3">
-                <Lock className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">Password</p>
-                  <p className="text-sm text-muted-foreground">
-                    {user.email?.includes("@gmail")
-                      ? "Managed by Google"
-                      : "Set a password for your account"}
-                  </p>
-                </div>
-              </div>
-              <Badge variant="outline">
-                {user.email?.includes("@gmail") ? "OAuth" : "Not Set"}
-              </Badge>
-            </div>
-
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-3">
-                <Smartphone className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">Two-Factor Authentication</p>
-                  <p className="text-sm text-muted-foreground">
-                    Add an extra layer of security
-                  </p>
-                </div>
-              </div>
-              <Button variant="outline" size="sm" disabled>
-                Coming Soon
-              </Button>
-            </div>
-
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-3">
-                <Shield className="h-5 w-5 text-muted-foreground" />
-                <div>
-                  <p className="font-medium">Active Sessions</p>
-                  <p className="text-sm text-muted-foreground">
-                    Manage devices logged into your account
-                  </p>
-                </div>
-              </div>
-              <Badge variant="default">1 Active</Badge>
-            </div>
-          </div>
-          <div className="flex justify-end pt-4">
-            <Button variant="outline" onClick={() => setSecurityOpen(false)}>
-              Close
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Email Preferences Dialog */}
-      <Dialog open={emailPrefsOpen} onOpenChange={setEmailPrefsOpen}>
-        <DialogContent className="sm:max-w-[425px]">
-          <DialogHeader>
-            <DialogTitle>Email Preferences</DialogTitle>
-            <DialogDescription>
-              Configure your email notification settings.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <p className="font-medium">Marketing Emails</p>
-                <p className="text-sm text-muted-foreground">
-                  Product updates and announcements
-                </p>
-              </div>
-              <Badge variant="secondary">Coming Soon</Badge>
-            </div>
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div>
-                <p className="font-medium">Security Alerts</p>
-                <p className="text-sm text-muted-foreground">
-                  Important security notifications
-                </p>
-              </div>
-              <Badge variant="default">Always On</Badge>
-            </div>
-          </div>
-          <div className="flex justify-end pt-4">
-            <Button variant="outline" onClick={() => setEmailPrefsOpen(false)}>
-              Close
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 }
