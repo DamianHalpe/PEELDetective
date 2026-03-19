@@ -1,0 +1,22 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"type": "npm",
+			"script": "build",
+			"group": "build",
+			"problemMatcher": [],
+			"label": "npm: build",
+			"detail": "pnpm run db:migrate && next build"
+		},
+		{
+			"label": "Kill Port 3004",
+			"type": "shell",
+			"command": "powershell -Command \"try { Stop-Process -Id (Get-NetTCPConnection -LocalPort 3004 -ErrorAction SilentlyContinue).OwningProcess -Force -ErrorAction SilentlyContinue } catch {}\"",
+			"presentation": {
+				"reveal": "never"
+			},
+			"problemMatcher": []
+		}
+	]
+}
