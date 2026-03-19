@@ -35,6 +35,7 @@ const peelElements = [
     description: "Clearly state who the culprit is and your main argument.",
     example: "The culprit is [name] because...",
     color: "text-blue-500",
+    borderColor: "border-l-blue-500",
   },
   {
     letter: "E",
@@ -42,6 +43,7 @@ const peelElements = [
     description: "Cite specific clues from the scenario that support your claim.",
     example: "The evidence shows that... / According to the clues...",
     color: "text-detective-amber",
+    borderColor: "border-l-detective-amber",
   },
   {
     letter: "E",
@@ -49,6 +51,7 @@ const peelElements = [
     description: "Logically connect the evidence to your conclusion.",
     example: "This proves that... / This shows that...",
     color: "text-emerald-500",
+    borderColor: "border-l-emerald-500",
   },
   {
     letter: "L",
@@ -56,6 +59,7 @@ const peelElements = [
     description: "Tie your argument back to the original question or scenario.",
     example: "Therefore, the culprit is... / In conclusion...",
     color: "text-purple-500",
+    borderColor: "border-l-purple-500",
   },
 ];
 
@@ -168,8 +172,12 @@ export default function WritePage() {
         Back to Investigation
       </Link>
 
-      {/* Title */}
+      {/* Title with detective motif */}
       <div className="mb-8">
+        <div className="mb-2 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-detective-amber">
+          <Send className="h-3.5 w-3.5" />
+          Filing a Report
+        </div>
         <h1 className="mb-1 text-3xl font-bold">
           {scenario?.title ?? "Write Your Case Report"}
         </h1>
@@ -244,7 +252,7 @@ export default function WritePage() {
 
           <Button
             size="lg"
-            className="w-full"
+            className="w-full shadow-md transition-shadow hover:shadow-lg"
             onClick={handleSubmit}
             disabled={submitting || !responseText.trim()}
           >
@@ -293,7 +301,7 @@ export default function WritePage() {
           {(guideOpen || typeof window === "undefined") && (
             <div className="space-y-3">
               {peelElements.map((el) => (
-                <Card key={el.letter + el.name} className="overflow-hidden">
+                <Card key={el.letter + el.name} className={`overflow-hidden border-l-4 ${el.borderColor}`}>
                   <CardHeader className="p-3 pb-1">
                     <CardTitle className="flex items-center gap-2 text-sm">
                       <span

@@ -5,7 +5,6 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Star, ArrowLeft, FileText, Users, Search } from "lucide-react";
 import { GuideCharacter } from "@/components/guide-character";
-import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -149,13 +148,15 @@ export default function InvestigatePage() {
           <div className="space-y-8 md:col-span-2">
             {/* Crime Scene Briefing */}
             <section>
-              <div className="mb-3 flex items-center gap-2">
+              <div className="mb-3 flex items-center gap-2 relative">
+                <div className="absolute -left-3 top-1/2 h-px w-3 bg-detective-amber/40" />
                 <FileText className="h-4 w-4 text-detective-amber" />
                 <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
                   Crime Scene Briefing
                 </h2>
+                <div className="ml-2 h-px flex-1 bg-detective-amber/20" />
               </div>
-              <Card>
+              <Card className="border-detective-amber/10 bg-card dark:bg-card shadow-sm">
                 <CardContent className="p-5">
                   <p className="leading-relaxed text-card-foreground">
                     {scenario.crimeDescription}
@@ -166,11 +167,13 @@ export default function InvestigatePage() {
 
             {/* Suspects */}
             <section>
-              <div className="mb-3 flex items-center gap-2">
+              <div className="mb-3 flex items-center gap-2 relative">
+                <div className="absolute -left-3 top-1/2 h-px w-3 bg-detective-amber/40" />
                 <Users className="h-4 w-4 text-detective-amber" />
                 <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
                   Suspects
                 </h2>
+                <div className="ml-2 h-px flex-1 bg-detective-amber/20" />
               </div>
               <div className="space-y-4">
                 {scenario.suspects.map((suspect, index) => (
@@ -194,22 +197,21 @@ export default function InvestigatePage() {
           {/* Right panel: evidence board (1/3 width) */}
           <div>
             <div className="md:sticky md:top-6">
-              <div className="mb-3 flex items-center gap-2">
+              <div className="mb-3 flex items-center gap-2 relative">
+                <div className="absolute -left-3 top-1/2 h-px w-3 bg-detective-amber/40" />
                 <Search className="h-4 w-4 text-detective-amber" />
                 <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
                   Evidence Board
                 </h2>
+                <div className="ml-2 h-px flex-1 bg-detective-amber/20" />
               </div>
               <div className="space-y-3">
                 {scenario.clues.map((clue, index) => (
-                  <Card key={index} className="border-border">
+                  <Card key={index} className="border-border border-l-2 border-l-detective-amber/50">
                     <CardContent className="flex items-start gap-3 p-4">
-                      <Badge
-                        variant="outline"
-                        className="shrink-0 border-detective-amber text-detective-amber"
-                      >
+                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-detective-amber/15 text-xs font-bold text-detective-amber">
                         {index + 1}
-                      </Badge>
+                      </span>
                       <p className="text-sm leading-relaxed">{clue}</p>
                     </CardContent>
                   </Card>

@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
+import { seedBadgesIfNeeded, awardBadges } from "@/lib/badges";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 
@@ -124,7 +125,17 @@ export async function POST(req: Request) {
       .where(eq(schema.submission.id, submissionId))
       .returning();
 
-    return Response.json(updated, { status: 201 });
+    // Award points (totalScore) to the student
+    await db
+      .update(schema.user)
+      .set({ points: sql`${schema.user.points} + ${totalScore}` })
+      .where(eq(schema.user.id, session.user.id));
+
+    // Seed default badges if the badge table is empty, then award any earned badges
+    await seedBadgesIfNeeded(db);
+    const newBadges = await awardBadges(db, session.user.id, { totalScore });
+
+    return Response.json({ ...updated, newBadges }, { status: 201 });
   } catch (error) {
     // Network or timeout error — mark as failed
     await db

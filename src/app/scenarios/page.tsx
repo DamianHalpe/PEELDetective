@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Star, Search, ChevronRight, BookOpen } from "lucide-react";
+import { Star, Search, ChevronRight, BookOpen, Trophy, Crown } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -24,19 +24,28 @@ interface Submission {
   status: string;
 }
 
+interface LeaderboardEntry {
+  rank: number;
+  name: string;
+  points: number;
+  totalSubmissions: number;
+}
+
 export default function ScenariosPage() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
 
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [bestScores, setBestScores] = useState<Record<string, number>>({});
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
 
   const fetchData = useCallback(async () => {
     try {
-      const [scenariosRes, submissionsRes] = await Promise.all([
+      const [scenariosRes, submissionsRes, leaderboardRes] = await Promise.all([
         fetch("/api/scenarios"),
         fetch("/api/submissions"),
+        fetch("/api/leaderboard"),
       ]);
 
       if (scenariosRes.status === 401) {
@@ -62,6 +71,11 @@ export default function ScenariosPage() {
           }
         }
         setBestScores(bests);
+      }
+
+      if (leaderboardRes.ok) {
+        const lb = (await leaderboardRes.json()) as LeaderboardEntry[];
+        setLeaderboard(lb);
       }
     } finally {
       setLoading(false);
@@ -181,6 +195,56 @@ export default function ScenariosPage() {
             );
           })}
         </div>
+      )}
+
+      {/* Leaderboard section */}
+      {leaderboard.length > 0 && (
+        <section className="mt-14">
+          <div className="mb-4 flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-detective-amber">
+            <Trophy className="h-3.5 w-3.5" />
+            Top Detectives
+          </div>
+          <Card>
+            <CardContent className="p-0">
+              <div className="divide-y">
+                {leaderboard.map((entry) => (
+                  <div
+                    key={entry.rank}
+                    className="flex items-center gap-4 px-5 py-3"
+                  >
+                    <span
+                      className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                        entry.rank === 1
+                          ? "bg-detective-amber/20 text-detective-amber"
+                          : entry.rank === 2
+                            ? "bg-muted text-foreground"
+                            : entry.rank === 3
+                              ? "bg-orange-500/10 text-orange-500"
+                              : "bg-muted text-muted-foreground"
+                      }`}
+                    >
+                      {entry.rank === 1 ? (
+                        <Crown className="h-3.5 w-3.5" />
+                      ) : (
+                        entry.rank
+                      )}
+                    </span>
+                    <span className="flex-1 text-sm font-medium">
+                      {entry.name}
+                    </span>
+                    <span className="text-sm font-bold text-detective-amber">
+                      {entry.points} pts
+                    </span>
+                    <span className="text-xs text-muted-foreground">
+                      {entry.totalSubmissions}{" "}
+                      {entry.totalSubmissions === 1 ? "case" : "cases"}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </CardContent>
+          </Card>
+        </section>
       )}
     </div>
   );

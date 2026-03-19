@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback, useRef, useMemo } from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
@@ -68,24 +68,58 @@ function getScoreLabel(score: number): string {
   return "Excellent";
 }
 
+/**
+ * Animates a number counting up from 0 to the target value over a given duration.
+ */
+function useCountUp(target: number, duration = 1000) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (target === 0) return;
+    const start = Date.now();
+    let raf: number;
+    const tick = () => {
+      const elapsed = Date.now() - start;
+      const progress = Math.min(elapsed / duration, 1);
+      setCount(Math.round(progress * target));
+      if (progress < 1) {
+        raf = requestAnimationFrame(tick);
+      }
+    };
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+  }, [target, duration]);
+  return count;
+}
+
 function ScoreCard({
   letter,
   label,
   score,
   feedback,
+  delayIndex = 0,
 }: {
   letter: string;
   label: string;
   score: number;
   feedback: string;
+  delayIndex?: number;
 }) {
   const pct = (score / 5) * 100;
   const barColor = getScoreColor(score);
   const textColor = getScoreTextColor(score);
   const scoreLabel = getScoreLabel(score);
 
+  // Staggered fade-in animation via inline style
+  const animationStyle = useMemo(
+    () => ({
+      opacity: 0,
+      animation: `fadeInUp 0.5s ease-out ${delayIndex * 150}ms forwards`,
+    }),
+    [delayIndex],
+  );
+
   return (
-    <Card>
+    <Card style={animationStyle}>
       <CardHeader className="pb-2">
         <CardTitle className="flex items-center justify-between text-sm">
           <div className="flex items-center gap-2">
@@ -123,12 +157,13 @@ function ScoreCard({
 }
 
 function TotalScoreDisplay({ score, max = 20 }: { score: number; max?: number }) {
+  const animatedScore = useCountUp(score, 1200);
   const stars = Math.round((score / max) * 5);
 
   return (
     <div className="flex flex-col items-center gap-2 py-4">
       <div className="flex items-baseline gap-1">
-        <span className="text-5xl font-bold">{score}</span>
+        <span className="text-5xl font-bold">{animatedScore}</span>
         <span className="text-xl text-muted-foreground">/{max}</span>
       </div>
       <div className="flex gap-1">
@@ -347,7 +382,7 @@ export default function FeedbackPage() {
         PEEL Breakdown
       </h2>
       <div className="mb-8 grid gap-4 sm:grid-cols-2">
-        {peelElements.map((el) => {
+        {peelElements.map((el, index) => {
           const score = submission[el.scoreKey] ?? 0;
           const feedback = submission.feedbackJson?.[el.key] ?? "";
           return (
@@ -357,6 +392,7 @@ export default function FeedbackPage() {
               label={el.label}
               score={score}
               feedback={feedback}
+              delayIndex={index}
             />
           );
         })}
