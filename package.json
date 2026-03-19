@@ -12,6 +12,7 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "setup": "npx tsx scripts/setup.ts",
+    "seed:admin": "npx tsx scripts/seed-admin.ts",
     "env:check": "node -e \"require('./src/lib/env.ts').checkEnv()\" || echo 'Run with tsx: npx tsx -e \"import { checkEnv } from './src/lib/env'; checkEnv();\"'",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "drizzle-kit migrate",

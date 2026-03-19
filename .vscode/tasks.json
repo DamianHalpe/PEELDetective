@@ -12,7 +12,7 @@
 		{
 			"label": "Kill Port 3004",
 			"type": "shell",
-			"command": "powershell -Command \"try { Stop-Process -Id (Get-NetTCPConnection -LocalPort 3004 -ErrorAction SilentlyContinue).OwningProcess -Force -ErrorAction SilentlyContinue } catch {}\"",
+			"command": "powershell -Command \"try { Stop-Process -Id (Get-NetTCPConnection -LocalPort 3004 -ErrorAction SilentlyContinue).OwningProcess -Force -ErrorAction SilentlyContinue } catch {}; exit 0\"",
 			"presentation": {
 				"reveal": "never"
 			},
