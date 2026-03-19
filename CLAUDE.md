@@ -1,250 +1,97 @@
-# Agentic Coding Boilerplate - AI Assistant Guidelines
+# CLAUDE.md
 
-## Project Overview
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-This is a Next.js 16 boilerplate for building AI-powered applications with authentication, database, and modern UI components.
+## What This Project Is
 
-### Tech Stack
+**PEEL Detective** is an educational web app where students solve crime mystery scenarios by writing structured PEEL paragraphs (Point, Evidence, Explain, Link). An AI (via OpenRouter) evaluates their responses and provides scored feedback. Teachers can manage scenarios, review student submissions, and export class data.
 
-- **Framework**: Next.js 16 with App Router, React 19, TypeScript
-- **AI Integration**: Vercel AI SDK 5 + OpenRouter (access to 100+ AI models)
-- **Authentication**: BetterAuth with Email/Password
-- **Database**: PostgreSQL with Drizzle ORM
-- **UI**: shadcn/ui components with Tailwind CSS 4
-- **Styling**: Tailwind CSS with dark mode support (next-themes)
+## Commands
 
-## AI Integration with OpenRouter
-
-### Key Points
-
-- This project uses **OpenRouter** as the AI provider, NOT direct OpenAI
-- OpenRouter provides access to 100+ AI models through a single unified API
-- Default model: `openai/gpt-5-mini` (configurable via `OPENROUTER_MODEL` env var)
-- Users browse models at: https://openrouter.ai/models
-- Users get API keys from: https://openrouter.ai/settings/keys
-
-### AI Implementation Files
-
-- `src/app/api/chat/route.ts` - Chat API endpoint using OpenRouter
-- Package: `@openrouter/ai-sdk-provider` (not `@ai-sdk/openai`)
-- Import: `import { openrouter } from "@openrouter/ai-sdk-provider"`
-
-## Project Structure
-
+```bash
+pnpm dev           # Start dev server with Turbopack
+pnpm build         # Run DB migrations then build for production
+pnpm lint          # ESLint
+pnpm typecheck     # tsc --noEmit
+pnpm check         # lint + typecheck together
+pnpm format        # Prettier write
+pnpm db:generate   # Generate Drizzle migration files
+pnpm db:migrate    # Apply pending migrations
+pnpm db:push       # Push schema changes directly (dev shortcut)
+pnpm db:studio     # Open Drizzle Studio GUI
+pnpm seed:admin    # Seed a super-admin user
 ```
-src/
-├── app/                          # Next.js App Router
-│   ├── (auth)/                  # Auth route group
-│   │   ├── login/               # Login page
-│   │   ├── register/            # Registration page
-│   │   ├── forgot-password/     # Forgot password page
-│   │   └── reset-password/      # Reset password page
-│   ├── api/
-│   │   ├── auth/[...all]/       # Better Auth catch-all route
-│   │   ├── chat/route.ts        # AI chat endpoint (OpenRouter)
-│   │   └── diagnostics/         # System diagnostics
-│   ├── chat/page.tsx            # AI chat interface (protected)
-│   ├── dashboard/page.tsx       # User dashboard (protected)
-│   ├── profile/page.tsx         # User profile (protected)
-│   ├── page.tsx                 # Home/landing page
-│   └── layout.tsx               # Root layout
-├── components/
-│   ├── auth/                    # Authentication components
-│   │   ├── sign-in-button.tsx   # Sign in form
-│   │   ├── sign-up-form.tsx     # Sign up form
-│   │   ├── forgot-password-form.tsx
-│   │   ├── reset-password-form.tsx
-│   │   ├── sign-out-button.tsx
-│   │   └── user-profile.tsx
-│   ├── ui/                      # shadcn/ui components
-│   │   ├── button.tsx
-│   │   ├── card.tsx
-│   │   ├── dialog.tsx
-│   │   ├── dropdown-menu.tsx
-│   │   ├── avatar.tsx
-│   │   ├── badge.tsx
-│   │   ├── separator.tsx
-│   │   ├── mode-toggle.tsx      # Dark/light mode toggle
-│   │   └── github-stars.tsx
-│   ├── site-header.tsx          # Main navigation header
-│   ├── site-footer.tsx          # Footer component
-│   ├── theme-provider.tsx       # Dark mode provider
-│   ├── setup-checklist.tsx      # Setup guide component
-│   └── starter-prompt-modal.tsx # Starter prompts modal
-└── lib/
-    ├── auth.ts                  # Better Auth server config
-    ├── auth-client.ts           # Better Auth client hooks
-    ├── db.ts                    # Database connection
-    ├── schema.ts                # Drizzle schema (users, sessions, etc.)
-    ├── storage.ts               # File storage abstraction (Vercel Blob / local)
-    └── utils.ts                 # Utility functions (cn, etc.)
-```
+
+Run `pnpm check` before committing — it covers both lint and type errors.
+
+## Architecture
+
+### Stack
+- **Next.js 16** (App Router) with React 19, TypeScript, Turbopack in dev
+- **Better Auth** for authentication (email/password + Google OAuth)
+- **Drizzle ORM** with PostgreSQL (`postgres` driver)
+- **Vercel AI SDK** + **OpenRouter** for AI evaluation
+- **shadcn/ui** + **Tailwind CSS v4** for UI
+
+### Key Directories
+- `src/app/` — Next.js App Router pages and API routes
+- `src/lib/` — Shared utilities: `auth.ts`, `auth-client.ts`, `db.ts`, `schema.ts`, `session.ts`, `badges.ts`, `storage.ts`
+- `src/hooks/` — Client-side hooks
+- `src/components/` — Shared React components (`ui/` = shadcn)
+
+### Database Schema (`src/lib/schema.ts`)
+Core tables:
+- `user` — extends BetterAuth user with `role` ("student" | "teacher" | "admin"), `schoolId`, `points`
+- `scenario` — mystery scenarios with `suspects` (jsonb), `clues` (jsonb), `correctCulprit`, `published`, `difficulty`
+- `submission` — student responses with per-PEEL scores (`scorePoint`, `scoreEvidence`, `scoreExplain`, `scoreLink`), `feedbackJson`, `grammarFlagsJson`, `modelAnswer`, `status` ("pending" | "evaluated" | "failed"), teacher override fields
+- `badge` / `studentBadge` — gamification: badges seeded via `src/lib/badges.ts`
+
+**Important:** All non-BetterAuth ID fields must use UUID (`crypto.randomUUID()`), not auto-increment integers. BetterAuth tables (user, session, account, verification) use text IDs managed by the library.
+
+### Auth & Session Pattern
+- Server-side auth check: `auth.api.getSession({ headers: await headers() })` — used directly in Server Components and API routes
+- Helper wrappers in `src/lib/session.ts`: `requireAuth()` (redirects if unauthenticated), `getOptionalSession()`
+- Client-side: `useSession()` from `src/lib/auth-client`
+- Middleware (`src/proxy.ts`) protects `/teacher/*` and `/admin/*` routes via session cookie check; role enforcement happens server-side in pages/routes
+
+### Role-Based Access
+Roles: `student` (default), `teacher`, `admin`. Role checks are done in individual pages/API routes, not middleware. Teacher pages redirect to `/dashboard` if the user is not `teacher` or `admin`.
+
+### AI Evaluation Flow
+1. Student submits at `POST /api/submissions` — creates a `pending` submission in DB
+2. The route internally calls `POST /api/evaluate` with the scenario context and student text
+3. `/api/evaluate` calls OpenRouter (model from `OPENROUTER_MODEL` env var, defaults to `anthropic/claude-sonnet-4-5`) with a structured prompt, returns JSON scores + feedback
+4. Submission is updated to `evaluated` (or `failed`), points are added to the user, badges are awarded via `src/lib/badges.ts`
+5. Client is redirected to `/scenarios/[id]/feedback/[submissionId]`
+
+### Route Structure
+- `/(auth)/` — login, register, forgot/reset password (route group, shared layout)
+- `/scenarios/` — student-facing: browse scenarios, view details, write response, view feedback
+- `/teacher/` — teacher dashboard, scenario CRUD, student views, submission review; protected by middleware + role check
+- `/dashboard/` — student dashboard
+- `/learn/` — PEEL learning guide
+- `/api/` — REST endpoints mirroring the above domains
+
+### Styling
+Tailwind CSS v4 (config is inline in `globals.css` via `@theme`). Custom brand tokens:
+- `detective-amber` — primary accent color (gold/amber, used throughout)
+- `detective-crimson` — danger/highlight
+- `detective-slate` — muted backgrounds
+
+Use these tokens in classnames: `text-detective-amber`, `bg-detective-amber/10`, `border-detective-amber/20`, etc.
+
+### File Storage
+`src/lib/storage.ts` auto-switches between local `public/uploads/` (dev, no token set) and Vercel Blob (prod, when `BLOB_READ_WRITE_TOKEN` is set).
 
 ## Environment Variables
 
-Required environment variables (see `env.example`):
+Required:
+- `POSTGRES_URL` — PostgreSQL connection string
+- `BETTER_AUTH_SECRET` — 32+ char random secret
+- `NEXT_PUBLIC_APP_URL` — app base URL (used for internal fetch in submissions route)
 
-```env
-# Database
-POSTGRES_URL=postgresql://user:password@localhost:5432/db_name
-
-# Better Auth
-BETTER_AUTH_SECRET=32-char-random-string
-
-# AI via OpenRouter
-OPENROUTER_API_KEY=sk-or-v1-your-key
-OPENROUTER_MODEL=openai/gpt-5-mini  # or any model from openrouter.ai/models
-
-# App
-NEXT_PUBLIC_APP_URL=http://localhost:3000
-
-# File Storage (optional)
-BLOB_READ_WRITE_TOKEN=  # Leave empty for local dev, set for Vercel Blob in production
-```
-
-## Available Scripts
-
-```bash
-npm run dev          # Start dev server (DON'T run this yourself - ask user)
-npm run build        # Build for production (runs db:migrate first)
-npm run build:ci     # Build without database (for CI/CD pipelines)
-npm run start        # Start production server
-npm run lint         # Run ESLint (ALWAYS run after changes)
-npm run typecheck    # TypeScript type checking (ALWAYS run after changes)
-npm run db:generate  # Generate database migrations
-npm run db:migrate   # Run database migrations
-npm run db:push      # Push schema changes to database
-npm run db:studio    # Open Drizzle Studio (database GUI)
-npm run db:dev       # Push schema for development
-npm run db:reset     # Reset database (drop all tables)
-```
-
-## Documentation Files
-
-The project includes technical documentation in `docs/`:
-
-- `docs/technical/ai/streaming.md` - AI streaming implementation guide
-- `docs/technical/ai/structured-data.md` - Structured data extraction
-- `docs/technical/react-markdown.md` - Markdown rendering guide
-- `docs/technical/betterauth/polar.md` - Polar payment integration
-- `docs/business/starter-prompt.md` - Business context for AI prompts
-
-## Guidelines for AI Assistants
-
-### CRITICAL RULES
-
-1. **ALWAYS run lint and typecheck** after completing changes:
-
-   ```bash
-   npm run lint && npm run typecheck
-   ```
-
-2. **NEVER start the dev server yourself**
-
-   - If you need dev server output, ask the user to provide it
-   - Don't run `npm run dev` or `pnpm dev`
-
-3. **Use OpenRouter, NOT OpenAI directly**
-
-   - Import from `@openrouter/ai-sdk-provider`
-   - Use `openrouter()` function, not `openai()`
-   - Model names follow OpenRouter format: `provider/model-name`
-
-4. **Styling Guidelines**
-
-   - Stick to standard Tailwind CSS utility classes
-   - Use shadcn/ui color tokens (e.g., `bg-background`, `text-foreground`)
-   - Avoid custom colors unless explicitly requested
-   - Support dark mode with appropriate Tailwind classes
-
-5. **Authentication**
-
-   - Server-side: Import from `@/lib/auth` (Better Auth instance)
-   - Client-side: Import hooks from `@/lib/auth-client`
-   - Protected routes should check session in Server Components
-   - Use existing auth components from `src/components/auth/`
-
-6. **Database Operations**
-
-   - Use Drizzle ORM (imported from `@/lib/db`)
-   - Schema is defined in `@/lib/schema`
-   - Always run migrations after schema changes
-   - PostgreSQL is the database (not SQLite, MySQL, etc.)
-
-7. **File Storage**
-
-   - Use the storage abstraction from `@/lib/storage`
-   - Automatically uses local storage (dev) or Vercel Blob (production)
-   - Import: `import { upload, deleteFile } from "@/lib/storage"`
-   - Example: `const result = await upload(buffer, "avatar.png", "avatars")`
-   - Storage switches based on `BLOB_READ_WRITE_TOKEN` environment variable
-
-8. **Component Creation**
-
-   - Use existing shadcn/ui components when possible
-   - Follow the established patterns in `src/components/ui/`
-   - Support both light and dark modes
-   - Use TypeScript with proper types
-
-9. **API Routes**
-   - Follow Next.js 16 App Router conventions
-   - Use Route Handlers (route.ts files)
-   - Return Response objects
-   - Handle errors appropriately
-
-### Best Practices
-
-- Read existing code patterns before creating new features
-- Maintain consistency with established file structure
-- Use the documentation files when implementing related features
-- Test changes with lint and typecheck before considering complete
-- When modifying AI functionality, refer to `docs/technical/ai/` guides
-
-### Common Tasks
-
-**Adding a new page:**
-
-1. Create in `src/app/[route]/page.tsx`
-2. Use Server Components by default
-3. Add to navigation if needed
-
-**Adding a new API route:**
-
-1. Create in `src/app/api/[route]/route.ts`
-2. Export HTTP method handlers (GET, POST, etc.)
-3. Use proper TypeScript types
-
-**Adding authentication to a page:**
-
-1. Import auth instance: `import { auth } from "@/lib/auth"`
-2. Get session: `const session = await auth.api.getSession({ headers: await headers() })`
-3. Check session and redirect if needed
-
-**Working with the database:**
-
-1. Update schema in `src/lib/schema.ts`
-2. Generate migration: `npm run db:generate`
-3. Apply migration: `npm run db:migrate`
-4. Import `db` from `@/lib/db` to query
-
-**Modifying AI chat:**
-
-1. Backend: `src/app/api/chat/route.ts`
-2. Frontend: `src/app/chat/page.tsx`
-3. Reference streaming docs: `docs/technical/ai/streaming.md`
-4. Remember to use OpenRouter, not direct OpenAI
-
-**Working with file storage:**
-
-1. Import storage functions: `import { upload, deleteFile } from "@/lib/storage"`
-2. Upload files: `const result = await upload(fileBuffer, "filename.png", "folder")`
-3. Delete files: `await deleteFile(result.url)`
-4. Storage automatically uses local filesystem in dev, Vercel Blob in production
-5. Local files are saved to `public/uploads/` and served at `/uploads/`
-
-## Package Manager
-
-This project uses **pnpm** (see `pnpm-lock.yaml`). When running commands:
-
-- Use `pnpm` instead of `npm` when possible
-- Scripts defined in package.json work with `pnpm run [script]`
+Optional:
+- `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` — Google OAuth
+- `OPENROUTER_API_KEY` — required for AI evaluation
+- `OPENROUTER_MODEL` — defaults to `anthropic/claude-sonnet-4-5`
+- `BLOB_READ_WRITE_TOKEN` — Vercel Blob (falls back to local storage)
