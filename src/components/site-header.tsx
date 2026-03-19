@@ -1,6 +1,5 @@
 import { headers } from "next/headers";
 import Link from "next/link";
-import { Search } from "lucide-react";
 import { UserProfile } from "@/components/auth/user-profile";
 import { auth } from "@/lib/auth";
 import { ModeToggle } from "./ui/mode-toggle";
@@ -17,43 +16,54 @@ export async function SiteHeader() {
       >
         Skip to main content
       </a>
-      <header className="border-b" role="banner">
+      <header className="border-b bg-background/80 backdrop-blur-sm sticky top-0 z-40" role="banner">
         <nav
-          className="container mx-auto px-4 py-4 flex justify-between items-center"
+          className="container mx-auto px-4 py-3 flex justify-between items-center"
           aria-label="Main navigation"
         >
-          <h1 className="text-2xl font-bold">
-            <Link
-              href="/"
-              className="flex items-center gap-2 text-primary hover:text-primary/80 transition-colors"
-              aria-label="PEEL Detective - Go to homepage"
-            >
-              <div
-                className="flex items-center justify-center w-8 h-8 rounded-lg bg-primary/10"
-                aria-hidden="true"
-              >
-                <Search className="h-5 w-5" />
-              </div>
-              <span className="bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                PEEL Detective
-              </span>
-            </Link>
-          </h1>
+          {/* Logo */}
+          <Link
+            href="/"
+            className="flex items-center gap-2.5 group"
+            aria-label="PEEL Detective - Go to homepage"
+          >
+            {/* Amber magnifying glass icon */}
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-detective-amber/15 border border-detective-amber/30 group-hover:bg-detective-amber/25 transition-colors">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-detective-amber">
+                <circle cx="11" cy="11" r="8"/>
+                <path d="m21 21-4.35-4.35"/>
+              </svg>
+            </div>
+            <span className="font-display text-xl font-bold italic text-foreground group-hover:text-detective-amber transition-colors">
+              PEEL<span className="text-detective-amber not-italic font-bold"> Detective</span>
+            </span>
+          </Link>
+
           <div className="flex items-center gap-6">
-            <div className="hidden md:flex items-center gap-4 text-sm font-medium" role="group" aria-label="Navigation links">
-              <Link href="/scenarios" className="text-muted-foreground hover:text-foreground transition-colors">
-                Scenarios
+            {/* Nav links */}
+            <div className="hidden md:flex items-center gap-1 text-sm font-medium" role="group" aria-label="Navigation links">
+              <Link
+                href="/scenarios"
+                className="px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+              >
+                Cases
               </Link>
-              <Link href="/learn" className="text-muted-foreground hover:text-foreground transition-colors">
-                Learn
+              <Link
+                href="/learn"
+                className="px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+              >
+                PEEL Guide
               </Link>
               {(role === "teacher" || role === "admin") && (
-                <Link href="/teacher" className="text-muted-foreground hover:text-foreground transition-colors">
-                  Teacher Dashboard
+                <Link
+                  href="/teacher"
+                  className="px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+                >
+                  Teacher
                 </Link>
               )}
             </div>
-            <div className="flex items-center gap-4" role="group" aria-label="User actions">
+            <div className="flex items-center gap-3" role="group" aria-label="User actions">
               <UserProfile />
               <ModeToggle />
             </div>
