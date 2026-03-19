@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Plus, Pencil, Star, Trash2 } from "lucide-react";
+import { Plus, Pencil, Star, Trash2, FileText } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -152,6 +152,12 @@ export default function TeacherScenariosPage() {
                     }
                   >
                     {scenario.published ? "Unpublish" : "Publish"}
+                  </Button>
+                  <Button size="sm" variant="outline" asChild>
+                    <Link href={`/teacher/scenarios/${scenario.id}/submissions`}>
+                      <FileText className="mr-1 h-3 w-3" />
+                      Submissions
+                    </Link>
                   </Button>
                   <Button size="sm" variant="outline" asChild>
                     <Link href={`/teacher/scenarios/${scenario.id}/edit`}>
