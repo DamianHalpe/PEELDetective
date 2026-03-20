@@ -3,10 +3,29 @@
 import { useState } from "react"
 import Link from "next/link"
 import { useRouter, useSearchParams } from "next/navigation"
+import { Check, X } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { resetPassword } from "@/lib/auth-client"
+import { PASSWORD_REQUIREMENTS, validatePassword } from "@/lib/password-validation"
+
+function PasswordRequirements({ password }: { password: string }) {
+  if (!password) return null
+  return (
+    <ul className="mt-2 space-y-1">
+      {PASSWORD_REQUIREMENTS.map((req) => {
+        const met = req.test(password)
+        return (
+          <li key={req.label} className={`flex items-center gap-1.5 text-xs ${met ? "text-emerald-500" : "text-muted-foreground"}`}>
+            {met ? <Check className="h-3 w-3 shrink-0" /> : <X className="h-3 w-3 shrink-0" />}
+            {req.label}
+          </li>
+        )
+      })}
+    </ul>
+  )
+}
 
 export function ResetPasswordForm() {
   const router = useRouter()
@@ -40,13 +59,14 @@ export function ResetPasswordForm() {
     e.preventDefault()
     setFormError("")
 
-    if (password !== confirmPassword) {
-      setFormError("Passwords do not match")
+    const pwError = validatePassword(password)
+    if (pwError) {
+      setFormError(pwError)
       return
     }
 
-    if (password.length < 8) {
-      setFormError("Password must be at least 8 characters")
+    if (password !== confirmPassword) {
+      setFormError("Passwords do not match")
       return
     }
 
@@ -83,6 +103,7 @@ export function ResetPasswordForm() {
           required
           disabled={isPending}
         />
+        <PasswordRequirements password={password} />
       </div>
       <div className="space-y-2">
         <Label htmlFor="confirmPassword">Confirm New Password</Label>
