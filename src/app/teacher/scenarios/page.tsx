@@ -141,7 +141,7 @@ export default function TeacherScenariosPage() {
               </CardHeader>
               <CardContent>
                 <p className="text-sm text-muted-foreground line-clamp-2 mb-4">
-                  {scenario.crimeDescription}
+                  {scenario.crimeDescription.replace(/<[^>]+>/g, "")}
                 </p>
                 <div className="flex items-center gap-2">
                   <Button

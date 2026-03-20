@@ -14,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { RichTextEditor } from "@/components/ui/rich-text-editor";
 
 interface Suspect {
   name: string;
@@ -89,7 +90,8 @@ export function ScenarioForm({
 
   function validate(): string | null {
     if (!title.trim()) return "Title is required";
-    if (!crimeDescription.trim()) return "Crime description is required";
+    if (!crimeDescription.replace(/<[^>]+>/g, "").trim())
+      return "Crime description is required";
     if (suspects.some((s) => !s.name.trim() || !s.background.trim())) {
       return "All suspects must have a name and background";
     }
@@ -159,9 +161,14 @@ export function ScenarioForm({
           <CardContent className="space-y-6">
             <div>
               <h3 className="font-semibold mb-2">Crime Description</h3>
-              <p className="text-muted-foreground">
-                {crimeDescription || "No description provided."}
-              </p>
+              {crimeDescription.replace(/<[^>]+>/g, "").trim() ? (
+                <div
+                  className="text-muted-foreground leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: crimeDescription }}
+                />
+              ) : (
+                <p className="text-muted-foreground">No description provided.</p>
+              )}
             </div>
 
             <div>
@@ -232,14 +239,12 @@ export function ScenarioForm({
 
         {/* Crime Description */}
         <div className="space-y-2">
-          <Label htmlFor="crimeDescription">Crime Description</Label>
-          <Textarea
-            id="crimeDescription"
+          <Label>Crime Description</Label>
+          <RichTextEditor
             value={crimeDescription}
-            onChange={(e) => setCrimeDescription(e.target.value)}
+            onChange={setCrimeDescription}
             placeholder="Describe the crime scene and events..."
-            rows={4}
-            required
+            minRows={4}
           />
         </div>
 

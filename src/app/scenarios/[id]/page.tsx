@@ -280,9 +280,10 @@ export default function InvestigatePage() {
               </div>
               <Card className="border-detective-amber/10 bg-card shadow-sm dark:bg-card">
                 <CardContent className="p-5">
-                  <p className="leading-relaxed text-card-foreground">
-                    {scenario.crimeDescription}
-                  </p>
+                  <div
+                    className="leading-relaxed text-card-foreground"
+                    dangerouslySetInnerHTML={{ __html: scenario.crimeDescription }}
+                  />
                 </CardContent>
               </Card>
             </section>

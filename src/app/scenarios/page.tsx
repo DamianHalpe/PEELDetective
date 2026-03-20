@@ -184,7 +184,7 @@ export default function ScenariosPage() {
 
                   {/* Description */}
                   <p className="text-sm text-muted-foreground leading-relaxed line-clamp-3 mb-5 flex-1">
-                    {scenario.crimeDescription}
+                    {scenario.crimeDescription.replace(/<[^>]+>/g, "")}
                   </p>
 
                   {/* CTA */}
