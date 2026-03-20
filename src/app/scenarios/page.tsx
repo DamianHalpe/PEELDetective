@@ -156,7 +156,7 @@ export default function ScenariosPage() {
                 <div className="h-1 bg-gradient-to-r from-detective-amber/60 via-detective-amber to-detective-amber/60" />
 
                 {/* Case number watermark */}
-                <div className="absolute top-3 right-4 font-display text-5xl font-bold italic text-detective-amber/6 leading-none select-none pointer-events-none">
+                <div className="absolute top-3 right-4 font-display text-5xl font-bold italic text-detective-amber/18 dark:text-detective-amber/6 leading-none select-none pointer-events-none">
                   {(index + 1).toString().padStart(2, "0")}
                 </div>
 
@@ -171,7 +171,7 @@ export default function ScenariosPage() {
                         ★ {best}/20
                       </span>
                     ) : (
-                      <span className="shrink-0 inline-flex items-center text-xs text-muted-foreground/50 border border-border/50 rounded-full px-2.5 py-0.5">
+                      <span className="shrink-0 inline-flex items-center text-xs text-muted-foreground border border-border rounded-full px-2.5 py-0.5">
                         Unsolved
                       </span>
                     )}
@@ -191,7 +191,7 @@ export default function ScenariosPage() {
                   <Button
                     asChild
                     size="sm"
-                    className="w-full gap-1.5 group-hover:gap-2.5 transition-all bg-detective-amber text-detective-slate hover:bg-detective-amber/90 font-semibold"
+                    className="w-full gap-1.5 group-hover:gap-2.5 transition-all bg-detective-amber text-white dark:text-detective-slate hover:bg-detective-amber/90 font-semibold"
                   >
                     <Link href={`/scenarios/${scenario.id}`}>
                       Investigate

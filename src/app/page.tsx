@@ -86,7 +86,7 @@ export default async function Home() {
                 <Button
                   size="lg"
                   asChild
-                  className="gap-2 bg-detective-amber text-detective-slate hover:bg-detective-amber/90 animate-pulse-glow font-semibold text-base px-8"
+                  className="gap-2 bg-detective-amber text-white dark:text-detective-slate hover:bg-detective-amber/90 animate-pulse-glow font-semibold text-base px-8"
                 >
                   <Link href="/scenarios">
                     Open Case Files
@@ -102,7 +102,7 @@ export default async function Home() {
                 <Button
                   size="lg"
                   asChild
-                  className="gap-2 bg-detective-amber text-detective-slate hover:bg-detective-amber/90 animate-pulse-glow font-semibold text-base px-8"
+                  className="gap-2 bg-detective-amber text-white dark:text-detective-slate hover:bg-detective-amber/90 animate-pulse-glow font-semibold text-base px-8"
                 >
                   <Link href="/register">
                     Start Investigating — Free
@@ -178,7 +178,7 @@ export default async function Home() {
               <div className="absolute top-0 left-6 right-6 h-0.5 bg-gradient-to-r from-transparent via-detective-amber/60 to-transparent" />
 
               {/* Step number watermark */}
-              <div className="absolute top-4 right-5 font-display text-6xl font-bold italic text-detective-amber/8 leading-none select-none pointer-events-none">
+              <div className="absolute top-4 right-5 font-display text-6xl font-bold italic text-detective-amber/20 dark:text-detective-amber/8 leading-none select-none pointer-events-none">
                 {item.step}
               </div>
 
@@ -301,7 +301,7 @@ export default async function Home() {
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center">
                 {isLoggedIn ? (
-                  <Button size="lg" asChild className="gap-2 bg-detective-amber text-detective-slate hover:bg-detective-amber/90 font-semibold text-base px-8">
+                  <Button size="lg" asChild className="gap-2 bg-detective-amber text-white dark:text-detective-slate hover:bg-detective-amber/90 font-semibold text-base px-8">
                     <Link href="/scenarios">
                       Open Case Files
                       <ChevronRight className="h-4 w-4" />
@@ -309,7 +309,7 @@ export default async function Home() {
                   </Button>
                 ) : (
                   <>
-                    <Button size="lg" asChild className="gap-2 bg-detective-amber text-detective-slate hover:bg-detective-amber/90 font-semibold text-base px-8">
+                    <Button size="lg" asChild className="gap-2 bg-detective-amber text-white dark:text-detective-slate hover:bg-detective-amber/90 font-semibold text-base px-8">
                       <Link href="/register">
                         Start Investigating
                         <ChevronRight className="h-4 w-4" />

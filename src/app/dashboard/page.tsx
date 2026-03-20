@@ -64,10 +64,10 @@ export default function DashboardPage() {
   if (!session) {
     return (
       <div className="container mx-auto px-4 py-24 text-center">
-        <Search className="w-16 h-16 mx-auto mb-6 text-detective-amber/50" />
+        <Search className="w-16 h-16 mx-auto mb-6 text-detective-amber/80 dark:text-detective-amber/50" />
         <h1 className="font-display text-3xl font-bold italic mb-3">Access Denied</h1>
         <p className="text-muted-foreground mb-8">You need to sign in to view your dashboard.</p>
-        <Button asChild className="bg-detective-amber text-detective-slate hover:bg-detective-amber/90">
+        <Button asChild className="bg-detective-amber text-white dark:text-detective-slate hover:bg-detective-amber/90">
           <Link href="/login">Sign In</Link>
         </Button>
       </div>
@@ -160,7 +160,7 @@ export default function DashboardPage() {
           <p className="text-sm text-muted-foreground mb-5 leading-relaxed">
             New mysteries are waiting. Choose a case, study the evidence, and write your PEEL response.
           </p>
-          <Button asChild className="gap-1.5 group-hover:gap-2.5 transition-all bg-detective-amber text-detective-slate hover:bg-detective-amber/90 font-semibold">
+          <Button asChild className="gap-1.5 group-hover:gap-2.5 transition-all bg-detective-amber text-white dark:text-detective-slate hover:bg-detective-amber/90 font-semibold">
             <Link href="/scenarios">
               Open Cases
               <ChevronRight className="h-4 w-4" />

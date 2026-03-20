@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@variant dark (&:is(.dark, .dark *));
 
 @theme inline {
   --color-background: var(--background);
@@ -55,13 +56,13 @@
   --secondary: oklch(0.967 0.001 286.375);
   --secondary-foreground: oklch(0.21 0.006 285.885);
   --muted: oklch(0.967 0.001 286.375);
-  --muted-foreground: oklch(0.552 0.016 285.938);
+  --muted-foreground: oklch(0.44 0.016 285.938);
   --accent: oklch(0.967 0.001 286.375);
   --accent-foreground: oklch(0.21 0.006 285.885);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.92 0.004 286.32);
-  --input: oklch(0.92 0.004 286.32);
-  --ring: oklch(0.705 0.015 286.067);
+  --destructive: oklch(0.50 0.245 27.325);
+  --border: oklch(0.88 0.004 286.32);
+  --input: oklch(0.88 0.004 286.32);
+  --ring: oklch(0.44 0.015 286.067);
   --chart-1: oklch(0.646 0.222 41.116);
   --chart-2: oklch(0.6 0.118 184.704);
   --chart-3: oklch(0.398 0.07 227.392);
@@ -75,8 +76,8 @@
   --sidebar-accent-foreground: oklch(0.21 0.006 285.885);
   --sidebar-border: oklch(0.92 0.004 286.32);
   --sidebar-ring: oklch(0.705 0.015 286.067);
-  --detective-amber: oklch(0.75 0.18 75);
-  --detective-crimson: oklch(0.55 0.22 25);
+  --detective-amber: oklch(0.50 0.20 75);
+  --detective-crimson: oklch(0.42 0.22 25);
   --detective-slate: oklch(0.25 0.01 260);
 }
 
@@ -99,6 +100,8 @@
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
   --ring: oklch(0.552 0.016 285.938);
+  --detective-amber: oklch(0.75 0.18 75);
+  --detective-crimson: oklch(0.55 0.22 25);
   --chart-1: oklch(0.488 0.243 264.376);
   --chart-2: oklch(0.696 0.17 162.48);
   --chart-3: oklch(0.769 0.188 70.08);
@@ -163,8 +166,8 @@
 }
 
 @keyframes pulseGlow {
-  0%, 100% { box-shadow: 0 0 0 0 oklch(0.75 0.18 75 / 0); }
-  50% { box-shadow: 0 0 20px 4px oklch(0.75 0.18 75 / 0.25); }
+  0%, 100% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--detective-amber) 0%, transparent); }
+  50% { box-shadow: 0 0 20px 4px color-mix(in oklch, var(--detective-amber) 25%, transparent); }
 }
 
 @keyframes rotateSlow {
@@ -204,7 +207,7 @@
   background: linear-gradient(
     90deg,
     transparent 0%,
-    oklch(0.75 0.18 75 / 0.15) 50%,
+    color-mix(in oklch, var(--detective-amber) 15%, transparent) 50%,
     transparent 100%
   );
   background-size: 200% 100%;

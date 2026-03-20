@@ -136,7 +136,7 @@ export function ChangePasswordForm() {
       )}
       <Button
         type="submit"
-        className="bg-detective-amber text-detective-slate hover:bg-detective-amber/90 font-semibold"
+        className="bg-detective-amber text-white dark:text-detective-slate hover:bg-detective-amber/90 font-semibold"
         disabled={isPending}
       >
         <KeyRound className="mr-2 h-4 w-4" />
