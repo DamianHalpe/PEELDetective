@@ -47,6 +47,7 @@ export const auth = betterAuth({
       nickname: {
         type: "string",
         required: false,
+        input: true,
       },
     },
   },

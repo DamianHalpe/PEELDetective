@@ -2,9 +2,123 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { ChevronDown, KeyRound, Settings, User } from "lucide-react"
+import { AtSign, Check, ChevronDown, KeyRound, Loader2, Settings, User, X } from "lucide-react"
 import { ChangePasswordForm } from "@/components/auth/change-password-form"
 import { useSession } from "@/lib/auth-client"
+
+function NicknameForm({ currentNickname }: { currentNickname?: string | null | undefined }) {
+  const { refetch } = useSession()
+  const [value, setValue] = useState(currentNickname ?? "")
+  const [status, setStatus] = useState<"idle" | "checking" | "available" | "taken" | "saving" | "saved" | "error">("idle")
+  const [errorMsg, setErrorMsg] = useState("")
+  const debounceRef = { current: undefined as ReturnType<typeof setTimeout> | undefined }
+
+  const validate = (v: string) => /^[a-zA-Z0-9_-]{3,30}$/.test(v)
+
+  useEffect(() => {
+    if (value === "" || value === (currentNickname ?? "")) {
+      setStatus("idle")
+      return
+    }
+    if (!validate(value)) {
+      setStatus("idle")
+      return
+    }
+    setStatus("checking")
+    clearTimeout(debounceRef.current)
+    debounceRef.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/user/nickname-check?nickname=${encodeURIComponent(value)}`)
+        const data = await res.json()
+        setStatus(data.available ? "available" : "taken")
+      } catch {
+        setStatus("idle")
+      }
+    }, 400)
+    return () => clearTimeout(debounceRef.current)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [value])
+
+  async function handleSave(e: React.FormEvent) {
+    e.preventDefault()
+    if (status === "taken" || status === "saving") return
+    setStatus("saving")
+    setErrorMsg("")
+    try {
+      const res = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nickname: value }),
+      })
+      const data = await res.json()
+      if (!res.ok) {
+        setErrorMsg(data.error ?? "Something went wrong")
+        setStatus("error")
+        return
+      }
+      await refetch()
+      setStatus("saved")
+      setTimeout(() => setStatus("idle"), 2000)
+    } catch {
+      setErrorMsg("Something went wrong")
+      setStatus("error")
+    }
+  }
+
+  const isDirty = value !== (currentNickname ?? "")
+  const isInvalid = value !== "" && !validate(value)
+
+  return (
+    <form onSubmit={handleSave} className="mt-4 space-y-3">
+      <div className="space-y-1.5">
+        <label htmlFor="nickname" className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+          Username
+        </label>
+        <div className="relative">
+          <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
+          <input
+            id="nickname"
+            type="text"
+            value={value}
+            onChange={(e) => setValue(e.target.value)}
+            placeholder="choose a username"
+            maxLength={30}
+            className="w-full pl-8 pr-10 py-2 text-sm rounded-lg border bg-background focus:outline-none focus:ring-2 focus:ring-detective-amber/40 focus:border-detective-amber transition-colors"
+          />
+          <div className="absolute right-3 top-1/2 -translate-y-1/2">
+            {status === "checking" && <Loader2 className="h-3.5 w-3.5 text-muted-foreground animate-spin" />}
+            {status === "available" && <Check className="h-3.5 w-3.5 text-green-500" />}
+            {status === "taken" && <X className="h-3.5 w-3.5 text-destructive" />}
+            {status === "saved" && <Check className="h-3.5 w-3.5 text-green-500" />}
+          </div>
+        </div>
+        {isInvalid && (
+          <p className="text-xs text-destructive">3–30 characters: letters, numbers, _ or -</p>
+        )}
+        {status === "taken" && (
+          <p className="text-xs text-destructive">That username is already taken</p>
+        )}
+        {status === "error" && (
+          <p className="text-xs text-destructive">{errorMsg}</p>
+        )}
+        {status === "available" && (
+          <p className="text-xs text-green-600 dark:text-green-400">Username is available</p>
+        )}
+        {status === "saved" && (
+          <p className="text-xs text-green-600 dark:text-green-400">Username saved!</p>
+        )}
+      </div>
+      <button
+        type="submit"
+        disabled={!isDirty || isInvalid || status === "taken" || status === "saving" || status === "checking"}
+        className="px-4 py-1.5 text-sm font-medium rounded-lg bg-detective-amber text-black hover:bg-detective-amber/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+      >
+        {status === "saving" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+        Save
+      </button>
+    </form>
+  )
+}
 
 export default function SettingsPage() {
   const { data: session, isPending } = useSession()
@@ -72,6 +186,9 @@ export default function SettingsPage() {
             <span className="text-muted-foreground w-16 shrink-0">Email</span>
             <span className="font-medium">{session.user.email}</span>
           </div>
+        </div>
+        <div className="mt-5 pt-5 border-t">
+          <NicknameForm currentNickname={(session.user as { nickname?: string | null }).nickname} />
         </div>
       </div>
 
