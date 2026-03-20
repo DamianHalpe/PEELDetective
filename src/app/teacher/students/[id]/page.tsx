@@ -225,6 +225,11 @@ export default async function StudentDetailPage({ params }: PageProps) {
                 <Mail className="h-3.5 w-3.5" />
                 {student.email}
               </div>
+              {student.nickname && (
+                <div className="flex items-center gap-1.5 mt-1 text-sm text-muted-foreground">
+                  <span className="font-medium text-foreground">&ldquo;{student.nickname}&rdquo;</span>
+                </div>
+              )}
             </div>
           </div>
           <Button variant="outline" asChild>

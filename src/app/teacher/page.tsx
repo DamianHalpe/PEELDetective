@@ -48,6 +48,7 @@ export default async function TeacherDashboardPage() {
     .select({
       studentId: schema.submission.studentId,
       studentName: schema.user.name,
+      studentNickname: schema.user.nickname,
       studentEmail: schema.user.email,
       totalScore: schema.submission.totalScore,
       teacherOverrideScore: schema.submission.teacherOverrideScore,
@@ -62,6 +63,7 @@ export default async function TeacherDashboardPage() {
     string,
     {
       name: string;
+      nickname: string | null;
       email: string;
       totalSubmissions: number;
       evaluatedCount: number;
@@ -87,6 +89,7 @@ export default async function TeacherDashboardPage() {
     if (!existing) {
       studentMap.set(row.studentId, {
         name: row.studentName ?? "Unknown",
+        nickname: row.studentNickname ?? null,
         email: row.studentEmail ?? "",
         totalSubmissions: 1,
         evaluatedCount: isEvaluated ? 1 : 0,
@@ -236,7 +239,7 @@ export default async function TeacherDashboardPage() {
                           href={`/teacher/students/${student.id}`}
                           className="font-medium text-detective-amber hover:underline"
                         >
-                          {student.name}
+                          {student.name}{student.nickname ? <span className="text-muted-foreground font-normal"> ({student.nickname})</span> : null}
                         </Link>
                       </TableCell>
                       <TableCell className="text-muted-foreground">

@@ -328,7 +328,7 @@ export default function FeedbackPage() {
             </p>
             <div className="flex justify-center gap-3">
               <Button asChild>
-                <Link href={`/scenarios/${id}/write`}>
+                <Link href={`/scenarios/${id}`}>
                   <RefreshCw className="mr-2 h-4 w-4" />
                   Try Again
                 </Link>
@@ -448,13 +448,16 @@ export default function FeedbackPage() {
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/90 p-4 backdrop-blur">
         <div className="container mx-auto flex max-w-3xl gap-3">
           <Button className="flex-1" asChild>
-            <Link href={`/scenarios/${id}/write`}>
+            <Link href={`/scenarios/${id}`}>
               <RefreshCw className="mr-2 h-4 w-4" />
               Try Again
             </Link>
           </Button>
           <Button variant="outline" className="flex-1" asChild>
             <Link href="/scenarios">New Case</Link>
+          </Button>
+          <Button variant="ghost" size="sm" asChild className="shrink-0">
+            <Link href="/profile">My Results</Link>
           </Button>
         </div>
       </div>

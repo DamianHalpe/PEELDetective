@@ -1,6 +1,7 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 import { UserProfile } from "@/components/auth/user-profile";
+import { MobileNav } from "@/components/mobile-nav";
 import { auth } from "@/lib/auth";
 import { ModeToggle } from "./ui/mode-toggle";
 
@@ -66,6 +67,7 @@ export async function SiteHeader() {
             <div className="flex items-center gap-3" role="group" aria-label="User actions">
               <UserProfile />
               <ModeToggle />
+              <MobileNav showTeacher={role === "teacher" || role === "admin"} />
             </div>
           </div>
         </nav>

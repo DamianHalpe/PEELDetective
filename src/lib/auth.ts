@@ -44,6 +44,10 @@ export const auth = betterAuth({
         type: "number",
         defaultValue: 0,
       },
+      nickname: {
+        type: "string",
+        required: false,
+      },
     },
   },
 })

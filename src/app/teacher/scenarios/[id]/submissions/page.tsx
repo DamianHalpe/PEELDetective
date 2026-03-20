@@ -87,6 +87,7 @@ export default async function ScenarioSubmissionsPage({
     .select({
       id: schema.submission.id,
       studentName: schema.user.name,
+      studentNickname: schema.user.nickname,
       studentEmail: schema.user.email,
       scorePoint: schema.submission.scorePoint,
       scoreEvidence: schema.submission.scoreEvidence,
@@ -163,7 +164,7 @@ export default async function ScenarioSubmissionsPage({
                   {submissions.map((sub) => (
                     <TableRow key={sub.id}>
                       <TableCell className="font-medium">
-                        {sub.studentName ?? "Unknown"}
+                        {sub.studentName ?? "Unknown"}{sub.studentNickname ? <span className="text-muted-foreground"> ({sub.studentNickname})</span> : null}
                         <span className="block text-xs text-muted-foreground">
                           {sub.studentEmail}
                         </span>

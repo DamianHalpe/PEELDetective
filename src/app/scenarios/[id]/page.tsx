@@ -96,6 +96,7 @@ export default function InvestigatePage() {
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
+  const [bestScore, setBestScore] = useState<number | null>(null);
 
   // Writing form state
   const [showForm, setShowForm] = useState(false);
@@ -135,6 +136,21 @@ export default function InvestigatePage() {
     }
     void fetchScenario();
   }, [session, isPending, router, fetchScenario]);
+
+  // Fetch personal best score for this scenario
+  useEffect(() => {
+    if (!session || isPending) return;
+    fetch("/api/submissions")
+      .then((r) => (r.ok ? (r.json() as Promise<Array<{ scenarioId: string; totalScore: number | null; status: string }>>) : null))
+      .then((subs) => {
+        if (!subs) return;
+        const evaluated = subs.filter((s) => s.scenarioId === id && s.status === "evaluated" && s.totalScore !== null);
+        if (evaluated.length > 0) {
+          setBestScore(Math.max(...evaluated.map((s) => s.totalScore!)));
+        }
+      })
+      .catch(() => null);
+  }, [session, isPending, id]);
 
   function renderDifficultyStars(difficulty: number) {
     return Array.from({ length: 3 }, (_, i) => (
@@ -259,8 +275,15 @@ export default function InvestigatePage() {
         {/* Title and difficulty */}
         <div className="mb-8">
           <h1 className="mb-2 text-3xl font-bold">{scenario.title}</h1>
-          <div className="flex items-center gap-1">
-            {renderDifficultyStars(scenario.difficulty)}
+          <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1">
+              {renderDifficultyStars(scenario.difficulty)}
+            </div>
+            {bestScore !== null && (
+              <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2.5 py-0.5">
+                <Star className="h-3 w-3 fill-current" /> Your best: {bestScore}/20
+              </span>
+            )}
           </div>
         </div>
 
@@ -376,7 +399,19 @@ export default function InvestigatePage() {
                   disabled={submitting}
                 />
                 <p className="mt-1.5 text-xs text-muted-foreground">
-                  {responseText.length} characters
+                  {(() => {
+                    const wc = responseText.trim() === "" ? 0 : responseText.trim().split(/\s+/).length;
+                    return (
+                      <>
+                        {wc} words &middot; {responseText.length} chars
+                        {wc > 0 && wc < 50 && (
+                          <span className="ml-2 text-detective-amber/80">
+                            &mdash; aim for 80&ndash;150 words for a complete response
+                          </span>
+                        )}
+                      </>
+                    );
+                  })()}
                 </p>
 
                 {submitError && (

@@ -4,7 +4,20 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Search, Trophy, Target, ChevronRight, Zap, BookOpen, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth-client";
+
+const TIPS = [
+  "The best PEEL paragraphs cite specific clues from the crime scene \u2014 not just general observations. Make the examiner feel the evidence.",
+  "Your Point should name the culprit in the very first sentence \u2014 don\u2019t make the reader hunt for your answer.",
+  "Strong Evidence quotes or paraphrases exact details from the case: times, locations, and objects mentioned in the clues.",
+  "The Explain step is where most marks are lost. Don\u2019t just restate the clue \u2014 say why it proves your point.",
+  "A strong Link does more than say \u2018in conclusion\u2019 \u2014 it echoes the original question and confirms your verdict.",
+  "Re-reading your paragraph aloud helps you catch missing connections between your evidence and your explanation.",
+];
+
+/** Pick one tip per calendar day (deterministic rotation). */
+const TIP_OF_THE_DAY = TIPS[Math.floor(Date.now() / 86_400_000) % TIPS.length];
 
 interface DashboardStats {
   points: number;
@@ -76,6 +89,7 @@ export default function DashboardPage() {
 
   const firstName = session.user.name?.split(" ")[0] ?? "Detective";
   const points = stats?.points ?? (session.user as { points?: number }).points ?? 0;
+  const isLoadingStats = stats === null;
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
@@ -134,8 +148,14 @@ export default function DashboardPage() {
             <div className={`flex items-center justify-center w-9 h-9 rounded-lg ${stat.bg} mb-3`}>
               <stat.icon className={`h-4.5 w-4.5 ${stat.color}`} />
             </div>
-            <div className={`font-display text-2xl font-bold italic ${stat.color} leading-none mb-1`}>
-              {stat.value}
+            <div className="mb-1">
+              {isLoadingStats ? (
+                <Skeleton className="h-7 w-14 rounded" />
+              ) : (
+                <span className={`font-display text-2xl font-bold italic ${stat.color} leading-none`}>
+                  {stat.value}
+                </span>
+              )}
             </div>
             <div className="text-xs text-muted-foreground uppercase tracking-wider">{stat.label}</div>
           </div>
@@ -198,7 +218,7 @@ export default function DashboardPage() {
           <Zap className="h-4 w-4 text-detective-amber" />
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
-          <span className="font-semibold text-foreground">Tip:</span> The best PEEL paragraphs cite <em>specific</em> clues from the crime scene — not just general observations. Make the examiner feel the evidence.
+          <span className="font-semibold text-foreground">Tip:</span>{" "}{TIP_OF_THE_DAY}
         </p>
       </div>
     </div>

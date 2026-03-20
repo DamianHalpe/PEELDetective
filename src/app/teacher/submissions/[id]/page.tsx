@@ -116,6 +116,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
       submittedAt: schema.submission.submittedAt,
       aiEvaluatedAt: schema.submission.aiEvaluatedAt,
       studentName: schema.user.name,
+      studentNickname: schema.user.nickname,
       studentEmail: schema.user.email,
       scenarioTitle: schema.scenario.title,
     })
@@ -153,7 +154,7 @@ export default async function SubmissionDetailPage({ params }: PageProps) {
             </h1>
             <p className="text-sm text-muted-foreground">
               {result.scenarioTitle ?? "Unknown Scenario"} &mdash;{" "}
-              {result.studentName ?? "Unknown Student"}
+              {result.studentName ?? "Unknown Student"}{result.studentNickname ? <span className="text-muted-foreground font-normal"> ({result.studentNickname})</span> : null}
             </p>
           </div>
         </div>

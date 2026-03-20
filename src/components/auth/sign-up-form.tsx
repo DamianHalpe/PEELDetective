@@ -1,9 +1,9 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect, useRef } from "react"
 import Link from "next/link"
 import { useRouter } from "next/navigation"
-import { Check, X } from "lucide-react"
+import { Check, X, Loader2 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -30,11 +30,34 @@ function PasswordRequirements({ password }: { password: string }) {
 export function SignUpForm() {
   const router = useRouter()
   const [name, setName] = useState("")
+  const [nickname, setNickname] = useState("")
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [confirmPassword, setConfirmPassword] = useState("")
   const [error, setError] = useState("")
   const [isPending, setIsPending] = useState(false)
+  const [nicknameStatus, setNicknameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle")
+  const nicknameDebounce = useRef<ReturnType<typeof setTimeout> | null>(null)
+
+  useEffect(() => {
+    if (!nickname.trim()) {
+      setNicknameStatus("idle");
+      return;
+    }
+    setNicknameStatus("checking");
+    if (nicknameDebounce.current) clearTimeout(nicknameDebounce.current);
+    nicknameDebounce.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/user/nickname-check?nickname=${encodeURIComponent(nickname.trim())}`);
+        if (res.ok) {
+          const data = (await res.json()) as { available: boolean };
+          setNicknameStatus(data.available ? "available" : "taken");
+        }
+      } catch {
+        setNicknameStatus("idle");
+      }
+    }, 400);
+  }, [nickname]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -51,6 +74,11 @@ export function SignUpForm() {
       return
     }
 
+    if (nickname.trim() && nicknameStatus === "taken") {
+      setError("That nickname is already taken. Please choose a different one.");
+      return;
+    }
+
     setIsPending(true)
 
     try {
@@ -58,6 +86,7 @@ export function SignUpForm() {
         name,
         email,
         password,
+        nickname: nickname || undefined,
         callbackURL: "/dashboard",
       })
 
@@ -118,6 +147,36 @@ export function SignUpForm() {
           required
           disabled={isPending}
         />
+      </div>
+      <div className="space-y-2">
+        <Label htmlFor="nickname">Nickname</Label>
+        <div className="relative">
+          <Input
+            id="nickname"
+            type="text"
+            placeholder="e.g. SherlockJr"
+            value={nickname}
+            onChange={(e) => setNickname(e.target.value)}
+            disabled={isPending}
+            className={nicknameStatus === "taken" ? "border-destructive pr-8" : nicknameStatus === "available" ? "border-emerald-500 pr-8" : "pr-8"}
+          />
+          {nickname.trim() && (
+            <span className="absolute right-2.5 top-1/2 -translate-y-1/2">
+              {nicknameStatus === "checking" && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+              {nicknameStatus === "available" && <Check className="h-3.5 w-3.5 text-emerald-500" />}
+              {nicknameStatus === "taken" && <X className="h-3.5 w-3.5 text-destructive" />}
+            </span>
+          )}
+        </div>
+        {nicknameStatus === "taken" && (
+          <p className="text-xs text-destructive">That nickname is already taken.</p>
+        )}
+        {nicknameStatus === "available" && (
+          <p className="text-xs text-emerald-600 dark:text-emerald-400">Nickname is available!</p>
+        )}
+        {nicknameStatus !== "taken" && nicknameStatus !== "available" && (
+          <p className="text-xs text-muted-foreground">(optional) — shown to others on the leaderboard</p>
+        )}
       </div>
       <div className="space-y-2">
         <Label htmlFor="email">Email</Label>

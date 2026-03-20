@@ -19,6 +19,7 @@ export async function GET() {
   const topStudents = await db
     .select({
       name: schema.user.name,
+      nickname: schema.user.nickname,
       points: schema.user.points,
       totalSubmissions: count(schema.submission.id),
     })
@@ -28,13 +29,13 @@ export async function GET() {
       eq(schema.user.id, schema.submission.studentId),
     )
     .where(eq(schema.user.role, "student"))
-    .groupBy(schema.user.id, schema.user.name, schema.user.points)
+    .groupBy(schema.user.id, schema.user.name, schema.user.nickname, schema.user.points)
     .orderBy(desc(schema.user.points))
     .limit(10);
 
   const leaderboard = topStudents.map((row, index) => ({
     rank: index + 1,
-    name: row.name,
+    name: row.nickname ?? row.name.split(" ")[0],
     points: row.points,
     totalSubmissions: row.totalSubmissions,
   }));

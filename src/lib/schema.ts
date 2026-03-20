@@ -24,6 +24,7 @@ export const user = pgTable(
     role: text("role").notNull().default("student"), // "student" | "teacher" | "admin"
     schoolId: text("school_id").references(() => school.id),
     points: integer("points").notNull().default(0),
+    nickname: text("nickname").unique(),
   },
   (table) => [index("user_email_idx").on(table.email)]
 );

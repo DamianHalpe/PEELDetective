@@ -87,6 +87,7 @@ async function handleClassExport(): Promise<Response> {
     .select({
       studentId: schema.submission.studentId,
       studentName: schema.user.name,
+      studentNickname: schema.user.nickname,
       studentEmail: schema.user.email,
       totalScore: schema.submission.totalScore,
       teacherOverrideScore: schema.submission.teacherOverrideScore,
@@ -102,6 +103,7 @@ async function handleClassExport(): Promise<Response> {
     string,
     {
       name: string;
+      nickname: string;
       email: string;
       totalSubmissions: number;
       evaluatedCount: number;
@@ -119,6 +121,7 @@ async function handleClassExport(): Promise<Response> {
     if (!existing) {
       studentMap.set(row.studentId, {
         name: row.studentName ?? "Unknown",
+        nickname: row.studentNickname ?? "",
         email: row.studentEmail ?? "",
         totalSubmissions: 1,
         evaluatedCount: isEvaluated ? 1 : 0,
@@ -139,6 +142,7 @@ async function handleClassExport(): Promise<Response> {
 
   const headerRow = [
     "Student Name",
+    "Nickname",
     "Email",
     "Total Submissions",
     "Average Score",
@@ -153,6 +157,7 @@ async function handleClassExport(): Promise<Response> {
         : "N/A";
     dataRows.push([
       stats.name,
+      stats.nickname,
       stats.email,
       String(stats.totalSubmissions),
       avgScore,
@@ -219,6 +224,7 @@ async function handleScenarioExport(scenarioId: string): Promise<Response> {
   const submissions = await db
     .select({
       studentName: schema.user.name,
+      studentNickname: schema.user.nickname,
       studentEmail: schema.user.email,
       scorePoint: schema.submission.scorePoint,
       scoreEvidence: schema.submission.scoreEvidence,
@@ -237,6 +243,7 @@ async function handleScenarioExport(scenarioId: string): Promise<Response> {
 
   const headerRow = [
     "Student Name",
+    "Nickname",
     "Email",
     "Point",
     "Evidence",
@@ -250,6 +257,7 @@ async function handleScenarioExport(scenarioId: string): Promise<Response> {
   ];
   const dataRows = submissions.map((s) => [
     s.studentName ?? "Unknown",
+    s.studentNickname ?? "",
     s.studentEmail ?? "",
     String(s.scorePoint ?? ""),
     String(s.scoreEvidence ?? ""),

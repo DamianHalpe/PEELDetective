@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Star, Search, ChevronRight, BookOpen, Trophy, Crown } from "lucide-react";
+import { Star, Search, ChevronRight, BookOpen, Trophy, Crown, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -38,6 +38,7 @@ export default function ScenariosPage() {
   const [bestScores, setBestScores] = useState<Record<string, number>>({});
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filterDifficulty, setFilterDifficulty] = useState<number | null>(null);
 
   const fetchData = useCallback(async () => {
     try {
@@ -130,7 +131,34 @@ export default function ScenariosPage() {
           Choose a mystery to investigate. Write your PEEL response and get
           instant AI feedback.
         </p>
+        {!loading && scenarios.length > 0 && (
+          <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
+            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+            {Object.keys(bestScores).length} of {scenarios.length} cases solved
+          </p>
+        )}
       </div>
+
+      {/* Difficulty filter */}
+      {scenarios.length > 0 && (
+        <div className="flex items-center gap-2 mb-6">
+          {([null, 1, 2, 3] as const).map((level) => (
+            <Button
+              key={level ?? "all"}
+              size="sm"
+              variant={filterDifficulty === level ? "default" : "outline"}
+              className={
+                filterDifficulty === level
+                  ? "bg-detective-amber text-white hover:bg-detective-amber/90"
+                  : ""
+              }
+              onClick={() => setFilterDifficulty(level)}
+            >
+              {level === null ? "All" : "★".repeat(level)}
+            </Button>
+          ))}
+        </div>
+      )}
 
       {/* Empty state */}
       {scenarios.length === 0 ? (
@@ -143,14 +171,16 @@ export default function ScenariosPage() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {scenarios.map((scenario, index) => {
+          {scenarios
+            .filter((s) => filterDifficulty === null || s.difficulty === filterDifficulty)
+            .map((scenario, index) => {
             const best = bestScores[scenario.id];
             const hasBest = best !== undefined;
 
             return (
               <div
                 key={scenario.id}
-                className="group relative rounded-xl border bg-card overflow-hidden hover:border-detective-amber/50 hover:shadow-lg hover:shadow-detective-amber/5 transition-all duration-300 flex flex-col"
+                className={`group relative rounded-xl border bg-card overflow-hidden hover:border-detective-amber/50 hover:shadow-lg hover:shadow-detective-amber/5 transition-all duration-300 flex flex-col ${hasBest ? "border-emerald-500/20 bg-emerald-500/5" : ""}`}
               >
                 {/* Amber top bar */}
                 <div className="h-1 bg-gradient-to-r from-detective-amber/60 via-detective-amber to-detective-amber/60" />
@@ -194,7 +224,8 @@ export default function ScenariosPage() {
                     className="w-full gap-1.5 group-hover:gap-2.5 transition-all bg-detective-amber text-white dark:text-detective-slate hover:bg-detective-amber/90 font-semibold"
                   >
                     <Link href={`/scenarios/${scenario.id}`}>
-                      Investigate
+                      {hasBest && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" />}
+                      {hasBest ? "Re-investigate" : "Investigate"}
                       <ChevronRight className="h-3.5 w-3.5" />
                     </Link>
                   </Button>

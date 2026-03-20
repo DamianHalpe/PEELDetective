@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import {
@@ -16,7 +16,11 @@ import {
   Shield,
   Star,
   FileText,
+  Loader2,
+  Check,
+  X,
 } from "lucide-react";
+import { toast } from "sonner";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -27,8 +31,9 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useSession } from "@/lib/auth-client";
+import { useSession, updateUser } from "@/lib/auth-client";
 
 // --- Types ---
 
@@ -139,6 +144,31 @@ export default function ProfilePage() {
   const router = useRouter();
   const [profileData, setProfileData] = useState<ProfileData | null>(null);
   const [profileLoading, setProfileLoading] = useState(true);
+  const [nicknameInput, setNicknameInput] = useState("");
+  const [isSavingNickname, setIsSavingNickname] = useState(false);
+  const [nicknameStatus, setNicknameStatus] = useState<"idle" | "checking" | "available" | "taken">("idle");
+  const nicknameDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    const current = (session?.user as { nickname?: string | null } | undefined)?.nickname ?? "";
+    if (!nicknameInput.trim() || nicknameInput.trim() === current) {
+      setNicknameStatus("idle");
+      return;
+    }
+    setNicknameStatus("checking");
+    if (nicknameDebounce.current) clearTimeout(nicknameDebounce.current);
+    nicknameDebounce.current = setTimeout(async () => {
+      try {
+        const res = await fetch(`/api/user/nickname-check?nickname=${encodeURIComponent(nicknameInput.trim())}`);
+        if (res.ok) {
+          const data = (await res.json()) as { available: boolean };
+          setNicknameStatus(data.available ? "available" : "taken");
+        }
+      } catch {
+        setNicknameStatus("idle");
+      }
+    }, 400);
+  }, [nicknameInput, session]);
 
   const fetchProfile = useCallback(async () => {
     try {
@@ -160,6 +190,9 @@ export default function ProfilePage() {
   useEffect(() => {
     if (session) {
       fetchProfile();
+      setNicknameInput(
+        (session.user as { nickname?: string | null }).nickname ?? ""
+      );
     }
   }, [session, fetchProfile]);
 
@@ -251,6 +284,11 @@ export default function ProfilePage() {
                     {profileData?.points ?? 0} pts
                   </Badge>
                 </div>
+                {(user as { nickname?: string | null }).nickname && (
+                  <p className="text-sm text-muted-foreground">
+                    &ldquo;{(user as { nickname?: string | null }).nickname}&rdquo;
+                  </p>
+                )}
                 <div className="flex items-center gap-2 text-muted-foreground">
                   <Mail className="h-4 w-4" />
                   <span>{user.email}</span>
@@ -370,6 +408,72 @@ export default function ProfilePage() {
                   );
                 })}
               </div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Nickname */}
+        <Card>
+          <CardHeader>
+            <CardTitle>Nickname</CardTitle>
+            <CardDescription>
+              Your nickname is displayed on the leaderboard and visible to other
+              students.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <form
+              className="flex items-center gap-3"
+              onSubmit={async (e) => {
+                e.preventDefault();
+                if (nicknameInput.trim() && nicknameStatus === "taken") {
+                  toast.error("That nickname is already taken.");
+                  return;
+                }
+                setIsSavingNickname(true);
+                try {
+                  const result = await updateUser({
+                    nickname: nicknameInput || undefined,
+                  });
+                  if (result.error) {
+                    toast.error(
+                      result.error.message ?? "Failed to save nickname"
+                    );
+                  } else {
+                    toast.success("Nickname saved!");
+                  }
+                } catch {
+                  toast.error("An unexpected error occurred");
+                } finally {
+                  setIsSavingNickname(false);
+                }
+              }}
+            >
+              <div className="relative max-w-xs">
+                <Input
+                  value={nicknameInput}
+                  onChange={(e) => setNicknameInput(e.target.value)}
+                  placeholder="e.g. SherlockJr"
+                  className={`pr-8 ${nicknameStatus === "taken" ? "border-destructive" : nicknameStatus === "available" ? "border-emerald-500" : ""}`}
+                  disabled={isSavingNickname}
+                />
+                {nicknameInput.trim() && (
+                  <span className="absolute right-2.5 top-1/2 -translate-y-1/2">
+                    {nicknameStatus === "checking" && <Loader2 className="h-3.5 w-3.5 animate-spin text-muted-foreground" />}
+                    {nicknameStatus === "available" && <Check className="h-3.5 w-3.5 text-emerald-500" />}
+                    {nicknameStatus === "taken" && <X className="h-3.5 w-3.5 text-destructive" />}
+                  </span>
+                )}
+              </div>
+              <Button type="submit" disabled={isSavingNickname || nicknameStatus === "taken" || nicknameStatus === "checking"}>
+                {isSavingNickname ? "Saving..." : "Save"}
+              </Button>
+            </form>
+            {nicknameStatus === "taken" && (
+              <p className="text-xs text-destructive mt-2">That nickname is already taken.</p>
+            )}
+            {nicknameStatus === "available" && (
+              <p className="text-xs text-emerald-600 dark:text-emerald-400 mt-2">Nickname is available!</p>
             )}
           </CardContent>
         </Card>
