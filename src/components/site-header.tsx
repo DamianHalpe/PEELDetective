@@ -63,11 +63,19 @@ export async function SiteHeader() {
                   Teacher
                 </Link>
               )}
+              {role === "admin" && (
+                <Link
+                  href="/admin"
+                  className="px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+                >
+                  Admin
+                </Link>
+              )}
             </div>
             <div className="flex items-center gap-3" role="group" aria-label="User actions">
               <UserProfile />
               <ModeToggle />
-              <MobileNav showTeacher={role === "teacher" || role === "admin"} />
+              <MobileNav showTeacher={role === "teacher" || role === "admin"} showAdmin={role === "admin"} />
             </div>
           </div>
         </nav>
