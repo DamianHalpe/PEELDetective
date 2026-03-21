@@ -23,6 +23,7 @@ import {
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
+import { StudentActionsBar } from "./_components/StudentActionsBar";
 
 export const metadata = { title: "Student Detail" };
 
@@ -218,9 +219,14 @@ export default async function StudentDetailPage({ params }: PageProps) {
               </Link>
             </Button>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                {student.name}
-              </h1>
+              <div className="flex items-center gap-2">
+                <h1 className="text-2xl font-bold tracking-tight">
+                  {student.name}
+                </h1>
+                {student.banned && (
+                  <Badge variant="destructive">DEACTIVATED</Badge>
+                )}
+              </div>
               <div className="flex items-center gap-2 text-sm text-muted-foreground mt-1">
                 <Mail className="h-3.5 w-3.5" />
                 {student.email}
@@ -232,12 +238,20 @@ export default async function StudentDetailPage({ params }: PageProps) {
               )}
             </div>
           </div>
-          <Button variant="outline" asChild>
-            <a href={`/api/export?type=student&studentId=${id}`} download>
-              <Download className="mr-2 h-4 w-4" />
-              Export CSV
-            </a>
-          </Button>
+          <div className="flex items-center gap-2">
+            <StudentActionsBar
+              studentId={id}
+              studentName={student.name}
+              isBanned={student.banned ?? false}
+              viewerRole={role}
+            />
+            <Button variant="outline" asChild>
+              <a href={`/api/export?type=student&studentId=${id}`} download>
+                <Download className="mr-2 h-4 w-4" />
+                Export CSV
+              </a>
+            </Button>
+          </div>
         </div>
 
         {/* Stats row */}

@@ -25,6 +25,7 @@ export const user = pgTable(
     schoolId: text("school_id").references(() => school.id),
     points: integer("points").notNull().default(0),
     nickname: text("nickname").unique(),
+    banned: boolean("banned").notNull().default(false),
   },
   (table) => [index("user_email_idx").on(table.email)]
 );

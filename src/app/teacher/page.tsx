@@ -145,6 +145,12 @@ export default async function TeacherDashboardPage() {
               </Link>
             </Button>
             <Button variant="outline" asChild>
+              <Link href="/teacher/students">
+                <Users className="mr-2 h-4 w-4" />
+                Manage Students
+              </Link>
+            </Button>
+            <Button variant="outline" asChild>
               <a href="/api/export?type=class" download>
                 <Download className="mr-2 h-4 w-4" />
                 Export CSV

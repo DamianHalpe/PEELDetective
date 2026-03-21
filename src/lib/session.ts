@@ -22,6 +22,11 @@ export async function requireAuth() {
     redirect("/");
   }
 
+  // Redirect banned users to the account-suspended page
+  if ((session.user as { banned?: boolean }).banned === true) {
+    redirect("/account-suspended");
+  }
+
   return session;
 }
 

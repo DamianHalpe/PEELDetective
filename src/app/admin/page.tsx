@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Users } from "lucide-react";
+import { Users, GraduationCap } from "lucide-react";
 import {
   Card,
   CardDescription,
@@ -34,6 +34,17 @@ export default async function AdminPage() {
                 </div>
                 <CardTitle className="text-lg">Teachers</CardTitle>
                 <CardDescription>Create and manage teacher accounts</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+          <Link href="/teacher/students">
+            <Card className="border-detective-amber/20 hover:border-detective-amber/60 transition-colors cursor-pointer">
+              <CardHeader>
+                <div className="rounded-lg bg-detective-amber/10 p-2 w-fit mb-2">
+                  <GraduationCap className="h-5 w-5 text-detective-amber" />
+                </div>
+                <CardTitle className="text-lg">Students</CardTitle>
+                <CardDescription>Manage and deactivate student accounts</CardDescription>
               </CardHeader>
             </Card>
           </Link>
