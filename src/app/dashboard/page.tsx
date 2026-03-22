@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Search, Trophy, Target, ChevronRight, Lock, Zap, BookOpen, Star } from "lucide-react";
+import { Search, Trophy, Target, ChevronRight, Lock, Zap, BookOpen, Star, CreditCard, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth-client";
@@ -28,6 +28,8 @@ interface DashboardStats {
 export default function DashboardPage() {
   const { data: session, isPending } = useSession();
   const [stats, setStats] = useState<DashboardStats | null>(null);
+  const [cancelStep, setCancelStep] = useState<"idle" | "confirm">("idle");
+  const [cancelling, setCancelling] = useState(false);
 
   useEffect(() => {
     if (!session) return;
@@ -93,6 +95,22 @@ export default function DashboardPage() {
   const role = (session.user as { role?: string }).role;
   const subscribed = (session.user as { subscribed?: boolean }).subscribed;
   const showSubscribeBanner = role === "student" && !subscribed;
+  const showSubscriptionManagement = role === "student" && subscribed;
+  const periodEnd = (session.user as { subscriptionPeriodEnd?: string }).subscriptionPeriodEnd;
+  const renewalDate = periodEnd
+    ? new Date(periodEnd).toLocaleDateString(undefined, { year: "numeric", month: "long", day: "numeric" })
+    : null;
+
+  async function handleCancelSubscription() {
+    setCancelling(true);
+    try {
+      await fetch("/api/subscribe/cancel", { method: "POST" });
+      // Reload to reflect the updated session
+      window.location.reload();
+    } catch {
+      setCancelling(false);
+    }
+  }
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
@@ -114,6 +132,57 @@ export default function DashboardPage() {
           <Button asChild size="sm" className="shrink-0 bg-detective-amber text-black font-bold border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all">
             <Link href="/subscribe">Subscribe Now</Link>
           </Button>
+        </div>
+      )}
+
+      {/* ── Subscription management (subscribed students) ── */}
+      {showSubscriptionManagement && (
+        <div
+          className="mb-8 rounded-xl border border-border bg-card px-5 py-4"
+          style={{ animation: "fadeInUp 0.4s ease-out both" }}
+        >
+          <div className="flex items-center gap-3">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-emerald-500/15 border border-emerald-500/30">
+              <CreditCard className="h-4 w-4 text-emerald-500" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-semibold text-foreground">Subscription Active</p>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {renewalDate ? <>Renews on <span className="font-medium text-foreground">{renewalDate}</span></> : "You can submit case reports and receive AI feedback."}
+              </p>
+            </div>
+            {cancelStep === "idle" ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="shrink-0 text-muted-foreground hover:text-destructive"
+                onClick={() => setCancelStep("confirm")}
+              >
+                Cancel subscription
+              </Button>
+            ) : (
+              <div className="flex items-center gap-2 shrink-0">
+                <AlertTriangle className="h-4 w-4 text-destructive shrink-0" />
+                <span className="text-xs text-muted-foreground">Are you sure?</span>
+                <Button
+                  size="sm"
+                  variant="destructive"
+                  disabled={cancelling}
+                  onClick={handleCancelSubscription}
+                >
+                  {cancelling ? "Cancelling…" : "Yes, cancel"}
+                </Button>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  disabled={cancelling}
+                  onClick={() => setCancelStep("idle")}
+                >
+                  Keep it
+                </Button>
+              </div>
+            )}
+          </div>
         </div>
       )}
 

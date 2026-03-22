@@ -29,10 +29,8 @@ export async function GET(_req: Request, { params }: RouteParams) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
-  // Students need an active subscription to view feedback
-  if (role === "student" && !(session.user as { subscribed?: boolean }).subscribed) {
-    return Response.json({ error: "subscription_required" }, { status: 403 });
-  }
+  // Unsubscribed students may read their own past submissions (read-only access after cancellation)
+  // but the ownership check above already ensures they can only see their own records
 
   return Response.json(found);
 }
