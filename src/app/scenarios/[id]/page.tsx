@@ -14,6 +14,7 @@ import {
   CheckCircle2,
   Loader2,
   Send,
+  Lightbulb,
 } from "lucide-react";
 import { GuideCharacter } from "@/components/guide-character";
 import { Button } from "@/components/ui/button";
@@ -368,9 +369,7 @@ export default function InvestigatePage() {
                     className="border-border border-l-2 border-l-detective-amber/50"
                   >
                     <CardContent className="flex items-start gap-3 p-4">
-                      <span className="flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-detective-amber/15 text-xs font-bold text-detective-amber">
-                        {index + 1}
-                      </span>
+                      <Lightbulb className="h-4 w-4 shrink-0 text-detective-amber" />
                       <p className="text-sm leading-relaxed">{clue}</p>
                     </CardContent>
                   </Card>

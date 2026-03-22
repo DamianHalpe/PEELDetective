@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { Bot } from "lucide-react";
 
 const hints = [
   "Study the crime scene carefully, detective...",
@@ -41,52 +42,9 @@ export function GuideCharacter() {
         <div className="absolute -right-2 bottom-3 h-0 w-0 border-y-[6px] border-l-[8px] border-y-transparent border-l-border" />
       </div>
 
-      {/* Detective silhouette */}
-      <div className="shrink-0 text-detective-amber">
-        <svg
-          viewBox="0 0 80 80"
-          fill="none"
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-20 w-20"
-          aria-hidden="true"
-        >
-          {/* Hat brim */}
-          <ellipse cx="40" cy="28" rx="22" ry="4" fill="currentColor" />
-          {/* Hat crown */}
-          <rect
-            x="24"
-            y="10"
-            width="32"
-            height="20"
-            rx="4"
-            fill="currentColor"
-          />
-          {/* Face */}
-          <circle cx="40" cy="42" r="12" fill="currentColor" />
-          {/* Body */}
-          <path
-            d="M20 80 C20 60 28 54 40 54 C52 54 60 60 60 80"
-            fill="currentColor"
-          />
-          {/* Magnifying glass */}
-          <circle
-            cx="62"
-            cy="58"
-            r="8"
-            stroke="currentColor"
-            strokeWidth="3"
-            fill="none"
-          />
-          <line
-            x1="68"
-            y1="64"
-            x2="76"
-            y2="72"
-            stroke="currentColor"
-            strokeWidth="3"
-            strokeLinecap="round"
-          />
-        </svg>
+      {/* Guide icon */}
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-detective-amber/15 text-detective-amber">
+        <Bot className="h-6 w-6" aria-hidden="true" />
       </div>
     </div>
   );
