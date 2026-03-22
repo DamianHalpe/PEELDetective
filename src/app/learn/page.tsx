@@ -189,7 +189,7 @@ export default function LearnPage() {
     <div className="container mx-auto max-w-5xl px-4 py-12">
       {/* Hero section */}
       <div className="mb-12 text-center">
-        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-detective-amber/10">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-full bg-detective-amber/15">
           <BookOpen className="h-7 w-7 text-detective-amber" />
         </div>
         <h1 className="mb-3 text-4xl font-bold tracking-tight">
@@ -240,7 +240,7 @@ export default function LearnPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <blockquote className="border-l-2 border-muted-foreground/20 pl-3 text-sm italic text-foreground">
+                    <blockquote className="border-l-2 border-muted-foreground/40 pl-3 text-sm italic text-foreground">
                       &ldquo;{level.example}&rdquo;
                     </blockquote>
                     <p className="text-xs leading-relaxed text-muted-foreground">
@@ -255,9 +255,9 @@ export default function LearnPage() {
       </div>
 
       {/* Footer tip */}
-      <Card className="mt-12 border-detective-amber/30 bg-detective-amber/5">
+      <Card className="mt-12 border-detective-amber/40 bg-detective-amber/8">
         <CardContent className="flex items-start gap-4 p-6">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-detective-amber/10">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-detective-amber/15">
             <BookOpen className="h-5 w-5 text-detective-amber" />
           </div>
           <div>

@@ -160,7 +160,7 @@ export default function InvestigatePage() {
         className={`h-4 w-4 ${
           i < difficulty
             ? "fill-detective-amber text-detective-amber"
-            : "text-muted-foreground"
+            : "text-muted-foreground/60"
         }`}
       />
     ));
@@ -310,9 +310,9 @@ export default function InvestigatePage() {
                 <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
                   Crime Scene Briefing
                 </h2>
-                <div className="ml-2 h-px flex-1 bg-detective-amber/20" />
+                <div className="ml-2 h-px flex-1 bg-detective-amber/35" />
               </div>
-              <Card className="border-detective-amber/10 bg-card shadow-sm dark:bg-card">
+              <Card className="border-detective-amber/25 bg-card shadow-sm dark:bg-card">
                 <CardContent className="p-5">
                   <div
                     className="leading-relaxed text-card-foreground"
@@ -330,7 +330,7 @@ export default function InvestigatePage() {
                 <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
                   Suspects
                 </h2>
-                <div className="ml-2 h-px flex-1 bg-detective-amber/20" />
+                <div className="ml-2 h-px flex-1 bg-detective-amber/35" />
               </div>
               <div className="space-y-4">
                 {scenario.suspects.map((suspect, index) => (
@@ -360,13 +360,13 @@ export default function InvestigatePage() {
                 <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
                   Evidence Board
                 </h2>
-                <div className="ml-2 h-px flex-1 bg-detective-amber/20" />
+                <div className="ml-2 h-px flex-1 bg-detective-amber/35" />
               </div>
               <div className="space-y-3">
                 {scenario.clues.map((clue, index) => (
                   <Card
                     key={index}
-                    className="border-border border-l-2 border-l-detective-amber/50"
+                    className="border-border border-l-2 border-l-detective-amber/70"
                   >
                     <CardContent className="flex items-start gap-3 p-4">
                       <Lightbulb className="h-4 w-4 shrink-0 text-detective-amber" />
@@ -389,7 +389,7 @@ export default function InvestigatePage() {
               <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
                 Your Case Report
               </h2>
-              <div className="ml-2 h-px flex-1 bg-detective-amber/20" />
+              <div className="ml-2 h-px flex-1 bg-detective-amber/35" />
             </div>
 
             <p className="mb-6 text-sm text-muted-foreground">
@@ -455,7 +455,7 @@ export default function InvestigatePage() {
                               className={
                                 i <= evalStep
                                   ? "text-foreground"
-                                  : "text-muted-foreground/50"
+                                  : "text-muted-foreground/70"
                               }
                             >
                               {step.label}
@@ -536,7 +536,7 @@ export default function InvestigatePage() {
                           <p className="mb-1.5 text-xs leading-relaxed text-muted-foreground">
                             {el.description}
                           </p>
-                          <p className="rounded bg-muted px-2 py-1 text-xs italic text-muted-foreground">
+                          <p className="rounded border border-border bg-muted px-2 py-1 text-xs italic text-muted-foreground">
                             {el.example}
                           </p>
                         </CardContent>

@@ -213,7 +213,7 @@ export default function DashboardPage() {
             value: points,
             color: "text-detective-amber",
             bg: "bg-detective-amber/10",
-            border: "border-detective-amber/20",
+            border: "border-detective-amber/35",
           },
           {
             icon: Target,
@@ -221,7 +221,7 @@ export default function DashboardPage() {
             value: stats?.submissionCount ?? "\u2014",
             color: "text-emerald-500",
             bg: "bg-emerald-500/10",
-            border: "border-emerald-500/20",
+            border: "border-emerald-500/30",
           },
           {
             icon: Star,
@@ -229,7 +229,7 @@ export default function DashboardPage() {
             value: stats?.bestScore != null ? `${stats.bestScore}/20` : "\u2014",
             color: "text-purple-500",
             bg: "bg-purple-500/10",
-            border: "border-purple-500/20",
+            border: "border-purple-500/30",
           },
         ].map((stat, i) => (
           <div
@@ -259,7 +259,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {/* Primary CTA */}
         <div
-          className="relative rounded-xl border border-detective-amber/30 bg-detective-amber/5 p-7 overflow-hidden group hover:border-detective-amber/50 transition-all duration-300"
+          className="relative rounded-xl border border-detective-amber/40 bg-detective-amber/8 p-7 overflow-hidden group hover:border-detective-amber/50 transition-all duration-300"
           style={{ animation: "fadeInUp 0.5s ease-out 0.3s both" }}
         >
           <div className="absolute top-0 left-6 right-6 h-0.5 bg-gradient-to-r from-transparent via-detective-amber/60 to-transparent" />
@@ -304,7 +304,7 @@ export default function DashboardPage() {
 
       {/* ── Motivational tip ────────────────────────────── */}
       <div
-        className="rounded-xl border border-detective-amber/20 bg-detective-amber/5 px-6 py-4 flex items-center gap-4"
+        className="rounded-xl border border-detective-amber/35 bg-detective-amber/8 px-6 py-4 flex items-center gap-4"
         style={{ animation: "fadeInUp 0.5s ease-out 0.45s both" }}
       >
         <div className="flex items-center justify-center w-8 h-8 rounded-full bg-detective-amber/15 shrink-0">

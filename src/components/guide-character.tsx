@@ -43,7 +43,7 @@ export function GuideCharacter() {
       </div>
 
       {/* Guide icon */}
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-detective-amber/15 text-detective-amber">
+      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-detective-amber/20 text-detective-amber">
         <Bot className="h-6 w-6" aria-hidden="true" />
       </div>
     </div>

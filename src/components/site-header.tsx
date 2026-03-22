@@ -31,7 +31,7 @@ export async function SiteHeader() {
             aria-label="PEEL Detective - Go to homepage"
           >
             {/* Amber magnifying glass icon */}
-            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-detective-amber/15 border border-detective-amber/30 group-hover:bg-detective-amber/25 transition-colors">
+            <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-detective-amber/20 border border-detective-amber/40 group-hover:bg-detective-amber/25 transition-colors">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" className="text-detective-amber">
                 <circle cx="11" cy="11" r="8"/>
                 <path d="m21 21-4.35-4.35"/>

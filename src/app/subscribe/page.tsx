@@ -53,7 +53,7 @@ function SubscribeContent() {
       </Link>
 
       <div className="mb-8 text-center">
-        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-detective-amber/10 border-2 border-detective-amber/30">
+        <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-detective-amber/15 border-2 border-detective-amber/45">
           <CreditCard className="h-8 w-8 text-detective-amber" />
         </div>
         <h1 className="text-3xl font-bold tracking-tight">Detective Subscription</h1>
@@ -63,7 +63,7 @@ function SubscribeContent() {
       </div>
 
       <Card className="border-2 border-black shadow-[6px_6px_0px_0px_rgba(0,0,0,1)]">
-        <CardHeader className="border-b-2 border-black bg-detective-amber/10 pb-4">
+        <CardHeader className="border-b-2 border-black bg-detective-amber/15 pb-4">
           <CardTitle className="flex items-center justify-between">
             <span className="text-lg">Monthly Plan</span>
             <div className="text-right">
@@ -82,7 +82,7 @@ function SubscribeContent() {
             ))}
           </ul>
 
-          <div className="mb-5 flex items-center gap-2 rounded-lg border border-detective-amber/20 bg-detective-amber/5 px-3 py-2.5">
+          <div className="mb-5 flex items-center gap-2 rounded-lg border border-detective-amber/35 bg-detective-amber/8 px-3 py-2.5">
             <RefreshCw className="h-4 w-4 shrink-0 text-detective-amber" />
             <p className="text-xs text-muted-foreground">
               Renews automatically every 30 days. Cancel any time.

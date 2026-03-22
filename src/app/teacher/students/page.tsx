@@ -92,10 +92,10 @@ export default async function ManageStudentsPage() {
 
         {/* Stats cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <Card className="border-detective-amber/20">
+          <Card className="border-detective-amber/35">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-detective-amber/10 p-2">
+                <div className="rounded-lg bg-detective-amber/15 p-2">
                   <Users className="h-5 w-5 text-detective-amber" />
                 </div>
                 <div>
@@ -107,10 +107,10 @@ export default async function ManageStudentsPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-detective-amber/20">
+          <Card className="border-detective-amber/35">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-green-500/10 p-2">
+                <div className="rounded-lg bg-green-100 dark:bg-green-900/30 p-2">
                   <UserCheck className="h-5 w-5 text-green-600" />
                 </div>
                 <div>
@@ -122,10 +122,10 @@ export default async function ManageStudentsPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-detective-amber/20">
+          <Card className="border-detective-amber/35">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-red-500/10 p-2">
+                <div className="rounded-lg bg-red-100 dark:bg-red-900/30 p-2">
                   <UserX className="h-5 w-5 text-red-600" />
                 </div>
                 <div>
@@ -137,10 +137,10 @@ export default async function ManageStudentsPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-detective-amber/20">
+          <Card className="border-detective-amber/35">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-emerald-500/10 p-2">
+                <div className="rounded-lg bg-emerald-100 dark:bg-emerald-900/30 p-2">
                   <CreditCard className="h-5 w-5 text-emerald-600" />
                 </div>
                 <div>
@@ -155,7 +155,7 @@ export default async function ManageStudentsPage() {
         </div>
 
         {/* Students table */}
-        <Card className="border-detective-amber/20">
+        <Card className="border-detective-amber/35">
           <CardHeader>
             <CardTitle>All Students</CardTitle>
             <CardDescription>
@@ -166,7 +166,7 @@ export default async function ManageStudentsPage() {
           <CardContent>
             {students.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
-                <Users className="h-10 w-10 mx-auto mb-3 opacity-40" />
+                <Users className="h-10 w-10 mx-auto mb-3 opacity-60" />
                 <p>No students registered yet.</p>
               </div>
             ) : (

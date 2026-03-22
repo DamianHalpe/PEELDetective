@@ -98,7 +98,7 @@ export default function ScenariosPage() {
         className={`h-3.5 w-3.5 ${
           i < difficulty
             ? "fill-detective-amber text-detective-amber"
-            : "text-muted-foreground/30"
+            : "text-muted-foreground/50"
         }`}
       />
     ));
@@ -180,7 +180,7 @@ export default function ScenariosPage() {
             return (
               <div
                 key={scenario.id}
-                className={`group relative rounded-xl border bg-card overflow-hidden hover:border-detective-amber/50 hover:shadow-lg hover:shadow-detective-amber/5 transition-all duration-300 flex flex-col ${hasBest ? "border-emerald-500/20 bg-emerald-500/5" : ""}`}
+                className={`group relative rounded-xl border bg-card overflow-hidden hover:border-detective-amber/50 hover:shadow-lg hover:shadow-detective-amber/5 transition-all duration-300 flex flex-col ${hasBest ? "border-emerald-600/30 bg-emerald-50" : ""}`}
               >
                 {/* Amber top bar */}
                 <div className="h-1 bg-gradient-to-r from-detective-amber/60 via-detective-amber to-detective-amber/60" />
@@ -197,11 +197,11 @@ export default function ScenariosPage() {
                       {renderDifficultyStars(scenario.difficulty)}
                     </div>
                     {hasBest ? (
-                      <span className="shrink-0 inline-flex items-center gap-1 text-xs font-bold border border-detective-amber/40 text-detective-amber bg-detective-amber/8 rounded-full px-2.5 py-0.5">
+                      <span className="shrink-0 inline-flex items-center gap-1 text-xs font-bold border border-detective-amber/60 text-detective-amber bg-detective-amber/12 rounded-full px-2.5 py-0.5">
                         ★ {best}/20
                       </span>
                     ) : (
-                      <span className="shrink-0 inline-flex items-center text-xs text-muted-foreground border border-border rounded-full px-2.5 py-0.5">
+                      <span className="shrink-0 inline-flex items-center text-xs text-foreground/60 border border-border rounded-full px-2.5 py-0.5">
                         Unsolved
                       </span>
                     )}

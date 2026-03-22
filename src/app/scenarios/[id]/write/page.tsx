@@ -248,7 +248,7 @@ export default function WritePage() {
                         className={
                           i <= evalStep
                             ? "text-foreground"
-                            : "text-muted-foreground/50"
+                            : "text-muted-foreground/70"
                         }
                       >
                         {step.label}
@@ -326,7 +326,7 @@ export default function WritePage() {
                     <p className="mb-1.5 text-xs leading-relaxed text-muted-foreground">
                       {el.description}
                     </p>
-                    <p className="rounded bg-muted px-2 py-1 text-xs italic text-muted-foreground">
+                    <p className="rounded border border-border bg-muted px-2 py-1 text-xs italic text-muted-foreground">
                       {el.example}
                     </p>
                   </CardContent>

@@ -173,7 +173,7 @@ function TotalScoreDisplay({ score, max = 20 }: { score: number; max?: number })
             className={`h-6 w-6 ${
               i < stars
                 ? "fill-detective-amber text-detective-amber"
-                : "text-muted-foreground"
+                : "text-muted-foreground/60"
             }`}
           />
         ))}
@@ -424,7 +424,7 @@ export default function FeedbackPage() {
       {submission.modelAnswer && (
         <section className="mb-8">
           <button
-            className="flex w-full items-center justify-between rounded-md border bg-card px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/50"
+            className="flex w-full items-center justify-between rounded-md border bg-card px-4 py-3 text-sm font-medium transition-colors hover:bg-muted/80"
             onClick={() => setModelAnswerOpen((v) => !v)}
           >
             <span className="text-xs font-semibold uppercase tracking-widest text-detective-amber">

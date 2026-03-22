@@ -13,7 +13,7 @@ export default async function Home() {
       {/* ── Hero ─────────────────────────────────────────── */}
       <section className="relative overflow-hidden border-b min-h-[80vh] flex items-center">
         {/* Layered atmospheric background */}
-        <div className="absolute inset-0 bg-gradient-to-br from-detective-slate/30 via-background to-detective-amber/5 dark:from-detective-slate/60 dark:via-background dark:to-detective-amber/10 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-detective-slate/15 via-background to-detective-amber/8 dark:from-detective-slate/60 dark:via-background dark:to-detective-amber/10 pointer-events-none" />
 
         {/* Radial glow behind headline */}
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-detective-amber/8 dark:bg-detective-amber/12 rounded-full blur-3xl pointer-events-none" />
@@ -37,7 +37,7 @@ export default async function Home() {
         <div className="container mx-auto px-4 py-20 md:py-32 text-center relative">
           {/* Animated badge */}
           <div
-            className="inline-flex items-center gap-2 rounded-full border border-detective-amber/40 bg-detective-amber/8 px-5 py-2 text-xs font-semibold text-detective-amber mb-10 tracking-widest uppercase"
+            className="inline-flex items-center gap-2 rounded-full border border-detective-amber/50 bg-detective-amber/12 px-5 py-2 text-xs font-semibold text-detective-amber mb-10 tracking-widest uppercase"
             style={{ animation: "fadeIn 0.6s ease-out both" }}
           >
             <span className="relative flex h-2 w-2">
@@ -93,7 +93,7 @@ export default async function Home() {
                     <ChevronRight className="h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="font-semibold text-base px-8 border-detective-amber/30 hover:border-detective-amber/60 hover:bg-detective-amber/5">
+                <Button size="lg" variant="outline" asChild className="font-semibold text-base px-8 border-detective-amber/45 hover:border-detective-amber/70 hover:bg-detective-amber/8">
                   <Link href="/learn">PEEL Guide</Link>
                 </Button>
               </>
@@ -109,7 +109,7 @@ export default async function Home() {
                     <ChevronRight className="h-4 w-4" />
                   </Link>
                 </Button>
-                <Button size="lg" variant="outline" asChild className="font-semibold text-base px-8 border-detective-amber/30 hover:border-detective-amber/60 hover:bg-detective-amber/5">
+                <Button size="lg" variant="outline" asChild className="font-semibold text-base px-8 border-detective-amber/45 hover:border-detective-amber/70 hover:bg-detective-amber/8">
                   <Link href="/scenarios">See the Cases</Link>
                 </Button>
               </>
@@ -178,11 +178,11 @@ export default async function Home() {
               <div className="absolute top-0 left-6 right-6 h-0.5 bg-gradient-to-r from-transparent via-detective-amber/60 to-transparent" />
 
               {/* Step number watermark */}
-              <div className="absolute top-4 right-5 font-display text-6xl font-bold italic text-detective-amber/20 dark:text-detective-amber/8 leading-none select-none pointer-events-none">
+              <div className="absolute top-4 right-5 font-display text-6xl font-bold italic text-detective-amber/30 dark:text-detective-amber/8 leading-none select-none pointer-events-none">
                 {item.step}
               </div>
 
-              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-detective-amber/10 border border-detective-amber/20 mb-5 group-hover:bg-detective-amber/15 transition-colors">
+              <div className="flex items-center justify-center w-12 h-12 rounded-xl bg-detective-amber/15 border border-detective-amber/30 mb-5 group-hover:bg-detective-amber/15 transition-colors">
                 <item.icon className="h-6 w-6 text-detective-amber" />
               </div>
 
@@ -197,7 +197,7 @@ export default async function Home() {
       </section>
 
       {/* ── PEEL Breakdown ────────────────────────────────── */}
-      <section className="border-y bg-detective-slate/5 dark:bg-detective-slate/20">
+      <section className="border-y bg-detective-slate/8 dark:bg-detective-slate/20">
         <div className="container mx-auto px-4 py-20">
           <div className="text-center mb-14">
             <div className="inline-flex items-center gap-2 text-xs font-semibold uppercase tracking-widest text-detective-amber mb-3">
@@ -315,7 +315,7 @@ export default async function Home() {
                         <ChevronRight className="h-4 w-4" />
                       </Link>
                     </Button>
-                    <Button size="lg" variant="outline" asChild className="font-semibold text-base px-8 border-detective-amber/30 hover:border-detective-amber/60">
+                    <Button size="lg" variant="outline" asChild className="font-semibold text-base px-8 border-detective-amber/45 hover:border-detective-amber/70">
                       <Link href="/login">Sign In</Link>
                     </Button>
                   </>

@@ -362,7 +362,7 @@ export default function ProfilePage() {
           <CardContent>
             {(profileData?.submissions ?? []).length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                <FileText className="h-10 w-10 mx-auto mb-3 opacity-40" />
+                <FileText className="h-10 w-10 mx-auto mb-3 opacity-60" />
                 <p>No cases solved yet. Start with a scenario!</p>
                 <Button variant="outline" className="mt-4" asChild>
                   <Link href="/">Browse Scenarios</Link>
@@ -383,7 +383,7 @@ export default function ProfilePage() {
                   return (
                     <div
                       key={sub.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50 transition-colors"
+                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/80 transition-colors"
                     >
                       <div className="flex-1 min-w-0 mr-4">
                         <Link
@@ -489,7 +489,7 @@ export default function ProfilePage() {
           <CardContent>
             {(profileData?.badges ?? []).length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
-                <Trophy className="h-10 w-10 mx-auto mb-3 opacity-40" />
+                <Trophy className="h-10 w-10 mx-auto mb-3 opacity-60" />
                 <p>No badges yet. Keep solving cases!</p>
               </div>
             ) : (

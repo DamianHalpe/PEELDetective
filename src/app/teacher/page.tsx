@@ -161,10 +161,10 @@ export default async function TeacherDashboardPage() {
 
         {/* Stats cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          <Card className="border-detective-amber/20">
+          <Card className="border-detective-amber/35">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-detective-amber/10 p-2">
+                <div className="rounded-lg bg-detective-amber/15 p-2">
                   <Users className="h-5 w-5 text-detective-amber" />
                 </div>
                 <div>
@@ -176,10 +176,10 @@ export default async function TeacherDashboardPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-detective-amber/20">
+          <Card className="border-detective-amber/35">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-detective-amber/10 p-2">
+                <div className="rounded-lg bg-detective-amber/15 p-2">
                   <FileText className="h-5 w-5 text-detective-amber" />
                 </div>
                 <div>
@@ -191,10 +191,10 @@ export default async function TeacherDashboardPage() {
               </div>
             </CardContent>
           </Card>
-          <Card className="border-detective-amber/20">
+          <Card className="border-detective-amber/35">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
-                <div className="rounded-lg bg-detective-amber/10 p-2">
+                <div className="rounded-lg bg-detective-amber/15 p-2">
                   <TrendingUp className="h-5 w-5 text-detective-amber" />
                 </div>
                 <div>
@@ -211,7 +211,7 @@ export default async function TeacherDashboardPage() {
         </div>
 
         {/* Student table */}
-        <Card className="border-detective-amber/20">
+        <Card className="border-detective-amber/35">
           <CardHeader>
             <CardTitle>Students</CardTitle>
             <CardDescription>
