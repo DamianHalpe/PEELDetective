@@ -99,8 +99,14 @@ export default function WritePage() {
       router.push("/login");
       return;
     }
+    const userRole = (session.user as { role?: string }).role;
+    const userSubscribed = (session.user as { subscribed?: boolean }).subscribed;
+    if (userRole === "student" && !userSubscribed) {
+      router.push(`/subscribe?from=/scenarios/${id}/write`);
+      return;
+    }
     void fetchScenario();
-  }, [session, isPending, router, fetchScenario]);
+  }, [session, isPending, router, fetchScenario, id]);
 
   const evalSteps = [
     { label: "Reading your case report…", done: false },
@@ -131,6 +137,10 @@ export default function WritePage() {
         submissionId?: string;
       };
 
+      if (res.status === 403 && data.error === "subscription_required") {
+        router.push(`/subscribe?from=/scenarios/${id}/write`);
+        return;
+      }
       if (res.ok) {
         router.push(`/scenarios/${id}/feedback/${data.id}`);
       } else if (data.submissionId) {

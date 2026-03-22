@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Search, Trophy, Target, ChevronRight, Zap, BookOpen, Star } from "lucide-react";
+import { Search, Trophy, Target, ChevronRight, Lock, Zap, BookOpen, Star } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession } from "@/lib/auth-client";
@@ -90,9 +90,33 @@ export default function DashboardPage() {
   const firstName = session.user.name?.split(" ")[0] ?? "Detective";
   const points = stats?.points ?? (session.user as { points?: number }).points ?? 0;
   const isLoadingStats = stats === null;
+  const role = (session.user as { role?: string }).role;
+  const subscribed = (session.user as { subscribed?: boolean }).subscribed;
+  const showSubscribeBanner = role === "student" && !subscribed;
 
   return (
     <div className="container mx-auto max-w-4xl px-4 py-12">
+      {/* ── Subscription banner ─────────────────────────── */}
+      {showSubscribeBanner && (
+        <div
+          className="mb-8 flex items-center gap-4 rounded-xl border-2 border-detective-amber/40 bg-detective-amber/10 px-5 py-4"
+          style={{ animation: "fadeInUp 0.4s ease-out both" }}
+        >
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-detective-amber/20 border border-detective-amber/30">
+            <Lock className="h-4 w-4 text-detective-amber" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-foreground">Subscribe to unlock the full experience</p>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              A subscription is required to submit case reports and receive AI feedback.
+            </p>
+          </div>
+          <Button asChild size="sm" className="shrink-0 bg-detective-amber text-black font-bold border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all">
+            <Link href="/subscribe">Subscribe Now</Link>
+          </Button>
+        </div>
+      )}
+
       {/* ── Header ──────────────────────────────────────── */}
       <div
         className="mb-10"

@@ -53,6 +53,18 @@ export const auth = betterAuth({
         type: "boolean",
         defaultValue: false,
       },
+      subscribed: {
+        type: "boolean",
+        defaultValue: false,
+      },
+      subscribedAt: {
+        type: "string",
+        required: false,
+      },
+      subscriptionPeriodEnd: {
+        type: "string",
+        required: false,
+      },
     },
   },
 })

@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { eq, count } from "drizzle-orm";
 import {
   ArrowLeft,
+  CreditCard,
   Users,
   UserCheck,
   UserX,
@@ -51,6 +52,7 @@ export default async function ManageStudentsPage() {
       email: schema.user.email,
       nickname: schema.user.nickname,
       banned: schema.user.banned,
+      subscribed: schema.user.subscribed,
       createdAt: schema.user.createdAt,
       submissionCount: count(schema.submission.id),
     })
@@ -63,6 +65,7 @@ export default async function ManageStudentsPage() {
   const totalStudents = students.length;
   const activeStudents = students.filter((s) => !s.banned).length;
   const deactivatedStudents = students.filter((s) => s.banned).length;
+  const subscribedStudents = students.filter((s) => s.subscribed).length;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-detective-slate/10 to-background">
@@ -88,7 +91,7 @@ export default async function ManageStudentsPage() {
         </div>
 
         {/* Stats cards */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
           <Card className="border-detective-amber/20">
             <CardContent className="pt-6">
               <div className="flex items-center gap-3">
@@ -134,6 +137,21 @@ export default async function ManageStudentsPage() {
               </div>
             </CardContent>
           </Card>
+          <Card className="border-detective-amber/20">
+            <CardContent className="pt-6">
+              <div className="flex items-center gap-3">
+                <div className="rounded-lg bg-emerald-500/10 p-2">
+                  <CreditCard className="h-5 w-5 text-emerald-600" />
+                </div>
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    Subscribed
+                  </p>
+                  <p className="text-2xl font-bold">{subscribedStudents}</p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
 
         {/* Students table */}
@@ -159,6 +177,7 @@ export default async function ManageStudentsPage() {
                     <TableHead>Email</TableHead>
                     <TableHead>Nickname</TableHead>
                     <TableHead className="text-center">Status</TableHead>
+                    <TableHead className="text-center">Subscription</TableHead>
                     <TableHead className="text-center">Submissions</TableHead>
                     <TableHead className="text-right">Joined</TableHead>
                     <TableHead className="text-right">Actions</TableHead>
@@ -193,6 +212,17 @@ export default async function ManageStudentsPage() {
                         )}
                       </TableCell>
                       <TableCell className="text-center">
+                        {student.subscribed ? (
+                          <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700">
+                            Subscribed
+                          </Badge>
+                        ) : (
+                          <Badge variant="outline" className="text-muted-foreground">
+                            Inactive
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-center">
                         <Badge variant="secondary">
                           {student.submissionCount}
                         </Badge>
@@ -212,6 +242,7 @@ export default async function ManageStudentsPage() {
                           studentId={student.id}
                           studentName={student.name}
                           isBanned={student.banned}
+                          isSubscribed={student.subscribed}
                           viewerRole={role}
                         />
                       </TableCell>

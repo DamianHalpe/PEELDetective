@@ -25,11 +25,13 @@ export async function GET(_req: Request, { params }: RouteParams) {
 
   // Students can only view their own submissions
   const role = session.user.role as string;
-  if (
-    role === "student" &&
-    found.studentId !== session.user.id
-  ) {
+  if (role === "student" && found.studentId !== session.user.id) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  // Students need an active subscription to view feedback
+  if (role === "student" && !(session.user as { subscribed?: boolean }).subscribed) {
+    return Response.json({ error: "subscription_required" }, { status: 403 });
   }
 
   return Response.json(found);

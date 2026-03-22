@@ -7,9 +7,10 @@ import { Menu, X } from "lucide-react";
 interface MobileNavProps {
   showTeacher: boolean;
   showAdmin: boolean;
+  showSubscribe?: boolean;
 }
 
-export function MobileNav({ showTeacher, showAdmin }: MobileNavProps) {
+export function MobileNav({ showTeacher, showAdmin, showSubscribe }: MobileNavProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -38,6 +39,15 @@ export function MobileNav({ showTeacher, showAdmin }: MobileNavProps) {
           >
             PEEL Guide
           </Link>
+          {showSubscribe && (
+            <Link
+              href="/subscribe"
+              onClick={() => setOpen(false)}
+              className="block px-3 py-2 rounded-md text-sm font-semibold text-detective-amber hover:text-detective-amber/80 hover:bg-detective-amber/10 transition-all"
+            >
+              Subscribe
+            </Link>
+          )}
           {showTeacher && (
             <Link
               href="/teacher"

@@ -45,20 +45,48 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     );
   }
 
-  const body = (await request.json()) as { banned?: boolean };
-  if (typeof body.banned !== "boolean") {
-    return Response.json(
-      { error: "Request body must include a boolean 'banned' field" },
-      { status: 400 }
-    );
+  const body = (await request.json()) as { banned?: boolean; subscribed?: boolean };
+
+  if (typeof body.banned === "boolean") {
+    await db
+      .update(schema.user)
+      .set({ banned: body.banned })
+      .where(eq(schema.user.id, id));
+    return Response.json({ success: true, banned: body.banned });
   }
 
-  await db
-    .update(schema.user)
-    .set({ banned: body.banned })
-    .where(eq(schema.user.id, id));
+  if (typeof body.subscribed === "boolean") {
+    const now = new Date();
+    const periodEnd = body.subscribed
+      ? new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000)
+      : null;
+    await db
+      .update(schema.user)
+      .set({
+        subscribed: body.subscribed,
+        subscribedAt: body.subscribed ? now : null,
+        subscriptionPeriodEnd: periodEnd,
+      })
+      .where(eq(schema.user.id, id));
 
-  return Response.json({ success: true, banned: body.banned });
+    await db.insert(schema.subscriptionHistory).values({
+      id: crypto.randomUUID(),
+      userId: id,
+      action: body.subscribed ? "activated" : "revoked",
+      changedById: session.user.id,
+      changedByRole: role,
+      amount: 0, // manual activation — no charge
+      periodEnd: periodEnd ?? undefined,
+      createdAt: now,
+    });
+
+    return Response.json({ success: true, subscribed: body.subscribed });
+  }
+
+  return Response.json(
+    { error: "Request body must include a boolean 'banned' or 'subscribed' field" },
+    { status: 400 }
+  );
 }
 
 export async function DELETE(_request: Request, { params }: RouteParams) {

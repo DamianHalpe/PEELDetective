@@ -166,6 +166,12 @@ export default function InvestigatePage() {
   }
 
   function handleBeginWriting() {
+    const userRole = (session?.user as { role?: string })?.role;
+    const userSubscribed = (session?.user as { subscribed?: boolean })?.subscribed;
+    if (userRole === "student" && !userSubscribed) {
+      router.push(`/subscribe?from=/scenarios/${id}`);
+      return;
+    }
     setShowForm(true);
     // Allow React to render the form section before scrolling to it
     requestAnimationFrame(() => {
@@ -194,6 +200,10 @@ export default function InvestigatePage() {
         submissionId?: string;
       };
 
+      if (res.status === 403 && data.error === "subscription_required") {
+        router.push(`/subscribe?from=/scenarios/${id}`);
+        return;
+      }
       if (res.ok) {
         router.push(`/scenarios/${id}/feedback/${data.id}`);
       } else if (data.submissionId) {

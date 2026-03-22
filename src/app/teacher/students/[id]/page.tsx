@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { eq, desc } from "drizzle-orm";
-import { ArrowLeft, Mail, Trophy, FileText, Download } from "lucide-react";
+import { ArrowLeft, CreditCard, History, Mail, Trophy, FileText, Download } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -206,6 +206,22 @@ export default async function StudentDetailPage({ params }: PageProps) {
   // For sparkline, we want chronological order (oldest first)
   const chronologicalScores = [...scores].reverse();
 
+  // Fetch subscription history for this student
+  const subscriptionHistory = await db
+    .select({
+      id: schema.subscriptionHistory.id,
+      action: schema.subscriptionHistory.action,
+      changedByRole: schema.subscriptionHistory.changedByRole,
+      amount: schema.subscriptionHistory.amount,
+      periodEnd: schema.subscriptionHistory.periodEnd,
+      createdAt: schema.subscriptionHistory.createdAt,
+      changedByName: schema.user.name,
+    })
+    .from(schema.subscriptionHistory)
+    .leftJoin(schema.user, eq(schema.subscriptionHistory.changedById, schema.user.id))
+    .where(eq(schema.subscriptionHistory.userId, student.id))
+    .orderBy(desc(schema.subscriptionHistory.createdAt));
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-detective-slate/10 to-background">
       <div className="container mx-auto p-6 space-y-6">
@@ -243,6 +259,7 @@ export default async function StudentDetailPage({ params }: PageProps) {
               studentId={id}
               studentName={student.name}
               isBanned={student.banned ?? false}
+              isSubscribed={student.subscribed ?? false}
               viewerRole={role}
             />
             <Button variant="outline" asChild>
@@ -376,6 +393,86 @@ export default async function StudentDetailPage({ params }: PageProps) {
                             View
                           </Link>
                         </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Subscription History */}
+        <Card className="border-detective-amber/20">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <History className="h-4 w-4 text-detective-amber" />
+              Subscription History
+            </CardTitle>
+            <CardDescription>
+              A log of all subscription changes for this student
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            {subscriptionHistory.length === 0 ? (
+              <div className="flex flex-col items-center gap-2 py-8 text-center text-muted-foreground">
+                <CreditCard className="h-8 w-8 opacity-30" />
+                <p className="text-sm">No subscription events recorded.</p>
+              </div>
+            ) : (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Action</TableHead>
+                    <TableHead>Changed By</TableHead>
+                    <TableHead>Amount</TableHead>
+                    <TableHead>Period End</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {subscriptionHistory.map((event) => (
+                    <TableRow key={event.id}>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {new Date(event.createdAt).toLocaleString("en-US", {
+                          month: "short",
+                          day: "numeric",
+                          year: "numeric",
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </TableCell>
+                      <TableCell>
+                        {event.action === "activated" ? (
+                          <Badge className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700">
+                            Activated
+                          </Badge>
+                        ) : (
+                          <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-300 dark:border-red-700">
+                            Revoked
+                          </Badge>
+                        )}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {event.changedByRole === "student"
+                          ? "Student (self)"
+                          : event.changedByName
+                            ? `${event.changedByName} (${event.changedByRole})`
+                            : `Unknown (${event.changedByRole})`}
+                      </TableCell>
+                      <TableCell className="text-sm">
+                        {event.amount != null && event.amount > 0
+                          ? `$${(event.amount / 100).toFixed(2)}`
+                          : <span className="text-muted-foreground">Manual</span>}
+                      </TableCell>
+                      <TableCell className="text-sm text-muted-foreground">
+                        {event.periodEnd
+                          ? new Date(event.periodEnd).toLocaleDateString("en-US", {
+                              month: "short",
+                              day: "numeric",
+                              year: "numeric",
+                            })
+                          : <span>&mdash;</span>}
                       </TableCell>
                     </TableRow>
                   ))}

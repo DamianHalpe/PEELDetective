@@ -202,6 +202,10 @@ export default function FeedbackPage() {
       router.push("/login");
       return null;
     }
+    if (res.status === 403) {
+      router.push("/subscribe");
+      return null;
+    }
     if (!res.ok) return null;
     return (await res.json()) as Submission;
   }, [submissionId, router]);

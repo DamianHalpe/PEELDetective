@@ -23,6 +23,12 @@ export async function POST(req: Request) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
+  const userRole = (session.user as { role?: string }).role;
+  const userSubscribed = (session.user as { subscribed?: boolean }).subscribed;
+  if (userRole === "student" && !userSubscribed) {
+    return Response.json({ error: "subscription_required" }, { status: 403 });
+  }
+
   let body: unknown;
   try {
     body = await req.json();

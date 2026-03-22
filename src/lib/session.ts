@@ -41,6 +41,15 @@ export async function getOptionalSession() {
 }
 
 /**
+ * Returns true if the user is a teacher/admin (bypasses subscription gates)
+ * or a subscribed student. Used in API routes to return JSON errors.
+ */
+export function isSubscribedOrStaff(user: { role?: string; subscribed?: boolean }): boolean {
+  if (user.role === "teacher" || user.role === "admin") return true;
+  return user.subscribed === true;
+}
+
+/**
  * Checks if a given path is a protected route.
  *
  * @param path - The path to check

@@ -26,6 +26,9 @@ export const user = pgTable(
     points: integer("points").notNull().default(0),
     nickname: text("nickname").unique(),
     banned: boolean("banned").notNull().default(false),
+    subscribed: boolean("subscribed").notNull().default(false),
+    subscribedAt: timestamp("subscribed_at"),
+    subscriptionPeriodEnd: timestamp("subscription_period_end"),
   },
   (table) => [index("user_email_idx").on(table.email)]
 );
@@ -131,6 +134,17 @@ export const badge = pgTable("badge", {
   description: text("description").notNull(),
   iconName: text("icon_name").notNull(), // Lucide icon name string
   triggerCondition: text("trigger_condition").notNull(),
+});
+
+export const subscriptionHistory = pgTable("subscription_history", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+  action: text("action").notNull(), // "activated" | "revoked"
+  changedById: text("changed_by_id").references(() => user.id, { onDelete: "set null" }),
+  changedByRole: text("changed_by_role").notNull(), // "student" | "teacher" | "admin"
+  amount: integer("amount"), // amount charged in cents (e.g. 1000 = $10.00); null or 0 = manual/free
+  periodEnd: timestamp("period_end"), // subscription period end for this billing cycle
+  createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
 export const studentBadge = pgTable("student_badge", {

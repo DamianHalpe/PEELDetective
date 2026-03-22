@@ -8,6 +8,8 @@ import { ModeToggle } from "./ui/mode-toggle";
 export async function SiteHeader() {
   const session = await auth.api.getSession({ headers: await headers() });
   const role = (session?.user as { role?: string })?.role;
+  const subscribed = (session?.user as { subscribed?: boolean })?.subscribed;
+  const showSubscribe = !!session && role === "student" && !subscribed;
 
   return (
     <>
@@ -55,6 +57,14 @@ export async function SiteHeader() {
               >
                 PEEL Guide
               </Link>
+              {showSubscribe && (
+                <Link
+                  href="/subscribe"
+                  className="px-3 py-1.5 rounded-md text-detective-amber font-semibold hover:text-detective-amber/80 hover:bg-detective-amber/10 transition-all"
+                >
+                  Subscribe
+                </Link>
+              )}
               {(role === "teacher" || role === "admin") && (
                 <Link
                   href="/teacher"
@@ -75,7 +85,7 @@ export async function SiteHeader() {
             <div className="flex items-center gap-3" role="group" aria-label="User actions">
               <UserProfile />
               <ModeToggle />
-              <MobileNav showTeacher={role === "teacher" || role === "admin"} showAdmin={role === "admin"} />
+              <MobileNav showTeacher={role === "teacher" || role === "admin"} showAdmin={role === "admin"} showSubscribe={showSubscribe} />
             </div>
           </div>
         </nav>

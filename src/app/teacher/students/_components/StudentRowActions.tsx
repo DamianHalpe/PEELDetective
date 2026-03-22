@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Loader2, ShieldBan, ShieldCheck, Trash2 } from "lucide-react";
+import { CreditCard, Loader2, ShieldBan, ShieldCheck, Trash2 } from "lucide-react";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -20,6 +20,7 @@ interface StudentRowActionsProps {
   studentId: string;
   studentName: string;
   isBanned: boolean;
+  isSubscribed: boolean;
   viewerRole: string;
 }
 
@@ -27,10 +28,12 @@ export function StudentRowActions({
   studentId,
   studentName,
   isBanned,
+  isSubscribed,
   viewerRole,
 }: StudentRowActionsProps) {
   const router = useRouter();
   const [banLoading, setBanLoading] = useState(false);
+  const [subLoading, setSubLoading] = useState(false);
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -54,6 +57,29 @@ export function StudentRowActions({
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
       setBanLoading(false);
+    }
+  }
+
+  async function handleToggleSubscription() {
+    setSubLoading(true);
+    setError(null);
+    try {
+      const res = await fetch(`/api/students/${studentId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ subscribed: !isSubscribed }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.error || "Failed to update subscription");
+      }
+
+      router.refresh();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "An error occurred");
+    } finally {
+      setSubLoading(false);
     }
   }
 
@@ -84,6 +110,22 @@ export function StudentRowActions({
           {error}
         </p>
       )}
+
+      {/* Subscription toggle */}
+      <Button
+        variant="outline"
+        size="icon"
+        className="h-8 w-8"
+        disabled={subLoading}
+        title={isSubscribed ? "Revoke subscription" : "Grant subscription"}
+        onClick={handleToggleSubscription}
+      >
+        {subLoading ? (
+          <Loader2 className="h-4 w-4 animate-spin" />
+        ) : (
+          <CreditCard className={`h-4 w-4 ${isSubscribed ? "text-emerald-500" : "text-muted-foreground"}`} />
+        )}
+      </Button>
 
       {/* Deactivate / Reactivate button with confirmation */}
       <AlertDialog>
