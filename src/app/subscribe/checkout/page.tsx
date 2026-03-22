@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, CreditCard, Lock, Loader2, CheckCircle2 } from "lucide-react";
@@ -25,7 +25,7 @@ function formatExpiry(value: string) {
   return digits;
 }
 
-export default function CheckoutPage() {
+function CheckoutContent() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -232,5 +232,13 @@ export default function CheckoutPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function CheckoutPage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-detective-amber" /></div>}>
+      <CheckoutContent />
+    </Suspense>
   );
 }

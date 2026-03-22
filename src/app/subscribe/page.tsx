@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, Suspense } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ArrowLeft, CheckCircle2, CreditCard, Loader2, RefreshCw } from "lucide-react";
@@ -15,7 +15,7 @@ const PERKS = [
   "Track your score history and earn detective badges",
 ];
 
-export default function SubscribePage() {
+function SubscribeContent() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -104,5 +104,13 @@ export default function SubscribePage() {
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function SubscribePage() {
+  return (
+    <Suspense fallback={<div className="flex min-h-[60vh] items-center justify-center"><Loader2 className="h-8 w-8 animate-spin text-detective-amber" /></div>}>
+      <SubscribeContent />
+    </Suspense>
   );
 }
