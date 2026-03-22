@@ -129,7 +129,7 @@ export default function DashboardPage() {
               A subscription is required to submit case reports and receive AI feedback.
             </p>
           </div>
-          <Button asChild size="sm" className="shrink-0 bg-detective-amber text-black font-bold border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all">
+          <Button asChild size="sm" className="shrink-0 bg-detective-amber text-white font-bold border-2 border-black shadow-[3px_3px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[3px] hover:translate-y-[3px] transition-all">
             <Link href="/subscribe">Subscribe Now</Link>
           </Button>
         </div>

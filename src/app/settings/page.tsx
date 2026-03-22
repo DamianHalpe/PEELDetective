@@ -141,7 +141,7 @@ function NicknameForm({ currentNickname }: { currentNickname?: string | null | u
           <button
             type="submit"
             disabled={!isDirty || isInvalid || status === "taken" || status === "saving" || status === "checking"}
-            className="px-4 py-1.5 text-sm font-medium rounded-lg bg-detective-amber text-black hover:bg-detective-amber/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+            className="px-4 py-1.5 text-sm font-medium rounded-lg bg-detective-amber text-white hover:bg-detective-amber/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
           >
             {status === "saving" && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
             Save

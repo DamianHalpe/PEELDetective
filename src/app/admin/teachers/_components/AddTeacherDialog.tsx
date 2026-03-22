@@ -113,7 +113,7 @@ export function AddTeacherDialog() {
       }}
     >
       <DialogTrigger asChild>
-        <Button className="bg-detective-amber text-black hover:bg-detective-amber/90">
+        <Button className="bg-detective-amber text-white hover:bg-detective-amber/90">
           <UserPlus className="mr-2 h-4 w-4" />
           Add Teacher
         </Button>
@@ -196,7 +196,7 @@ export function AddTeacherDialog() {
             </Button>
             <Button
               type="submit"
-              className="bg-detective-amber text-black hover:bg-detective-amber/90"
+              className="bg-detective-amber text-white hover:bg-detective-amber/90"
               disabled={loading}
             >
               {loading ? (

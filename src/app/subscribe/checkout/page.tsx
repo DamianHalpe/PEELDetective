@@ -181,7 +181,7 @@ function CheckoutContent() {
               )}
 
               <Button
-                className="w-full border-2 border-black bg-detective-amber text-black font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all"
+                className="w-full border-2 border-black bg-detective-amber text-white font-bold shadow-[4px_4px_0px_0px_rgba(0,0,0,1)] hover:shadow-none hover:translate-x-[4px] hover:translate-y-[4px] transition-all"
                 onClick={handlePay}
                 disabled={loading || !isFormValid}
               >
