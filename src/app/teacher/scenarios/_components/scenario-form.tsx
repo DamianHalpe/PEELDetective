@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Plus, Minus, Eye, EyeOff } from "lucide-react";
+import { Plus, Minus, Eye, EyeOff, Upload, X, User } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -15,10 +15,12 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { RichTextEditor } from "@/components/ui/rich-text-editor";
+import Image from "next/image";
 
 interface Suspect {
   name: string;
   background: string;
+  imageUrl?: string;
 }
 
 export interface ScenarioFormData {
@@ -59,6 +61,10 @@ export function ScenarioForm({
   const [preview, setPreview] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [uploadingIndex, setUploadingIndex] = useState<number | null>(null);
+  const [uploadErrors, setUploadErrors] = useState<Record<number, string>>({});
+
+  const fileInputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   function addSuspect() {
     setSuspects([...suspects, { name: "", background: "" }]);
@@ -67,12 +73,57 @@ export function ScenarioForm({
   function removeSuspect(index: number) {
     if (suspects.length <= 1) return;
     setSuspects(suspects.filter((_, i) => i !== index));
+    setUploadErrors((prev) => {
+      const next = { ...prev };
+      delete next[index];
+      return next;
+    });
   }
 
   function updateSuspect(index: number, field: keyof Suspect, value: string) {
     setSuspects(
       suspects.map((s, i) => (i === index ? { ...s, [field]: value } : s))
     );
+  }
+
+  function removeSuspectImage(index: number) {
+    setSuspects(
+      suspects.map((s, i) => {
+        if (i !== index) return s;
+        const { imageUrl: _, ...rest } = s;
+        return rest;
+      })
+    );
+  }
+
+  async function handleImageChange(index: number, file: File) {
+    setUploadingIndex(index);
+    setUploadErrors((prev) => {
+      const next = { ...prev };
+      delete next[index];
+      return next;
+    });
+
+    const formData = new FormData();
+    formData.append("file", file);
+
+    try {
+      const res = await fetch("/api/upload", { method: "POST", body: formData });
+      const json = (await res.json()) as { url?: string; error?: string };
+      if (!res.ok || !json.url) {
+        throw new Error(json.error ?? "Upload failed");
+      }
+      setSuspects((prev) =>
+        prev.map((s, i) =>
+          i === index ? { name: s.name, background: s.background, imageUrl: json.url! } : s
+        )
+      );
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Upload failed";
+      setUploadErrors((prev) => ({ ...prev, [index]: msg }));
+    } finally {
+      setUploadingIndex(null);
+    }
   }
 
   function addClue() {
@@ -123,6 +174,7 @@ export function ScenarioForm({
         suspects: suspects.map((s) => ({
           name: s.name.trim(),
           background: s.background.trim(),
+          ...(s.imageUrl ? { imageUrl: s.imageUrl } : {}),
         })),
         clues: clues.map((c) => c.trim()),
         correctCulprit: correctCulprit.trim(),
@@ -175,13 +227,28 @@ export function ScenarioForm({
               <h3 className="font-semibold mb-2">Suspects</h3>
               <ul className="space-y-2">
                 {suspects.map((s, i) => (
-                  <li key={i} className="p-3 border rounded-lg">
-                    <span className="font-medium">
-                      {s.name || "Unnamed"}
-                    </span>
-                    <p className="text-sm text-muted-foreground mt-1">
-                      {s.background || "No background."}
-                    </p>
+                  <li key={i} className="p-3 border rounded-lg flex gap-3 items-start">
+                    <div className="w-12 h-12 shrink-0 rounded overflow-hidden bg-muted flex items-center justify-center">
+                      {s.imageUrl ? (
+                        <Image
+                          src={s.imageUrl}
+                          alt={s.name || "Suspect"}
+                          width={48}
+                          height={48}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <User className="h-6 w-6 text-muted-foreground/40" />
+                      )}
+                    </div>
+                    <div>
+                      <span className="font-medium">
+                        {s.name || "Unnamed"}
+                      </span>
+                      <p className="text-sm text-muted-foreground mt-1">
+                        {s.background || "No background."}
+                      </p>
+                    </div>
                   </li>
                 ))}
               </ul>
@@ -275,6 +342,73 @@ export function ScenarioForm({
                     </Button>
                   )}
                 </div>
+
+                {/* Image upload */}
+                <div className="flex items-start gap-3">
+                  <div className="shrink-0">
+                    <div className="w-16 h-16 rounded overflow-hidden border bg-muted flex items-center justify-center">
+                      {suspect.imageUrl ? (
+                        <Image
+                          src={suspect.imageUrl}
+                          alt={suspect.name || "Suspect"}
+                          width={64}
+                          height={64}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <User className="h-7 w-7 text-muted-foreground/40" />
+                      )}
+                    </div>
+                  </div>
+                  <div className="flex flex-col gap-1.5 justify-center">
+                    <div className="flex gap-2">
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        disabled={uploadingIndex === index}
+                        onClick={() => fileInputRefs.current[index]?.click()}
+                      >
+                        <Upload className="h-3 w-3 mr-1" />
+                        {uploadingIndex === index
+                          ? "Uploading…"
+                          : suspect.imageUrl
+                          ? "Replace"
+                          : "Upload Photo"}
+                      </Button>
+                      {suspect.imageUrl && (
+                        <Button
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => removeSuspectImage(index)}
+                        >
+                          <X className="h-3 w-3" />
+                        </Button>
+                      )}
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      JPG, PNG, WebP or GIF · max 5 MB · 1:1 recommended
+                    </p>
+                    {uploadErrors[index] && (
+                      <p className="text-xs text-destructive">{uploadErrors[index]}</p>
+                    )}
+                  </div>
+                </div>
+
+                {/* Hidden file input */}
+                <input
+                  ref={(el) => { fileInputRefs.current[index] = el; }}
+                  type="file"
+                  accept="image/jpeg,image/png,image/gif,image/webp"
+                  className="hidden"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) void handleImageChange(index, file);
+                    e.target.value = "";
+                  }}
+                />
+
                 <div className="space-y-2">
                   <Label htmlFor={`suspect-name-${index}`}>Name</Label>
                   <Input

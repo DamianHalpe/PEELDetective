@@ -45,7 +45,7 @@ export async function POST(req: Request) {
   const data = body as {
     title?: string;
     crimeDescription?: string;
-    suspects?: { name: string; background: string }[];
+    suspects?: { name: string; background: string; imageUrl?: string }[];
     clues?: string[];
     correctCulprit?: string;
     difficulty?: number;

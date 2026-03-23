@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useParams, useRouter } from "next/navigation";
 import {
   Star,
@@ -15,6 +16,8 @@ import {
   Loader2,
   Send,
   Lightbulb,
+  User,
+  X,
 } from "lucide-react";
 import { GuideCharacter } from "@/components/guide-character";
 import { Button } from "@/components/ui/button";
@@ -26,6 +29,7 @@ import { useSession } from "@/lib/auth-client";
 interface Suspect {
   name: string;
   background: string;
+  imageUrl?: string;
 }
 
 interface Scenario {
@@ -98,6 +102,10 @@ export default function InvestigatePage() {
   const [loading, setLoading] = useState(true);
   const [notFound, setNotFound] = useState(false);
   const [bestScore, setBestScore] = useState<number | null>(null);
+
+  // Lightbox state
+  const [lightboxUrl, setLightboxUrl] = useState<string | null>(null);
+  const [lightboxName, setLightboxName] = useState<string>("");
 
   // Writing form state
   const [showForm, setShowForm] = useState(false);
@@ -335,15 +343,39 @@ export default function InvestigatePage() {
               <div className="space-y-4">
                 {scenario.suspects.map((suspect, index) => (
                   <Card key={index}>
-                    <CardHeader className="pb-2">
-                      <CardTitle className="text-lg">
-                        {suspect.name}
-                      </CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                      <p className="text-sm leading-relaxed text-muted-foreground">
-                        {suspect.background}
-                      </p>
+                    <CardContent className="p-4 flex gap-4 items-start">
+                      {/* Suspect thumbnail */}
+                      {suspect.imageUrl ? (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setLightboxUrl(suspect.imageUrl!);
+                            setLightboxName(suspect.name);
+                          }}
+                          className="shrink-0 w-16 h-16 rounded overflow-hidden border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-detective-amber"
+                          aria-label={`View full photo of ${suspect.name}`}
+                        >
+                          <Image
+                            src={suspect.imageUrl}
+                            alt={suspect.name}
+                            width={64}
+                            height={64}
+                            className="w-full h-full object-cover"
+                          />
+                        </button>
+                      ) : (
+                        <div className="shrink-0 w-16 h-16 rounded border border-border bg-muted flex items-center justify-center">
+                          <User className="h-7 w-7 text-muted-foreground/40" />
+                        </div>
+                      )}
+                      <div className="min-w-0">
+                        <p className="font-semibold text-base leading-snug mb-1">
+                          {suspect.name}
+                        </p>
+                        <p className="text-sm leading-relaxed text-muted-foreground">
+                          {suspect.background}
+                        </p>
+                      </div>
                     </CardContent>
                   </Card>
                 ))}
@@ -566,6 +598,48 @@ export default function InvestigatePage() {
       )}
 
       <GuideCharacter />
+
+      {/* Suspect image lightbox */}
+      {lightboxUrl && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          onClick={() => setLightboxUrl(null)}
+          onKeyDown={(e) => e.key === "Escape" && setLightboxUrl(null)}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Photo of ${lightboxName}`}
+          tabIndex={-1}
+        >
+          <div
+            className="relative max-w-lg w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <Button
+              variant="outline"
+              size="sm"
+              className="absolute -top-10 right-0 text-white border-white/30 bg-white/10 hover:bg-white/20"
+              onClick={() => setLightboxUrl(null)}
+            >
+              <X className="h-4 w-4 mr-1" />
+              Close
+            </Button>
+            <div className="overflow-hidden rounded-lg border border-white/20 shadow-2xl aspect-square">
+              <Image
+                src={lightboxUrl}
+                alt={lightboxName}
+                width={512}
+                height={512}
+                className="w-full h-full object-cover"
+              />
+            </div>
+            {lightboxName && (
+              <p className="mt-3 text-center text-sm font-medium text-white/80">
+                {lightboxName}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
     </>
   );
 }
