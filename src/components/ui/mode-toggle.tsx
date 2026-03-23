@@ -1,6 +1,7 @@
 "use client";
 
-import { Moon, Sun } from "lucide-react";
+import { Moon, Palette, Sun } from "lucide-react";
+import { useEffect, useState } from "react";
 import { useTheme } from "next-themes";
 import { Button } from "@/components/ui/button";
 import {
@@ -10,8 +11,22 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
-export function ModeToggle() {
+function dispatchThemeChange() {
+  window.dispatchEvent(new Event("peel-theme-change"));
+}
+
+export function ModeToggle({ hasCustomTheme: hasCustomThemeProp }: { hasCustomTheme?: boolean }) {
   const { setTheme } = useTheme();
+  const [hasCustomTheme, setHasCustomTheme] = useState(hasCustomThemeProp ?? false);
+
+  useEffect(() => {
+    function check() {
+      setHasCustomTheme(!!localStorage.getItem("peel-custom-theme") || (hasCustomThemeProp ?? false));
+    }
+    check();
+    window.addEventListener("peel-theme-change", check);
+    return () => window.removeEventListener("peel-theme-change", check);
+  }, [hasCustomThemeProp]);
 
   return (
     <DropdownMenu>
@@ -23,15 +38,45 @@ export function ModeToggle() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => setTheme("light")}>
+        <DropdownMenuItem
+          onClick={() => {
+            localStorage.setItem("peel-theme-preference", "light");
+            setTheme("light");
+            dispatchThemeChange();
+          }}
+        >
           Light
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("dark")}>
+        <DropdownMenuItem
+          onClick={() => {
+            localStorage.setItem("peel-theme-preference", "dark");
+            setTheme("dark");
+            dispatchThemeChange();
+          }}
+        >
           Dark
         </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => setTheme("system")}>
+        <DropdownMenuItem
+          onClick={() => {
+            localStorage.setItem("peel-theme-preference", "system");
+            setTheme("system");
+            dispatchThemeChange();
+          }}
+        >
           System
         </DropdownMenuItem>
+        {hasCustomTheme && (
+          <DropdownMenuItem
+            onClick={() => {
+              localStorage.setItem("peel-theme-preference", "custom");
+              dispatchThemeChange();
+              setTheme("light");
+            }}
+          >
+            <Palette className="mr-2 h-4 w-4" />
+            Custom
+          </DropdownMenuItem>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

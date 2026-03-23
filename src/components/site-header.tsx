@@ -9,6 +9,7 @@ export async function SiteHeader() {
   const session = await auth.api.getSession({ headers: await headers() });
   const role = (session?.user as { role?: string })?.role;
   const subscribed = (session?.user as { subscribed?: boolean })?.subscribed;
+  const customTheme = (session?.user as { customTheme?: string | null })?.customTheme;
   const showSubscribe = !!session && role === "student" && !subscribed;
 
   return (
@@ -84,7 +85,7 @@ export async function SiteHeader() {
             </div>
             <div className="flex items-center gap-3" role="group" aria-label="User actions">
               <UserProfile />
-              <ModeToggle />
+              <ModeToggle hasCustomTheme={!!customTheme} />
               <MobileNav showTeacher={role === "teacher" || role === "admin"} showAdmin={role === "admin"} showSubscribe={showSubscribe} />
             </div>
           </div>

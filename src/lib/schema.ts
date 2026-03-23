@@ -29,6 +29,8 @@ export const user = pgTable(
     subscribed: boolean("subscribed").notNull().default(false),
     subscribedAt: timestamp("subscribed_at"),
     subscriptionPeriodEnd: timestamp("subscription_period_end"),
+    themePreference: text("theme_preference").default("system"),
+    customTheme: text("custom_theme"),
   },
   (table) => [index("user_email_idx").on(table.email)]
 );

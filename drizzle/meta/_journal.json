@@ -43,6 +43,13 @@
       "when": 1774151514545,
       "tag": "0005_married_nomad",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1774275462568,
+      "tag": "0006_add_theme_preference",
+      "breakpoints": true
     }
   ]
 }

@@ -1,5 +1,6 @@
 import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
+import { CustomThemeApplier } from "@/components/custom-theme-applier";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { ThemeProvider } from "@/components/theme-provider";
@@ -96,6 +97,7 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
+          <CustomThemeApplier />
           <TooltipProvider>
             <SiteHeader />
             <main id="main-content">{children}</main>

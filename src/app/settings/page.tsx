@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
-import { AtSign, Check, ChevronDown, KeyRound, Loader2, Settings, User, X } from "lucide-react"
+import { AtSign, Check, ChevronDown, KeyRound, Loader2, Palette, Settings, User, X } from "lucide-react"
 import { ChangePasswordForm } from "@/components/auth/change-password-form"
 import { useSession } from "@/lib/auth-client"
 
@@ -159,6 +159,148 @@ function NicknameForm({ currentNickname }: { currentNickname?: string | null | u
   )
 }
 
+function CustomThemeEditor() {
+  const [bg, setBg] = useState("#1a1a2e")
+  const [card, setCard] = useState("#16213e")
+  const [accent, setAccent] = useState("#e2b340")
+  const [isSaving, setIsSaving] = useState(false)
+  const [saveSuccess, setSaveSuccess] = useState(false)
+  const [isActive, setIsActive] = useState(false)
+
+  useEffect(() => {
+    const pref = localStorage.getItem("peel-theme-preference")
+    const raw = localStorage.getItem("peel-custom-theme")
+    if (raw) {
+      try {
+        const parsed = JSON.parse(raw) as { background: string; card: string; accent: string }
+        setBg(parsed.background)
+        setCard(parsed.card)
+        setAccent(parsed.accent)
+      } catch {
+        // Ignore invalid JSON in localStorage
+      }
+    }
+    setIsActive(pref === "custom")
+  }, [])
+
+  function handleColorChange(setter: (v: string) => void, value: string, field: "background" | "card" | "accent") {
+    setter(value)
+    const theme = { background: bg, card, accent, [field]: value };
+    (window as Window & { __applyCustomTheme?: (t: { background: string; card: string; accent: string } | null) => void }).__applyCustomTheme?.(theme)
+  }
+
+  async function handleSave() {
+    setIsSaving(true)
+    setSaveSuccess(false)
+    const themeJson = JSON.stringify({ background: bg, card, accent })
+    try {
+      const res = await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ themePreference: "custom", customTheme: themeJson }),
+      })
+      if (res.ok) {
+        localStorage.setItem("peel-custom-theme", themeJson)
+        localStorage.setItem("peel-theme-preference", "custom")
+        window.dispatchEvent(new Event("peel-theme-change"))
+        setIsActive(true)
+        setSaveSuccess(true)
+        setTimeout(() => setSaveSuccess(false), 2500)
+      }
+    } catch {
+      // Network error — silently fail
+    } finally {
+      setIsSaving(false)
+    }
+  }
+
+  async function handleReset() {
+    localStorage.removeItem("peel-custom-theme")
+    localStorage.setItem("peel-theme-preference", "system")
+    window.dispatchEvent(new Event("peel-theme-change"))
+    setIsActive(false)
+    try {
+      await fetch("/api/user/profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ themePreference: "system", customTheme: null }),
+      })
+    } catch {
+      // Network error — silently fail
+    }
+  }
+
+  const colorRows: Array<{ label: string; value: string; setter: (v: string) => void; field: "background" | "card" | "accent" }> = [
+    { label: "Page Background", value: bg, setter: setBg, field: "background" },
+    { label: "Cards & Panels", value: card, setter: setCard, field: "card" },
+    { label: "Accent Colour", value: accent, setter: setAccent, field: "accent" },
+  ]
+
+  return (
+    <div
+      className="rounded-xl border bg-card p-6"
+      style={{ animation: "fadeInUp 0.5s ease-out 0.3s both" }}
+    >
+      <div className="flex items-center gap-3 mb-1">
+        <div className="flex items-center justify-center w-8 h-8 rounded-lg bg-detective-amber/10 border border-detective-amber/20">
+          <Palette className="h-4 w-4 text-detective-amber" />
+        </div>
+        <div className="flex items-center gap-2">
+          <h2 className="font-semibold">Custom Theme</h2>
+          {isActive && (
+            <span className="text-[10px] font-semibold uppercase tracking-wider px-2 py-0.5 rounded-full bg-detective-amber/15 text-detective-amber border border-detective-amber/30">
+              Custom theme active
+            </span>
+          )}
+        </div>
+      </div>
+      <p className="text-sm text-muted-foreground mt-1 mb-5">
+        Personalise your PEEL Detective experience with custom colours.
+      </p>
+
+      <div className="space-y-4">
+        {colorRows.map(({ label, value, setter, field }) => (
+          <div key={field} className="flex items-center justify-between gap-4">
+            <label className="text-sm font-medium">{label}</label>
+            <div className="flex items-center gap-2">
+              <div
+                className="w-8 h-8 rounded-lg border shadow-sm"
+                style={{ backgroundColor: value }}
+              />
+              <input
+                type="color"
+                value={value}
+                onChange={(e) => handleColorChange(setter, e.target.value, field)}
+                className="w-10 h-8 rounded cursor-pointer border-0 bg-transparent"
+              />
+              <span className="text-xs font-mono text-muted-foreground w-16">{value}</span>
+            </div>
+          </div>
+        ))}
+      </div>
+
+      <div className="flex items-center gap-2 mt-6 pt-5 border-t">
+        <button
+          type="button"
+          onClick={handleSave}
+          disabled={isSaving}
+          className="px-4 py-1.5 text-sm font-medium rounded-lg bg-detective-amber text-white hover:bg-detective-amber/90 transition-colors disabled:opacity-40 disabled:cursor-not-allowed flex items-center gap-1.5"
+        >
+          {isSaving && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+          {saveSuccess ? "Saved!" : "Save Custom Theme"}
+        </button>
+        <button
+          type="button"
+          onClick={handleReset}
+          className="px-4 py-1.5 text-sm font-medium rounded-lg border hover:bg-muted/50 transition-colors"
+        >
+          Reset
+        </button>
+      </div>
+    </div>
+  )
+}
+
 export default function SettingsPage() {
   const { data: session, isPending } = useSession()
   const router = useRouter()
@@ -274,6 +416,11 @@ export default function SettingsPage() {
             </div>
           </div>
         )}
+      </div>
+
+      {/* Custom Theme */}
+      <div className="mt-6">
+        <CustomThemeEditor />
       </div>
     </div>
   )
