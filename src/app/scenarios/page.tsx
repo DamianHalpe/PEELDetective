@@ -180,7 +180,7 @@ export default function ScenariosPage() {
             return (
               <div
                 key={scenario.id}
-                className={`group relative rounded-xl border bg-card overflow-hidden hover:border-detective-amber/50 hover:shadow-lg hover:shadow-detective-amber/5 transition-all duration-300 flex flex-col ${hasBest ? "border-emerald-600/30 bg-emerald-50" : ""}`}
+                className={`group relative rounded-xl border bg-card overflow-hidden hover:border-detective-amber/50 hover:shadow-lg hover:shadow-detective-amber/5 transition-all duration-300 flex flex-col ${hasBest ? "border-emerald-600/30 bg-emerald-50 dark:bg-emerald-950/40 dark:border-emerald-500/30" : ""}`}
               >
                 {/* Amber top bar */}
                 <div className="h-1 bg-gradient-to-r from-detective-amber/60 via-detective-amber to-detective-amber/60" />
