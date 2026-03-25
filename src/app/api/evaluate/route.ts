@@ -1,5 +1,3 @@
-import { createOpenRouter } from "@openrouter/ai-sdk-provider";
-import { generateText } from "ai";
 
 interface EvaluateRequest {
   responseText: string;
@@ -62,15 +60,12 @@ export async function POST(req: Request) {
     );
   }
 
-  const apiKey = process.env.OPENROUTER_API_KEY;
-  if (!apiKey) {
+  if (!process.env.OPENROUTER_API_KEY) {
     return Response.json(
       { error: "OpenRouter API key not configured" },
       { status: 500 }
     );
   }
-
-  const openrouter = createOpenRouter({ apiKey });
 
   const suspectsDescription = data.scenario.suspects
     .map((s) => `- ${s.name}: ${s.background}`)
@@ -94,15 +89,45 @@ Correct Culprit: ${data.scenario.correctCulprit}
 Student's Response:
 ${data.responseText}`;
 
+  const openrouterApiKey = process.env.OPENROUTER_API_KEY!;
+  const model = process.env.OPENROUTER_MODEL || "anthropic/claude-sonnet-4-5";
+
   try {
-    const result = await generateText({
-      model: openrouter(process.env.OPENROUTER_MODEL || "anthropic/claude-sonnet-4-5"),
-      system: SYSTEM_PROMPT,
-      prompt: userMessage,
+    const apiResponse = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${openrouterApiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        model,
+        max_tokens: 2048,
+        messages: [
+          { role: "system", content: SYSTEM_PROMPT },
+          { role: "user", content: userMessage },
+        ],
+      }),
     });
 
-    // Parse the AI response as JSON
-    const parsed = JSON.parse(result.text) as EvaluateResult;
+    if (!apiResponse.ok) {
+      const errBody = await apiResponse.text();
+      console.error("[evaluate] OpenRouter error:", errBody);
+      return Response.json({ error: "OpenRouter request failed", details: errBody }, { status: 502 });
+    }
+
+    const apiJson = await apiResponse.json() as {
+      choices: { message: { content: string } }[];
+    };
+    console.log("[evaluate] full API response:", JSON.stringify(apiJson));
+    const rawResponse = apiJson.choices?.[0]?.message?.content ?? "";
+
+    console.log("[evaluate] raw model response:", rawResponse);
+
+    // Parse the AI response as JSON (strip markdown fences some models add)
+    let rawText = rawResponse.trim();
+    const fenceMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
+    if (fenceMatch) rawText = fenceMatch[1].trim();
+    const parsed = JSON.parse(rawText) as EvaluateResult;
 
     // Validate the response structure
     if (
@@ -115,8 +140,9 @@ ${data.responseText}`;
       !Array.isArray(parsed.grammarFlags) ||
       typeof parsed.modelAnswer !== "string"
     ) {
+      console.error("[evaluate] validation failed, parsed:", JSON.stringify(parsed));
       return Response.json(
-        { error: "Invalid AI response format" },
+        { error: "Invalid AI response format", raw: rawText },
         { status: 502 }
       );
     }
@@ -125,6 +151,7 @@ ${data.responseText}`;
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unknown evaluation error";
+    console.error("[evaluate] error:", message);
     return Response.json(
       { error: "Evaluation failed", details: message },
       { status: 502 }

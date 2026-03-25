@@ -16,9 +16,6 @@ const TIPS = [
   "Re-reading your paragraph aloud helps you catch missing connections between your evidence and your explanation.",
 ];
 
-/** Pick one tip per calendar day (deterministic rotation). */
-const TIP_OF_THE_DAY = TIPS[Math.floor(Date.now() / 86_400_000) % TIPS.length];
-
 interface DashboardStats {
   points: number;
   submissionCount: number;
@@ -27,9 +24,15 @@ interface DashboardStats {
 
 export default function DashboardPage() {
   const { data: session, isPending } = useSession();
+  const [mounted, setMounted] = useState(false);
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [cancelStep, setCancelStep] = useState<"idle" | "confirm">("idle");
   const [cancelling, setCancelling] = useState(false);
+
+  useEffect(() => { setMounted(true); }, []);
+
+  /** Pick one tip per calendar day (deterministic rotation). */
+  const TIP_OF_THE_DAY = TIPS[Math.floor(Date.now() / 86_400_000) % TIPS.length];
 
   useEffect(() => {
     if (!session) return;
@@ -65,7 +68,7 @@ export default function DashboardPage() {
       .catch(() => null);
   }, [session]);
 
-  if (isPending) {
+  if (!mounted || isPending) {
     return (
       <div className="flex justify-center items-center min-h-[60vh]">
         <div className="flex flex-col items-center gap-3 text-muted-foreground">
