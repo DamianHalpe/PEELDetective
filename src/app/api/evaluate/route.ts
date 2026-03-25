@@ -126,7 +126,7 @@ ${data.responseText}`;
     // Parse the AI response as JSON (strip markdown fences some models add)
     let rawText = rawResponse.trim();
     const fenceMatch = rawText.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-    if (fenceMatch) rawText = fenceMatch[1].trim();
+    if (fenceMatch?.[1]) rawText = fenceMatch[1].trim();
     const parsed = JSON.parse(rawText) as EvaluateResult;
 
     // Validate the response structure
