@@ -58,6 +58,14 @@ export async function SiteHeader() {
               >
                 PEEL Guide
               </Link>
+              {role === "student" && (
+                <Link
+                  href="/dashboard"
+                  className="px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+                >
+                  Dashboard
+                </Link>
+              )}
               {showSubscribe && (
                 <Link
                   href="/subscribe"
@@ -86,7 +94,7 @@ export async function SiteHeader() {
             <div className="flex items-center gap-3" role="group" aria-label="User actions">
               <UserProfile />
               <ModeToggle hasCustomTheme={!!customTheme} />
-              <MobileNav showTeacher={role === "teacher" || role === "admin"} showAdmin={role === "admin"} showSubscribe={showSubscribe} />
+              <MobileNav showTeacher={role === "teacher" || role === "admin"} showAdmin={role === "admin"} showSubscribe={showSubscribe} showDashboard={role === "student"} />
             </div>
           </div>
         </nav>

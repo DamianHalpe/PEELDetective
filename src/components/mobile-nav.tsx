@@ -8,9 +8,10 @@ interface MobileNavProps {
   showTeacher: boolean;
   showAdmin: boolean;
   showSubscribe?: boolean;
+  showDashboard?: boolean;
 }
 
-export function MobileNav({ showTeacher, showAdmin, showSubscribe }: MobileNavProps) {
+export function MobileNav({ showTeacher, showAdmin, showSubscribe, showDashboard }: MobileNavProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -39,6 +40,15 @@ export function MobileNav({ showTeacher, showAdmin, showSubscribe }: MobileNavPr
           >
             PEEL Guide
           </Link>
+          {showDashboard && (
+            <Link
+              href="/dashboard"
+              onClick={() => setOpen(false)}
+              className="block px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+            >
+              Dashboard
+            </Link>
+          )}
           {showSubscribe && (
             <Link
               href="/subscribe"
