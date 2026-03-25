@@ -24,35 +24,11 @@ import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { StudentActionsBar } from "./_components/StudentActionsBar";
+import { SubmissionsTable } from "./_components/SubmissionsTable";
 
 export const metadata = { title: "Student Detail" };
 
 type PageProps = { params: Promise<{ id: string }> };
-
-function StatusBadge({ status }: { status: string }) {
-  switch (status) {
-    case "evaluated":
-      return (
-        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-300 dark:border-green-700">
-          Evaluated
-        </Badge>
-      );
-    case "pending":
-      return (
-        <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-300 dark:border-amber-700">
-          Pending
-        </Badge>
-      );
-    case "failed":
-      return (
-        <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-300 dark:border-red-700">
-          Failed
-        </Badge>
-      );
-    default:
-      return <Badge variant="secondary">{status}</Badge>;
-  }
-}
 
 /**
  * Renders a simple SVG sparkline showing score trend for the last N submissions.
@@ -170,6 +146,7 @@ export default async function StudentDetailPage({ params }: PageProps) {
       id: schema.submission.id,
       scenarioId: schema.submission.scenarioId,
       scenarioTitle: schema.scenario.title,
+      responseText: schema.submission.responseText,
       scorePoint: schema.submission.scorePoint,
       scoreEvidence: schema.submission.scoreEvidence,
       scoreExplain: schema.submission.scoreExplain,
@@ -337,68 +314,7 @@ export default async function StudentDetailPage({ params }: PageProps) {
             <CardTitle>Submission History</CardTitle>
           </CardHeader>
           <CardContent>
-            {submissions.length === 0 ? (
-              <p className="text-center py-12 text-muted-foreground">
-                No submissions yet.
-              </p>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Scenario</TableHead>
-                    <TableHead className="text-center">P</TableHead>
-                    <TableHead className="text-center">E</TableHead>
-                    <TableHead className="text-center">E</TableHead>
-                    <TableHead className="text-center">L</TableHead>
-                    <TableHead className="text-center">Total</TableHead>
-                    <TableHead className="text-center">Status</TableHead>
-                    <TableHead className="text-right">Date</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {submissions.map((sub) => (
-                    <TableRow key={sub.id}>
-                      <TableCell className="font-medium">
-                        {sub.scenarioTitle ?? "Unknown"}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {sub.scorePoint ?? "--"}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {sub.scoreEvidence ?? "--"}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {sub.scoreExplain ?? "--"}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        {sub.scoreLink ?? "--"}
-                      </TableCell>
-                      <TableCell className="text-center font-semibold">
-                        {sub.totalScore != null ? `${sub.totalScore}/20` : "--"}
-                      </TableCell>
-                      <TableCell className="text-center">
-                        <StatusBadge status={sub.status} />
-                      </TableCell>
-                      <TableCell className="text-right text-sm text-muted-foreground">
-                        {new Date(sub.submittedAt).toLocaleDateString("en-US", {
-                          month: "short",
-                          day: "numeric",
-                          year: "numeric",
-                        })}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <Button size="sm" variant="ghost" asChild>
-                          <Link href={`/teacher/submissions/${sub.id}`}>
-                            View
-                          </Link>
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            )}
+            <SubmissionsTable submissions={submissions} />
           </CardContent>
         </Card>
 

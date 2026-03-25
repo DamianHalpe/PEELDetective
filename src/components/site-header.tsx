@@ -66,6 +66,14 @@ export async function SiteHeader() {
                   Dashboard
                 </Link>
               )}
+              {role === "student" && (
+                <Link
+                  href="/submissions"
+                  className="px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+                >
+                  My Results
+                </Link>
+              )}
               {showSubscribe && (
                 <Link
                   href="/subscribe"
@@ -94,7 +102,7 @@ export async function SiteHeader() {
             <div className="flex items-center gap-3" role="group" aria-label="User actions">
               <UserProfile />
               <ModeToggle hasCustomTheme={!!customTheme} />
-              <MobileNav showTeacher={role === "teacher" || role === "admin"} showAdmin={role === "admin"} showSubscribe={showSubscribe} showDashboard={role === "student"} />
+              <MobileNav showTeacher={role === "teacher" || role === "admin"} showAdmin={role === "admin"} showSubscribe={showSubscribe} showDashboard={role === "student"} showSubmissions={role === "student"} />
             </div>
           </div>
         </nav>

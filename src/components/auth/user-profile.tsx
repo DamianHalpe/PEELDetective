@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { User, LogOut, Settings } from "lucide-react";
+import { User, LogOut, Settings, ClipboardList } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import {
@@ -75,8 +75,14 @@ export function UserProfile() {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
         <DropdownMenuItem asChild>
-          <Link href="/dashboard" className="flex items-center">
+          <Link href="/profile" className="flex items-center">
             <User className="mr-2 h-4 w-4" />
+            Your Profile
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link href="/dashboard" className="flex items-center">
+            <ClipboardList className="mr-2 h-4 w-4" />
             Dashboard
           </Link>
         </DropdownMenuItem>

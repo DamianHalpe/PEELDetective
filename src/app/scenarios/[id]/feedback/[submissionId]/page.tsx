@@ -28,6 +28,7 @@ interface FeedbackJson {
 interface Submission {
   id: string;
   status: "pending" | "evaluated" | "failed";
+  responseText: string;
   scorePoint: number | null;
   scoreEvidence: number | null;
   scoreExplain: number | null;
@@ -312,8 +313,8 @@ export default function FeedbackPage() {
     );
   }
 
-  // Failed evaluation
-  if (!submission || submission.status === "failed") {
+  // Submission not found
+  if (!submission) {
     return (
       <div className="container mx-auto max-w-3xl p-6">
         <Link
@@ -326,20 +327,74 @@ export default function FeedbackPage() {
         <Card>
           <CardContent className="py-12 text-center">
             <TriangleAlert className="mx-auto mb-4 h-12 w-12 text-destructive" />
-            <p className="mb-2 text-lg font-medium">Evaluation failed</p>
+            <p className="mb-2 text-lg font-medium">Submission not found</p>
             <p className="mb-6 text-sm text-muted-foreground">
-              There was a problem evaluating your response. Your submission was saved — please try again.
+              We couldn&apos;t find this submission. It may have been removed.
             </p>
-            <div className="flex justify-center gap-3">
-              <Button asChild>
-                <Link href={`/scenarios/${id}`}>
-                  <RefreshCw className="mr-2 h-4 w-4" />
-                  Try Again
-                </Link>
-              </Button>
-              <Button variant="outline" asChild>
-                <Link href="/scenarios">New Case</Link>
-              </Button>
+            <Button variant="outline" asChild>
+              <Link href="/scenarios">Browse Cases</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  // Failed evaluation — show response but no scores
+  if (submission.status === "failed") {
+    return (
+      <div className="container mx-auto max-w-3xl p-6 pb-24">
+        <Link
+          href={`/scenarios/${id}`}
+          className="mb-6 inline-flex items-center gap-1 text-sm text-muted-foreground transition-colors hover:text-foreground"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Case
+        </Link>
+
+        <div className="mb-2">
+          <h1 className="text-3xl font-bold">Case Report Results</h1>
+        </div>
+        <p className="mb-6 text-sm text-muted-foreground">
+          Here is how your PEEL paragraph was evaluated by the AI detective.
+        </p>
+
+        {/* Submitted response */}
+        <section className="mb-6">
+          <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-detective-amber">
+            Your Response
+          </h2>
+          <Card>
+            <CardContent className="p-4">
+              <p className="text-sm leading-relaxed whitespace-pre-wrap">
+                {submission.responseText}
+              </p>
+            </CardContent>
+          </Card>
+        </section>
+
+        {/* Elegant failure notice */}
+        <Card className="border-destructive/30 bg-destructive/5">
+          <CardContent className="flex items-start gap-4 p-5">
+            <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-destructive/30 bg-destructive/10">
+              <TriangleAlert className="h-4 w-4 text-destructive" />
+            </div>
+            <div className="flex-1">
+              <p className="font-semibold text-foreground">Feedback unavailable</p>
+              <p className="mt-1 text-sm text-muted-foreground leading-relaxed">
+                The AI evaluator encountered an error and could not generate feedback for this submission. Your response has been saved and your teacher can review it manually.
+              </p>
+              <div className="mt-4 flex gap-3">
+                <Button asChild size="sm">
+                  <Link href={`/scenarios/${id}`}>
+                    <RefreshCw className="mr-2 h-3.5 w-3.5" />
+                    Try Again
+                  </Link>
+                </Button>
+                <Button variant="outline" size="sm" asChild>
+                  <Link href="/scenarios">New Case</Link>
+                </Button>
+              </div>
             </div>
           </CardContent>
         </Card>
@@ -365,9 +420,23 @@ export default function FeedbackPage() {
       <div className="mb-2">
         <h1 className="text-3xl font-bold">Case Report Results</h1>
       </div>
-      <p className="mb-8 text-sm text-muted-foreground">
+      <p className="mb-6 text-sm text-muted-foreground">
         Here is how your PEEL paragraph was evaluated by the AI detective.
       </p>
+
+      {/* Submitted response */}
+      <section className="mb-8">
+        <h2 className="mb-2 text-xs font-semibold uppercase tracking-widest text-detective-amber">
+          Your Response
+        </h2>
+        <Card>
+          <CardContent className="p-4">
+            <p className="text-sm leading-relaxed whitespace-pre-wrap">
+              {submission.responseText}
+            </p>
+          </CardContent>
+        </Card>
+      </section>
 
       {/* Total score */}
       <Card className="mb-8">
@@ -461,7 +530,7 @@ export default function FeedbackPage() {
             <Link href="/scenarios">New Case</Link>
           </Button>
           <Button variant="ghost" size="sm" asChild className="shrink-0">
-            <Link href="/profile">My Results</Link>
+            <Link href="/submissions">My Results</Link>
           </Button>
         </div>
       </div>

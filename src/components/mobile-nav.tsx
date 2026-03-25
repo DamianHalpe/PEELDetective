@@ -9,9 +9,10 @@ interface MobileNavProps {
   showAdmin: boolean;
   showSubscribe?: boolean;
   showDashboard?: boolean;
+  showSubmissions?: boolean;
 }
 
-export function MobileNav({ showTeacher, showAdmin, showSubscribe, showDashboard }: MobileNavProps) {
+export function MobileNav({ showTeacher, showAdmin, showSubscribe, showDashboard, showSubmissions }: MobileNavProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -47,6 +48,15 @@ export function MobileNav({ showTeacher, showAdmin, showSubscribe, showDashboard
               className="block px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
             >
               Dashboard
+            </Link>
+          )}
+          {showSubmissions && (
+            <Link
+              href="/submissions"
+              onClick={() => setOpen(false)}
+              className="block px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+            >
+              My Results
             </Link>
           )}
           {showSubscribe && (

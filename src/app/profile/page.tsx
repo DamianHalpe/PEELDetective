@@ -92,33 +92,6 @@ function effectiveScore(sub: ProfileSubmission): number | null {
   return sub.teacherOverrideScore ?? sub.totalScore;
 }
 
-// --- Status badge variant ---
-
-function StatusBadge({ status }: { status: string }) {
-  switch (status) {
-    case "evaluated":
-      return (
-        <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400 border-green-300 dark:border-green-700">
-          Evaluated
-        </Badge>
-      );
-    case "pending":
-      return (
-        <Badge className="bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-400 border-amber-300 dark:border-amber-700">
-          Pending
-        </Badge>
-      );
-    case "failed":
-      return (
-        <Badge className="bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400 border-red-300 dark:border-red-700">
-          Failed
-        </Badge>
-      );
-    default:
-      return <Badge variant="secondary">{status}</Badge>;
-  }
-}
-
 // --- Loading skeleton ---
 
 function ProfileSkeleton() {
@@ -351,64 +324,23 @@ export default function ProfilePage() {
           </Card>
         </div>
 
-        {/* Submission History */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Submission History</CardTitle>
-            <CardDescription>
-              Your past case investigations and scores
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            {(profileData?.submissions ?? []).length === 0 ? (
-              <div className="text-center py-8 text-muted-foreground">
-                <FileText className="h-10 w-10 mx-auto mb-3 opacity-60" />
-                <p>No cases solved yet. Start with a scenario!</p>
-                <Button variant="outline" className="mt-4" asChild>
-                  <Link href="/">Browse Scenarios</Link>
-                </Button>
+        {/* Case Report History link */}
+        <Card className="hover:border-detective-amber/40 transition-colors">
+          <CardContent className="flex items-center justify-between p-6">
+            <div className="flex items-center gap-4">
+              <div className="rounded-lg bg-detective-amber/10 border border-detective-amber/20 p-2.5">
+                <FileText className="h-5 w-5 text-detective-amber" />
               </div>
-            ) : (
-              <div className="space-y-3">
-                {profileData!.submissions.map((sub) => {
-                  const score = effectiveScore(sub);
-                  const dateStr = new Date(sub.submittedAt).toLocaleDateString(
-                    "en-US",
-                    {
-                      year: "numeric",
-                      month: "short",
-                      day: "numeric",
-                    }
-                  );
-                  return (
-                    <div
-                      key={sub.id}
-                      className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/80 transition-colors"
-                    >
-                      <div className="flex-1 min-w-0 mr-4">
-                        <Link
-                          href={`/scenarios/${sub.scenarioId}`}
-                          className="font-medium hover:underline truncate block"
-                        >
-                          {sub.scenarioTitle}
-                        </Link>
-                        <p className="text-sm text-muted-foreground">
-                          {dateStr}
-                        </p>
-                      </div>
-                      <div className="flex items-center gap-3 shrink-0">
-                        <span className="text-sm font-medium">
-                          {sub.status === "evaluated" && score !== null
-                            ? `${score}/20`
-                            : "Pending"}
-                        </span>
-                        <StatusBadge status={sub.status} />
-                      </div>
-                    </div>
-                  );
-                })}
+              <div>
+                <p className="font-semibold">Case Report History</p>
+                <p className="text-sm text-muted-foreground">
+                  View your previous submissions, scores, and AI feedback
+                </p>
               </div>
-            )}
+            </div>
+            <Button asChild variant="outline" size="sm">
+              <Link href="/submissions">View History</Link>
+            </Button>
           </CardContent>
         </Card>
 
