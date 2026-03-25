@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, max, ne, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { seedBadgesIfNeeded, awardBadges } from "@/lib/badges";
 import { db } from "@/lib/db";
@@ -131,11 +131,28 @@ export async function POST(req: Request) {
       .where(eq(schema.submission.id, submissionId))
       .returning();
 
-    // Award points (totalScore) to the student
-    await db
-      .update(schema.user)
-      .set({ points: sql`${schema.user.points} + ${totalScore}` })
-      .where(eq(schema.user.id, session.user.id));
+    // Award points — only the improvement over the student's best previous attempt
+    const [prevBest] = await db
+      .select({ best: max(schema.submission.totalScore) })
+      .from(schema.submission)
+      .where(
+        and(
+          eq(schema.submission.studentId, session.user.id),
+          eq(schema.submission.scenarioId, data.scenarioId),
+          eq(schema.submission.status, "evaluated"),
+          ne(schema.submission.id, submissionId)
+        )
+      );
+
+    const previousBest = prevBest?.best ?? 0;
+    const pointsDelta = totalScore - previousBest;
+
+    if (pointsDelta > 0) {
+      await db
+        .update(schema.user)
+        .set({ points: sql`${schema.user.points} + ${pointsDelta}` })
+        .where(eq(schema.user.id, session.user.id));
+    }
 
     // Seed default badges if the badge table is empty, then award any earned badges
     await seedBadgesIfNeeded(db);
