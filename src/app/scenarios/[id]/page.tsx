@@ -342,7 +342,7 @@ export default function InvestigatePage() {
               </div>
               <div className="space-y-4">
                 {scenario.suspects.map((suspect, index) => (
-                  <Card key={index}>
+                  <Card key={index} className="hover:border-detective-amber/50 transition-colors duration-200">
                     <CardContent className="p-4 flex gap-4 items-start">
                       {/* Suspect thumbnail */}
                       {suspect.imageUrl ? (
@@ -352,7 +352,7 @@ export default function InvestigatePage() {
                             setLightboxUrl(suspect.imageUrl!);
                             setLightboxName(suspect.name);
                           }}
-                          className="shrink-0 w-16 h-16 rounded overflow-hidden border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-detective-amber"
+                          className="shrink-0 w-20 h-20 rounded overflow-hidden border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-detective-amber"
                           aria-label={`View full photo of ${suspect.name}`}
                         >
                           <Image
@@ -364,7 +364,7 @@ export default function InvestigatePage() {
                           />
                         </button>
                       ) : (
-                        <div className="shrink-0 w-16 h-16 rounded border border-border bg-muted flex items-center justify-center">
+                        <div className="shrink-0 w-20 h-20 rounded border border-border bg-muted flex items-center justify-center">
                           <User className="h-7 w-7 text-muted-foreground/40" />
                         </div>
                       )}
@@ -398,9 +398,9 @@ export default function InvestigatePage() {
                 {scenario.clues.map((clue, index) => (
                   <Card
                     key={index}
-                    className="border-border border-l-2 border-l-detective-amber/70"
+                    className="border border-detective-amber/30 rounded-lg bg-amber-50/60 dark:bg-amber-950/20"
                   >
-                    <CardContent className="flex items-start gap-3 p-4">
+                    <CardContent className="flex items-start gap-3 p-3">
                       <Lightbulb className="h-4 w-4 shrink-0 text-detective-amber" />
                       <p className="text-sm leading-relaxed">{clue}</p>
                     </CardContent>
@@ -436,7 +436,7 @@ export default function InvestigatePage() {
                   value={responseText}
                   onChange={(e) => setResponseText(e.target.value)}
                   placeholder="Write your PEEL paragraph here. Start with your Point — who is the culprit? Then provide Evidence from the clues, Explain how the evidence proves your case, and Link back to the scenario..."
-                  className="min-h-[320px] resize-y font-mono text-sm leading-relaxed"
+                  className="min-h-[360px] resize-y text-base leading-relaxed focus-visible:ring-detective-amber/40 focus-visible:border-detective-amber"
                   disabled={submitting}
                 />
                 <p className="mt-1.5 text-xs text-muted-foreground">
@@ -584,7 +584,7 @@ export default function InvestigatePage() {
 
       {/* Sticky CTA at bottom — only visible before the form is shown */}
       {!showForm && (
-        <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/90 p-4 backdrop-blur">
+        <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/95 dark:bg-background/95 py-4 px-4 backdrop-blur">
           <div className="container mx-auto max-w-5xl">
             <Button
               className="w-full"

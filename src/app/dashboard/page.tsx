@@ -238,17 +238,17 @@ export default function DashboardPage() {
           <div
             key={stat.label}
             className={`relative rounded-xl border ${stat.border} bg-card p-5 overflow-hidden`}
-            style={{ animation: `fadeInUp 0.5s ease-out ${0.1 + i * 0.08}s both` }}
+            style={{ animation: `slideUp 0.5s ease-out ${0.1 + i * 0.08}s both` }}
           >
             <div className="absolute top-0 left-4 right-4 h-0.5 bg-gradient-to-r from-transparent via-current to-transparent opacity-30" />
-            <div className={`flex items-center justify-center w-9 h-9 rounded-lg ${stat.bg} mb-3`}>
+            <div className={`flex items-center justify-center w-12 h-12 rounded-lg ${stat.bg} mb-3`}>
               <stat.icon className={`h-4.5 w-4.5 ${stat.color}`} />
             </div>
             <div className="mb-1">
               {isLoadingStats ? (
                 <Skeleton className="h-7 w-14 rounded" />
               ) : (
-                <span className={`font-display text-2xl font-bold italic ${stat.color} leading-none`}>
+                <span className={`font-display text-4xl font-bold italic ${stat.color} leading-none`}>
                   {stat.value}
                 </span>
               )}
@@ -262,7 +262,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
         {/* Primary CTA */}
         <div
-          className="relative rounded-xl border border-detective-amber/40 bg-detective-amber/8 p-7 overflow-hidden group hover:border-detective-amber/50 transition-all duration-300"
+          className="relative rounded-xl border border-detective-amber/40 bg-detective-amber/8 p-7 md:p-8 overflow-hidden group hover:border-detective-amber/50 transition-all duration-300"
           style={{ animation: "fadeInUp 0.5s ease-out 0.3s both" }}
         >
           <div className="absolute top-0 left-6 right-6 h-0.5 bg-gradient-to-r from-transparent via-detective-amber/60 to-transparent" />
@@ -307,11 +307,11 @@ export default function DashboardPage() {
 
       {/* ── Motivational tip ────────────────────────────── */}
       <div
-        className="rounded-xl border border-detective-amber/35 bg-detective-amber/8 px-6 py-4 flex items-center gap-4"
+        className="rounded-xl border border-detective-amber/35 border-l-4 border-l-detective-amber bg-detective-amber/8 px-6 py-4 flex items-center gap-4"
         style={{ animation: "fadeInUp 0.5s ease-out 0.45s both" }}
       >
-        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-detective-amber/15 shrink-0">
-          <Zap className="h-4 w-4 text-detective-amber" />
+        <div className="flex items-center justify-center w-8 h-8 rounded-full bg-detective-amber/15 shrink-0 animate-subtle-glow">
+          <Zap className="h-4 w-4 text-detective-amber animate-float-slow" />
         </div>
         <p className="text-sm text-muted-foreground leading-relaxed">
           <span className="font-semibold text-foreground">Tip:</span>{" "}{TIP_OF_THE_DAY}

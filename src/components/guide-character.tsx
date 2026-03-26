@@ -24,16 +24,19 @@ export function GuideCharacter() {
         setHintIndex((prev) => (prev + 1) % hints.length);
         setVisible(true);
       }, 400);
-    }, 8000);
+    }, 10000);
 
     return () => clearInterval(interval);
   }, []);
 
   return (
-    <div className="fixed bottom-20 right-4 z-50 flex items-end gap-3 max-w-xs">
+    <div
+      className="fixed bottom-20 right-4 z-50 flex items-end gap-3 max-w-xs"
+      style={{ animation: "scaleIn 0.4s ease-out both" }}
+    >
       {/* Speech bubble */}
       <div
-        className={`relative rounded-lg border bg-card p-3 text-sm text-card-foreground shadow-md transition-opacity duration-400 ${
+        className={`relative rounded-lg border bg-card p-3 text-sm text-card-foreground shadow-md transition-opacity duration-300 ${
           visible ? "opacity-100" : "opacity-0"
         }`}
       >
@@ -42,9 +45,12 @@ export function GuideCharacter() {
         <div className="absolute -right-2 bottom-3 h-0 w-0 border-y-[6px] border-l-[8px] border-y-transparent border-l-border" />
       </div>
 
-      {/* Guide icon */}
-      <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-detective-amber/20 text-detective-amber">
-        <Bot className="h-6 w-6" aria-hidden="true" />
+      {/* Guide icon with ping ring */}
+      <div className="relative">
+        <div className="absolute inset-0 rounded-full bg-detective-amber/20 animate-ping" aria-hidden="true" />
+        <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-detective-amber/20 text-detective-amber">
+          <Bot className="h-6 w-6" aria-hidden="true" />
+        </div>
       </div>
     </div>
   );

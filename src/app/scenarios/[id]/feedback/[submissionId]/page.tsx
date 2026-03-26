@@ -9,6 +9,7 @@ import {
   ChevronUp,
   Loader2,
   RefreshCw,
+  Shield,
   Star,
   TriangleAlert,
 } from "lucide-react";
@@ -130,16 +131,16 @@ function ScoreCard({
             <span>{label}</span>
           </div>
           <div className="text-right">
-            <span className={`text-lg font-bold ${textColor}`}>{score}</span>
+            <span className={`text-3xl font-bold ${textColor}`}>{score}</span>
             <span className="text-xs text-muted-foreground">/5</span>
           </div>
         </CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="p-5 pt-0 space-y-3">
         {/* Progress bar */}
-        <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+        <div className="h-1.5 w-full overflow-hidden rounded-full bg-muted">
           <div
-            className={`h-full rounded-full transition-all duration-700 ${barColor}`}
+            className={`h-full rounded-full transition-[width] duration-700 ease-out ${barColor}`}
             style={{ width: `${pct}%` }}
           />
         </div>
@@ -149,9 +150,9 @@ function ScoreCard({
         >
           {scoreLabel}
         </Badge>
-        <p className="text-sm leading-relaxed text-muted-foreground">
+        <div className="mt-2 rounded-lg bg-muted/40 p-3 text-sm leading-relaxed text-muted-foreground">
           {feedback}
-        </p>
+        </div>
       </CardContent>
     </Card>
   );
@@ -163,20 +164,25 @@ function TotalScoreDisplay({ score, max = 20 }: { score: number; max?: number })
 
   return (
     <div className="flex flex-col items-center gap-2 py-4">
-      <div className="flex items-baseline gap-1">
-        <span className="text-5xl font-bold">{animatedScore}</span>
+      <div className="flex items-baseline gap-1 animate-celebrate">
+        <span className="text-7xl font-display italic font-bold">{animatedScore}</span>
         <span className="text-xl text-muted-foreground">/{max}</span>
       </div>
       <div className="flex gap-1">
         {Array.from({ length: 5 }, (_, i) => (
-          <Star
+          <span
             key={i}
-            className={`h-6 w-6 ${
-              i < stars
-                ? "fill-detective-amber text-detective-amber"
-                : "text-muted-foreground/60"
-            }`}
-          />
+            className="animate-tick-in"
+            style={{ animationDelay: `${i * 100}ms` }}
+          >
+            <Star
+              className={`h-6 w-6 ${
+                i < stars
+                  ? "fill-detective-amber text-detective-amber"
+                  : "text-muted-foreground/60"
+              }`}
+            />
+          </span>
         ))}
       </div>
       <p className="text-sm text-muted-foreground">Total Score</p>
@@ -263,7 +269,7 @@ export default function FeedbackPage() {
         <Skeleton className="mb-2 h-9 w-56" />
         <Skeleton className="mb-8 h-4 w-72" />
         <div className="mb-8 flex justify-center">
-          <div className="flex flex-col items-center gap-4 py-8">
+          <div className="flex flex-col items-center gap-4 py-8 animate-float-slow">
             <Loader2 className="h-10 w-10 animate-spin text-detective-amber" />
             <p className="text-sm text-muted-foreground">
               Evaluating your case report… this takes about 5 seconds.
@@ -437,6 +443,17 @@ export default function FeedbackPage() {
           </CardContent>
         </Card>
       </section>
+
+      {/* High score celebration */}
+      {displayScore >= 16 && (
+        <div className="mb-6 rounded-xl border border-detective-amber/30 bg-gradient-to-r from-detective-amber/20 via-amber-100/30 to-detective-amber/20 dark:from-detective-amber/10 dark:via-detective-amber/5 dark:to-detective-amber/10 p-5 text-center">
+          <div className="flex justify-center mb-2">
+            <Shield className="size-8 text-detective-amber animate-float-slow" />
+          </div>
+          <p className="font-display text-xl font-bold italic text-detective-amber">Outstanding Work, Detective!</p>
+          <p className="text-sm text-muted-foreground mt-1">You&apos;ve cracked the case with an exceptional report.</p>
+        </div>
+      )}
 
       {/* Total score */}
       <Card className="mb-8">

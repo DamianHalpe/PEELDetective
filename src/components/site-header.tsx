@@ -1,16 +1,28 @@
-import { headers } from "next/headers";
+"use client";
+
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { UserProfile } from "@/components/auth/user-profile";
 import { MobileNav } from "@/components/mobile-nav";
-import { auth } from "@/lib/auth";
+import { useSession } from "@/lib/auth-client";
 import { ModeToggle } from "./ui/mode-toggle";
 
-export async function SiteHeader() {
-  const session = await auth.api.getSession({ headers: await headers() });
+export function SiteHeader() {
+  const pathname = usePathname();
+  const { data: session } = useSession();
   const role = (session?.user as { role?: string })?.role;
   const subscribed = (session?.user as { subscribed?: boolean })?.subscribed;
   const customTheme = (session?.user as { customTheme?: string | null })?.customTheme;
   const showSubscribe = !!session && role === "student" && !subscribed;
+
+  function linkClass(href: string) {
+    const isActive = pathname === href || (href !== "/" && pathname.startsWith(href));
+    return `px-3 py-1.5 rounded-md transition-colors duration-150 ${
+      isActive
+        ? "text-foreground bg-muted/80 border-b-2 border-detective-amber"
+        : "text-muted-foreground hover:text-foreground hover:bg-muted/60"
+    }`;
+  }
 
   return (
     <>
@@ -48,20 +60,20 @@ export async function SiteHeader() {
             <div className="hidden md:flex items-center gap-1 text-sm font-medium" role="group" aria-label="Navigation links">
               <Link
                 href="/scenarios"
-                className="px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+                className={linkClass("/scenarios")}
               >
                 Cases
               </Link>
               <Link
                 href="/learn"
-                className="px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+                className={linkClass("/learn")}
               >
                 PEEL Guide
               </Link>
               {role === "student" && (
                 <Link
                   href="/dashboard"
-                  className="px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+                  className={linkClass("/dashboard")}
                 >
                   Dashboard
                 </Link>
@@ -69,7 +81,7 @@ export async function SiteHeader() {
               {role === "student" && (
                 <Link
                   href="/submissions"
-                  className="px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+                  className={linkClass("/submissions")}
                 >
                   My Results
                 </Link>
@@ -77,7 +89,11 @@ export async function SiteHeader() {
               {showSubscribe && (
                 <Link
                   href="/subscribe"
-                  className="px-3 py-1.5 rounded-md text-detective-amber font-semibold hover:text-detective-amber/80 hover:bg-detective-amber/10 transition-all"
+                  className={`px-3 py-1.5 rounded-md transition-colors duration-150 ${
+                    pathname.startsWith("/subscribe")
+                      ? "text-detective-amber font-semibold bg-detective-amber/10"
+                      : "text-detective-amber font-semibold hover:text-detective-amber/80 hover:bg-detective-amber/10"
+                  }`}
                 >
                   Subscribe
                 </Link>
@@ -85,7 +101,7 @@ export async function SiteHeader() {
               {(role === "teacher" || role === "admin") && (
                 <Link
                   href="/teacher"
-                  className="px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+                  className={linkClass("/teacher")}
                 >
                   Teacher
                 </Link>
@@ -93,7 +109,7 @@ export async function SiteHeader() {
               {role === "admin" && (
                 <Link
                   href="/admin"
-                  className="px-3 py-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+                  className={linkClass("/admin")}
                 >
                   Admin
                 </Link>

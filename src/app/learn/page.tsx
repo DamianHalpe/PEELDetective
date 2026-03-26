@@ -206,10 +206,10 @@ export default function LearnPage() {
       {/* PEEL elements */}
       <div className="space-y-12">
         {peelElements.map((el) => (
-          <section key={el.name}>
+          <section key={el.name} className={`border-l-4 ${el.borderColor} pl-4`}>
             {/* Element header */}
             <div className="mb-4 flex items-center gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-lg font-bold">
+              <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-muted text-xl font-bold">
                 {el.letter}
               </span>
               <div className="flex items-center gap-2">
@@ -240,7 +240,7 @@ export default function LearnPage() {
                     </CardTitle>
                   </CardHeader>
                   <CardContent className="space-y-3">
-                    <blockquote className="border-l-2 border-muted-foreground/40 pl-3 text-sm italic text-foreground">
+                    <blockquote className="bg-muted/60 border-l-4 border-muted-foreground/40 pl-3 pr-3 py-2 rounded-r text-sm italic text-foreground">
                       &ldquo;{level.example}&rdquo;
                     </blockquote>
                     <p className="text-xs leading-relaxed text-muted-foreground">
@@ -257,7 +257,7 @@ export default function LearnPage() {
       {/* Footer tip */}
       <Card className="mt-12 border-detective-amber/40 bg-detective-amber/8">
         <CardContent className="flex items-start gap-4 p-6">
-          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-detective-amber/15">
+          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-detective-amber/15 animate-pulse-glow">
             <BookOpen className="h-5 w-5 text-detective-amber" />
           </div>
           <div>

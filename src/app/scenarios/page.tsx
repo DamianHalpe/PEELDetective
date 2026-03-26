@@ -107,11 +107,11 @@ export default function ScenariosPage() {
   if (isPending || loading) {
     return (
       <div className="container mx-auto max-w-5xl px-4 py-12">
-        <Skeleton className="mb-2 h-9 w-48" />
-        <Skeleton className="mb-10 h-5 w-72" />
+        <Skeleton className="mb-2 h-9 w-48 animate-shimmer" />
+        <Skeleton className="mb-10 h-5 w-72 animate-shimmer" />
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array.from({ length: 6 }).map((_, i) => (
-            <Skeleton key={i} className="h-52 w-full rounded-lg" />
+            <Skeleton key={i} className="h-52 w-full rounded-lg animate-shimmer" />
           ))}
         </div>
       </div>
@@ -132,10 +132,18 @@ export default function ScenariosPage() {
           instant AI feedback.
         </p>
         {!loading && scenarios.length > 0 && (
-          <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
-            <CheckCircle2 className="h-4 w-4 text-emerald-500" />
-            {Object.keys(bestScores).length} of {scenarios.length} cases solved
-          </p>
+          <>
+            <p className="mt-2 flex items-center gap-1.5 text-sm text-muted-foreground">
+              <CheckCircle2 className="h-4 w-4 text-emerald-500" />
+              {Object.keys(bestScores).length} of {scenarios.length} cases solved
+            </p>
+            <div className="mt-2 h-1.5 w-48 rounded-full bg-muted overflow-hidden">
+              <div
+                className="h-full rounded-full bg-emerald-500 transition-[width] duration-700 ease-out"
+                style={{ width: `${Object.keys(bestScores).length && scenarios.length ? Math.round((Object.keys(bestScores).length / scenarios.length) * 100) : 0}%` }}
+              />
+            </div>
+          </>
         )}
       </div>
 
@@ -147,11 +155,11 @@ export default function ScenariosPage() {
               key={level ?? "all"}
               size="sm"
               variant={filterDifficulty === level ? "default" : "outline"}
-              className={
+              className={`transition-colors duration-150 ${
                 filterDifficulty === level
-                  ? "bg-detective-amber text-white hover:bg-detective-amber/90"
+                  ? "bg-detective-amber text-white dark:text-detective-slate hover:bg-detective-amber/90"
                   : ""
-              }
+              }`}
               onClick={() => setFilterDifficulty(level)}
             >
               {level === null ? "All" : "★".repeat(level)}
@@ -180,13 +188,13 @@ export default function ScenariosPage() {
             return (
               <div
                 key={scenario.id}
-                className={`group relative rounded-xl border bg-card overflow-hidden hover:border-detective-amber/50 hover:shadow-lg hover:shadow-detective-amber/5 transition-all duration-300 flex flex-col ${hasBest ? "border-emerald-600/30 bg-emerald-50 dark:bg-emerald-950/40 dark:border-emerald-500/30" : ""}`}
+                className={`group relative rounded-xl border bg-card overflow-hidden hover:border-detective-amber/50 hover:shadow-lg hover:shadow-detective-amber/5 transition-all duration-200 hover:rotate-0 hover:-translate-y-1 flex flex-col ${index % 2 !== 0 ? "rotate-[-0.5deg]" : ""} ${hasBest ? "border-emerald-600/30 bg-emerald-50 dark:bg-emerald-950/40 dark:border-emerald-500/30" : ""}`}
               >
                 {/* Amber top bar */}
                 <div className="h-1 bg-gradient-to-r from-detective-amber/60 via-detective-amber to-detective-amber/60" />
 
                 {/* Case number watermark */}
-                <div className="absolute top-3 right-4 font-display text-5xl font-bold italic text-detective-amber/18 dark:text-detective-amber/6 leading-none select-none pointer-events-none">
+                <div className="absolute top-3 right-4 font-display text-7xl font-bold italic text-detective-amber/25 dark:text-detective-amber/10 leading-none select-none pointer-events-none">
                   {(index + 1).toString().padStart(2, "0")}
                 </div>
 
@@ -197,8 +205,8 @@ export default function ScenariosPage() {
                       {renderDifficultyStars(scenario.difficulty)}
                     </div>
                     {hasBest ? (
-                      <span className="shrink-0 inline-flex items-center gap-1 text-xs font-bold border border-detective-amber/60 text-detective-amber bg-detective-amber/12 rounded-full px-2.5 py-0.5">
-                        ★ {best}/20
+                      <span className="shrink-0 inline-flex items-center gap-1 text-xs font-bold border border-detective-amber/60 text-detective-amber bg-detective-amber/12 rounded-full px-2.5 py-0.5 animate-tick-in">
+                        ✓ {best}/20
                       </span>
                     ) : (
                       <span className="shrink-0 inline-flex items-center text-xs text-foreground/60 border border-border rounded-full px-2.5 py-0.5">
