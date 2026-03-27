@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { eq } from "drizzle-orm";
+import { and, asc, eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
@@ -32,7 +32,22 @@ export async function GET(_req: Request, { params }: RouteParams) {
   // Unsubscribed students may read their own past submissions (read-only access after cancellation)
   // but the ownership check above already ensures they can only see their own records
 
-  return Response.json(found);
+  // Compute attempt number and total attempts for this student+scenario
+  const allAttempts = await db
+    .select({ id: schema.submission.id })
+    .from(schema.submission)
+    .where(
+      and(
+        eq(schema.submission.studentId, found.studentId),
+        eq(schema.submission.scenarioId, found.scenarioId)
+      )
+    )
+    .orderBy(asc(schema.submission.submittedAt));
+
+  const totalAttempts = allAttempts.length;
+  const attemptNumber = allAttempts.findIndex((a) => a.id === found.id) + 1;
+
+  return Response.json({ ...found, attemptNumber, totalAttempts });
 }
 
 export async function DELETE(_req: Request, { params }: RouteParams) {

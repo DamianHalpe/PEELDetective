@@ -20,10 +20,10 @@
 ### 2. Revise & Resubmit Flow
 > After viewing AI feedback, students should have a clear path to edit and resubmit. Prior submissions must be preserved. (Spec §4.3, Feature #8)
 
-- [ ] Audit `/scenarios/[id]/write` — confirm the page accepts a `?revise=submissionId` param and pre-fills the prior response text
-- [ ] Add a prominent "Revise My Answer" button on the feedback screen (`/scenarios/[id]/feedback/[submissionId]`) linking to write page with prior text
-- [ ] Ensure resubmission creates a new `submission` row (does not overwrite the previous one)
-- [ ] Show revision number / attempt count on feedback screen (e.g. "Attempt 2 of 3")
+- [x] Audit `/scenarios/[id]/write` — confirm the page accepts a `?revise=submissionId` param and pre-fills the prior response text
+- [x] Add a prominent "Revise My Answer" button on the feedback screen (`/scenarios/[id]/feedback/[submissionId]`) linking to write page with prior text
+- [x] Ensure resubmission creates a new `submission` row (does not overwrite the previous one)
+- [x] Show revision number / attempt count on feedback screen (e.g. "Attempt 2 of 3")
 
 ---
 

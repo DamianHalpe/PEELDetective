@@ -2,13 +2,14 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams, useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeft,
   ChevronLeft,
   ChevronRight,
   CheckCircle2,
   Loader2,
+  RefreshCw,
   Send,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
@@ -67,10 +68,13 @@ export default function WritePage() {
   const { id } = useParams<{ id: string }>();
   const { data: session, isPending } = useSession();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const reviseSubmissionId = searchParams.get("revise");
 
   const [scenario, setScenario] = useState<Scenario | null>(null);
   const [loading, setLoading] = useState(true);
   const [responseText, setResponseText] = useState("");
+  const [reviseAttemptNumber, setReviseAttemptNumber] = useState<number | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [guideOpen, setGuideOpen] = useState(true);
@@ -106,7 +110,20 @@ export default function WritePage() {
       return;
     }
     void fetchScenario();
-  }, [session, isPending, router, fetchScenario, id]);
+    if (reviseSubmissionId) {
+      void (async () => {
+        const res = await fetch(`/api/submissions/${reviseSubmissionId}`);
+        if (res.ok) {
+          const prior = (await res.json()) as {
+            responseText: string;
+            attemptNumber?: number;
+          };
+          setResponseText(prior.responseText);
+          setReviseAttemptNumber(prior.attemptNumber ?? null);
+        }
+      })();
+    }
+  }, [session, isPending, router, fetchScenario, id, reviseSubmissionId]);
 
   const evalSteps = [
     { label: "Reading your case report…", done: false },
@@ -181,6 +198,16 @@ export default function WritePage() {
         <ArrowLeft className="h-4 w-4" />
         Back to Investigation
       </Link>
+
+      {/* Revision banner */}
+      {reviseSubmissionId && (
+        <div className="mb-6 flex items-center gap-3 rounded-lg border border-detective-amber/30 bg-detective-amber/10 px-4 py-3 text-sm">
+          <RefreshCw className="h-4 w-4 shrink-0 text-detective-amber" />
+          <span className="text-detective-amber font-medium">
+            Revising{reviseAttemptNumber ? ` Attempt ${reviseAttemptNumber}` : " your previous answer"} — your prior text has been pre-filled below. Edit and resubmit to improve your score.
+          </span>
+        </div>
+      )}
 
       {/* Title with detective motif */}
       <div className="mb-8">

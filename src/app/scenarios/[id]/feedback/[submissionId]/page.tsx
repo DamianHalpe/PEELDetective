@@ -40,6 +40,8 @@ interface Submission {
   grammarFlagsJson: string[] | null;
   modelAnswer: string | null;
   submittedAt: string;
+  attemptNumber?: number;
+  totalAttempts?: number;
 }
 
 const POLL_INTERVAL_MS = 2000;
@@ -358,8 +360,13 @@ export default function FeedbackPage() {
           Back to Case
         </Link>
 
-        <div className="mb-2">
+        <div className="mb-2 flex items-center gap-3">
           <h1 className="text-3xl font-bold">Case Report Results</h1>
+          {submission.attemptNumber !== undefined && submission.totalAttempts !== undefined && (
+            <Badge variant="outline" className="text-xs text-muted-foreground">
+              Attempt {submission.attemptNumber} of {submission.totalAttempts}
+            </Badge>
+          )}
         </div>
         <p className="mb-6 text-sm text-muted-foreground">
           Here is how your PEEL paragraph was evaluated by the AI detective.
@@ -392,9 +399,9 @@ export default function FeedbackPage() {
               </p>
               <div className="mt-4 flex gap-3">
                 <Button asChild size="sm">
-                  <Link href={`/scenarios/${id}`}>
+                  <Link href={`/scenarios/${id}/write?revise=${submissionId}`}>
                     <RefreshCw className="mr-2 h-3.5 w-3.5" />
-                    Try Again
+                    Revise My Answer
                   </Link>
                 </Button>
                 <Button variant="outline" size="sm" asChild>
@@ -423,8 +430,13 @@ export default function FeedbackPage() {
       </Link>
 
       {/* Heading */}
-      <div className="mb-2">
+      <div className="mb-2 flex items-center gap-3">
         <h1 className="text-3xl font-bold">Case Report Results</h1>
+        {submission.attemptNumber !== undefined && submission.totalAttempts !== undefined && (
+          <Badge variant="outline" className="text-xs text-muted-foreground">
+            Attempt {submission.attemptNumber} of {submission.totalAttempts}
+          </Badge>
+        )}
       </div>
       <p className="mb-6 text-sm text-muted-foreground">
         Here is how your PEEL paragraph was evaluated by the AI detective.
@@ -538,9 +550,9 @@ export default function FeedbackPage() {
       <div className="fixed bottom-0 left-0 right-0 z-40 border-t bg-background/90 p-4 backdrop-blur">
         <div className="container mx-auto flex max-w-3xl gap-3">
           <Button className="flex-1" asChild>
-            <Link href={`/scenarios/${id}`}>
+            <Link href={`/scenarios/${id}/write?revise=${submissionId}`}>
               <RefreshCw className="mr-2 h-4 w-4" />
-              Try Again
+              Revise My Answer
             </Link>
           </Button>
           <Button variant="outline" className="flex-1" asChild>
