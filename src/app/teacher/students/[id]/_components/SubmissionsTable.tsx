@@ -2,9 +2,21 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { ChevronDown, ChevronUp, Eye, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import {
   Table,
   TableBody,
@@ -53,7 +65,55 @@ function StatusBadge({ status }: { status: string }) {
   }
 }
 
+function DeleteSubmissionButton({ submissionId, onDeleted }: { submissionId: string; onDeleted: () => void }) {
+  const [loading, setLoading] = useState(false);
+
+  async function handleDelete() {
+    setLoading(true);
+    try {
+      await fetch(`/api/submissions/${submissionId}`, { method: "DELETE" });
+      onDeleted();
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <AlertDialog>
+      <AlertDialogTrigger asChild>
+        <Button
+          size="icon"
+          variant="ghost"
+          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+          aria-label="Delete submission"
+        >
+          <Trash2 className="h-3.5 w-3.5" />
+        </Button>
+      </AlertDialogTrigger>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Delete submission?</AlertDialogTitle>
+          <AlertDialogDescription>
+            This will permanently delete this submission and cannot be undone.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogAction
+            onClick={handleDelete}
+            disabled={loading}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+          >
+            {loading ? "Deleting…" : "Delete"}
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}
+
 export function SubmissionsTable({ submissions }: { submissions: SubmissionRow[] }) {
+  const router = useRouter();
   const [expanded, setExpanded] = useState<Set<string>>(new Set());
 
   const toggle = (id: string) =>
@@ -127,8 +187,9 @@ export function SubmissionsTable({ submissions }: { submissions: SubmissionRow[]
                 <TableCell className="text-right">
                   <div className="flex items-center justify-end gap-1">
                     <Button
-                      size="sm"
+                      size="icon"
                       variant="ghost"
+                      className="h-8 w-8"
                       onClick={() => toggle(sub.id)}
                       aria-label={isExpanded ? "Hide response" : "Show response"}
                     >
@@ -138,9 +199,21 @@ export function SubmissionsTable({ submissions }: { submissions: SubmissionRow[]
                         <ChevronDown className="h-3.5 w-3.5" />
                       )}
                     </Button>
-                    <Button size="sm" variant="ghost" asChild>
-                      <Link href={`/teacher/submissions/${sub.id}`}>View</Link>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8"
+                      aria-label="View submission"
+                      asChild
+                    >
+                      <Link href={`/teacher/submissions/${sub.id}`}>
+                        <Eye className="h-3.5 w-3.5" />
+                      </Link>
                     </Button>
+                    <DeleteSubmissionButton
+                      submissionId={sub.id}
+                      onDeleted={() => router.refresh()}
+                    />
                   </div>
                 </TableCell>
               </TableRow>

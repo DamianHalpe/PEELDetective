@@ -35,6 +35,31 @@ export async function GET(_req: Request, { params }: RouteParams) {
   return Response.json(found);
 }
 
+export async function DELETE(_req: Request, { params }: RouteParams) {
+  const session = await auth.api.getSession({ headers: await headers() });
+  if (!session) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const role = session.user.role as string;
+  if (role !== "teacher" && role !== "admin") {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
+
+  const { id } = await params;
+
+  const [deleted] = await db
+    .delete(schema.submission)
+    .where(eq(schema.submission.id, id))
+    .returning();
+
+  if (!deleted) {
+    return Response.json({ error: "Submission not found" }, { status: 404 });
+  }
+
+  return Response.json({ success: true });
+}
+
 export async function PATCH(req: Request, { params }: RouteParams) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
