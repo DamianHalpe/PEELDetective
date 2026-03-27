@@ -50,6 +50,10 @@ export default async function TeacherDashboardPage() {
       studentName: schema.user.name,
       studentNickname: schema.user.nickname,
       studentEmail: schema.user.email,
+      scorePoint: schema.submission.scorePoint,
+      scoreEvidence: schema.submission.scoreEvidence,
+      scoreExplain: schema.submission.scoreExplain,
+      scoreLink: schema.submission.scoreLink,
       totalScore: schema.submission.totalScore,
       teacherOverrideScore: schema.submission.teacherOverrideScore,
       status: schema.submission.status,
@@ -123,6 +127,26 @@ export default async function TeacherDashboardPage() {
 
   const classAverage =
     totalEvaluated > 0 ? (totalScoreSum / totalEvaluated).toFixed(1) : "--";
+
+  // Compute overall PEEL element averages across all evaluated submissions
+  const evaluatedAll = allSubmissions.filter((s) => s.status === "evaluated");
+  const peelAvg =
+    evaluatedAll.length > 0
+      ? {
+          avgPoint:
+            evaluatedAll.reduce((sum, s) => sum + (s.scorePoint ?? 0), 0) /
+            evaluatedAll.length,
+          avgEvidence:
+            evaluatedAll.reduce((sum, s) => sum + (s.scoreEvidence ?? 0), 0) /
+            evaluatedAll.length,
+          avgExplain:
+            evaluatedAll.reduce((sum, s) => sum + (s.scoreExplain ?? 0), 0) /
+            evaluatedAll.length,
+          avgLink:
+            evaluatedAll.reduce((sum, s) => sum + (s.scoreLink ?? 0), 0) /
+            evaluatedAll.length,
+        }
+      : null;
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-detective-slate/10 to-background">
@@ -209,6 +233,78 @@ export default async function TeacherDashboardPage() {
             </CardContent>
           </Card>
         </div>
+
+        {/* PEEL Aggregate Panel */}
+        {peelAvg && (
+          <Card className="border-detective-amber/35">
+            <CardHeader className="pb-2">
+              <CardTitle className="text-base">
+                Class PEEL Averages — All Scenarios
+              </CardTitle>
+              <CardDescription>
+                Average score per element across {evaluatedAll.length} evaluated
+                submission{evaluatedAll.length !== 1 ? "s" : ""}. Each element
+                out of 5.
+              </CardDescription>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                {(
+                  [
+                    { label: "P", full: "Point", avg: peelAvg.avgPoint },
+                    { label: "E", full: "Evidence", avg: peelAvg.avgEvidence },
+                    { label: "E", full: "Explain", avg: peelAvg.avgExplain },
+                    { label: "L", full: "Link", avg: peelAvg.avgLink },
+                  ] as const
+                ).map(({ label, full, avg }) => {
+                  const minAvg = Math.min(
+                    peelAvg.avgPoint,
+                    peelAvg.avgEvidence,
+                    peelAvg.avgExplain,
+                    peelAvg.avgLink
+                  );
+                  const isWeakest = avg === minAvg;
+                  return (
+                    <div key={full} className="space-y-1.5">
+                      <div className="flex items-center justify-between text-sm">
+                        <span className="font-medium">
+                          {label}{" "}
+                          <span className="text-muted-foreground font-normal text-xs">
+                            {full}
+                          </span>
+                        </span>
+                        <span
+                          className={
+                            isWeakest
+                              ? "font-semibold text-amber-600 dark:text-amber-400"
+                              : "font-semibold"
+                          }
+                        >
+                          {avg.toFixed(1)}
+                        </span>
+                      </div>
+                      <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                        <div
+                          className={
+                            isWeakest
+                              ? "h-full rounded-full bg-amber-500"
+                              : "h-full rounded-full bg-detective-amber"
+                          }
+                          style={{ width: `${(avg / 5) * 100}%` }}
+                        />
+                      </div>
+                      {isWeakest && (
+                        <p className="text-xs text-amber-600 dark:text-amber-400">
+                          Class weakness
+                        </p>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </CardContent>
+          </Card>
+        )}
 
         {/* Student table */}
         <Card className="border-detective-amber/35">

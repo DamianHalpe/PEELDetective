@@ -57,5 +57,28 @@ export async function GET(_req: Request, { params }: RouteParams) {
     .where(eq(schema.submission.scenarioId, id))
     .orderBy(desc(schema.submission.submittedAt));
 
-  return Response.json(submissions);
+  // Compute per-element aggregate stats from evaluated submissions
+  const evaluated = submissions.filter((s) => s.status === "evaluated");
+  const count = evaluated.length;
+
+  const aggregate =
+    count > 0
+      ? {
+          avgPoint:
+            evaluated.reduce((sum, s) => sum + (s.scorePoint ?? 0), 0) / count,
+          avgEvidence:
+            evaluated.reduce((sum, s) => sum + (s.scoreEvidence ?? 0), 0) /
+            count,
+          avgExplain:
+            evaluated.reduce((sum, s) => sum + (s.scoreExplain ?? 0), 0) /
+            count,
+          avgLink:
+            evaluated.reduce((sum, s) => sum + (s.scoreLink ?? 0), 0) / count,
+          avgTotal:
+            evaluated.reduce((sum, s) => sum + (s.totalScore ?? 0), 0) / count,
+          count,
+        }
+      : null;
+
+  return Response.json({ submissions, aggregate });
 }

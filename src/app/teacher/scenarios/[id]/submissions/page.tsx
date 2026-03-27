@@ -30,6 +30,93 @@ import * as schema from "@/lib/schema";
 
 export const metadata = { title: "Scenario Submissions" };
 
+type PeelAggregate = {
+  avgPoint: number;
+  avgEvidence: number;
+  avgExplain: number;
+  avgLink: number;
+};
+
+function PeelAggregatePanel({
+  aggregate,
+  evaluatedCount,
+}: {
+  aggregate: PeelAggregate;
+  evaluatedCount: number;
+}) {
+  const elements: { label: string; key: keyof PeelAggregate; full: string }[] =
+    [
+      { label: "P", key: "avgPoint", full: "Point" },
+      { label: "E", key: "avgEvidence", full: "Evidence" },
+      { label: "E", key: "avgExplain", full: "Explain" },
+      { label: "L", key: "avgLink", full: "Link" },
+    ];
+
+  const MIN_VAL = Math.min(
+    aggregate.avgPoint,
+    aggregate.avgEvidence,
+    aggregate.avgExplain,
+    aggregate.avgLink
+  );
+
+  return (
+    <Card className="border-detective-amber/20">
+      <CardHeader className="pb-2">
+        <CardTitle className="text-base">Class PEEL Averages</CardTitle>
+        <p className="text-xs text-muted-foreground">
+          Based on {evaluatedCount} evaluated submission
+          {evaluatedCount !== 1 ? "s" : ""}. Each element scored out of 5.
+        </p>
+      </CardHeader>
+      <CardContent>
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+          {elements.map(({ label, key, full }) => {
+            const avg = aggregate[key];
+            const pct = (avg / 5) * 100;
+            const isWeakest = avg === MIN_VAL;
+            return (
+              <div key={key} className="space-y-1.5">
+                <div className="flex items-center justify-between text-sm">
+                  <span className="font-medium">
+                    {label}{" "}
+                    <span className="text-muted-foreground font-normal text-xs">
+                      {full}
+                    </span>
+                  </span>
+                  <span
+                    className={
+                      isWeakest
+                        ? "font-semibold text-amber-600 dark:text-amber-400"
+                        : "font-semibold"
+                    }
+                  >
+                    {avg.toFixed(1)}
+                  </span>
+                </div>
+                <div className="h-2 w-full rounded-full bg-muted overflow-hidden">
+                  <div
+                    className={
+                      isWeakest
+                        ? "h-full rounded-full bg-amber-500"
+                        : "h-full rounded-full bg-detective-amber"
+                    }
+                    style={{ width: `${pct}%` }}
+                  />
+                </div>
+                {isWeakest && (
+                  <p className="text-xs text-amber-600 dark:text-amber-400">
+                    Class weakness
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 type PageProps = { params: Promise<{ id: string }> };
 
 function StatusBadge({ status }: { status: string }) {
@@ -104,6 +191,27 @@ export default async function ScenarioSubmissionsPage({
     .where(eq(schema.submission.scenarioId, id))
     .orderBy(desc(schema.submission.submittedAt));
 
+  // Compute per-element class averages from evaluated submissions
+  const evaluated = submissions.filter((s) => s.status === "evaluated");
+  const evalCount = evaluated.length;
+  const aggregate =
+    evalCount > 0
+      ? {
+          avgPoint:
+            evaluated.reduce((sum, s) => sum + (s.scorePoint ?? 0), 0) /
+            evalCount,
+          avgEvidence:
+            evaluated.reduce((sum, s) => sum + (s.scoreEvidence ?? 0), 0) /
+            evalCount,
+          avgExplain:
+            evaluated.reduce((sum, s) => sum + (s.scoreExplain ?? 0), 0) /
+            evalCount,
+          avgLink:
+            evaluated.reduce((sum, s) => sum + (s.scoreLink ?? 0), 0) /
+            evalCount,
+        }
+      : null;
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-detective-slate/10 to-background">
       <div className="container mx-auto p-6 space-y-6">
@@ -133,6 +241,11 @@ export default async function ScenarioSubmissionsPage({
             </a>
           </Button>
         </div>
+
+        {/* PEEL Aggregate Stats */}
+        {aggregate && (
+          <PeelAggregatePanel aggregate={aggregate} evaluatedCount={evalCount} />
+        )}
 
         {/* Submissions table */}
         <Card className="border-detective-amber/20">
