@@ -40,6 +40,7 @@ interface Scenario {
   clues: string[];
   difficulty: number;
   published: boolean;
+  freeToView: boolean;
 }
 
 interface SubmissionResponse {
@@ -130,12 +131,18 @@ export default function InvestigatePage() {
       }
       if (res.ok) {
         const data = (await res.json()) as Scenario;
+        const userRole = (session?.user as { role?: string })?.role;
+        const userSubscribed = (session?.user as { subscribed?: boolean })?.subscribed;
+        if (userRole === "student" && !userSubscribed && !data.freeToView) {
+          router.push(`/subscribe?from=/scenarios/${id}`);
+          return;
+        }
         setScenario(data);
       }
     } finally {
       setLoading(false);
     }
-  }, [id, router]);
+  }, [id, router, session]);
 
   useEffect(() => {
     if (isPending) return;

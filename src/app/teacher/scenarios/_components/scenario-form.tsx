@@ -31,6 +31,7 @@ export interface ScenarioFormData {
   correctCulprit: string;
   difficulty: number;
   published: boolean;
+  freeToView: boolean;
 }
 
 interface ScenarioFormProps {
@@ -58,6 +59,7 @@ export function ScenarioForm({
   );
   const [difficulty, setDifficulty] = useState(initialData?.difficulty ?? 1);
   const [published, setPublished] = useState(initialData?.published ?? false);
+  const [freeToView, setFreeToView] = useState(initialData?.freeToView ?? false);
   const [preview, setPreview] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -180,6 +182,7 @@ export function ScenarioForm({
         correctCulprit: correctCulprit.trim(),
         difficulty,
         published,
+        freeToView,
       });
       router.push("/teacher/scenarios");
     } catch (err) {
@@ -518,6 +521,19 @@ export function ScenarioForm({
             className="h-4 w-4 rounded border-border"
           />
           <Label htmlFor="published">Publish immediately</Label>
+        </div>
+
+        {/* Free to View */}
+        <div className="flex items-center gap-3">
+          <input
+            type="checkbox"
+            id="freeToView"
+            checked={freeToView}
+            onChange={(e) => setFreeToView(e.target.checked)}
+            className="h-4 w-4 rounded border-border"
+          />
+          <Label htmlFor="freeToView">Free to View</Label>
+          <span className="text-xs text-muted-foreground">(Unsubscribed students can open this scenario)</span>
         </div>
 
         {/* Submit */}

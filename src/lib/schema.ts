@@ -106,6 +106,7 @@ export const scenario = pgTable("scenario", {
   difficulty: integer("difficulty").notNull().default(1), // 1-3
   createdBy: text("created_by").notNull().references(() => user.id),
   published: boolean("published").notNull().default(false),
+  freeToView: boolean("free_to_view").notNull().default(false),
   createdAt: timestamp("created_at").notNull().defaultNow(),
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });

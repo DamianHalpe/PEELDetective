@@ -65,6 +65,7 @@ export async function PUT(req: Request, { params }: RouteParams) {
     correctCulprit?: string;
     difficulty?: number;
     published?: boolean;
+    freeToView?: boolean;
   };
 
   // Build the update object with only provided fields
@@ -89,6 +90,7 @@ export async function PUT(req: Request, { params }: RouteParams) {
     updateFields.difficulty = data.difficulty;
   }
   if (data.published !== undefined) updateFields.published = data.published;
+  if (data.freeToView !== undefined) updateFields.freeToView = data.freeToView;
 
   const [updated] = await db
     .update(schema.scenario)

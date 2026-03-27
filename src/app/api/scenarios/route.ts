@@ -29,6 +29,7 @@ export async function GET() {
       difficulty: schema.scenario.difficulty,
       createdBy: schema.scenario.createdBy,
       published: schema.scenario.published,
+      freeToView: schema.scenario.freeToView,
       createdAt: schema.scenario.createdAt,
       updatedAt: schema.scenario.updatedAt,
     })
@@ -64,6 +65,7 @@ export async function POST(req: Request) {
     correctCulprit?: string;
     difficulty?: number;
     published?: boolean;
+    freeToView?: boolean;
   };
 
   if (
@@ -103,6 +105,7 @@ export async function POST(req: Request) {
       correctCulprit: data.correctCulprit,
       difficulty: data.difficulty,
       published: data.published ?? false,
+      freeToView: data.freeToView ?? false,
       createdBy: session.user.id,
       createdAt: now,
       updatedAt: now,

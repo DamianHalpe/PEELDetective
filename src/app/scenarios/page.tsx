@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Star, Search, ChevronRight, BookOpen, Trophy, Crown, CheckCircle2 } from "lucide-react";
+import { Star, Search, ChevronRight, BookOpen, Trophy, Crown, CheckCircle2, Lock } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,6 +15,7 @@ interface Scenario {
   crimeDescription: string;
   difficulty: number;
   published: boolean;
+  freeToView: boolean;
 }
 
 interface Submission {
@@ -33,6 +34,10 @@ interface LeaderboardEntry {
 export default function ScenariosPage() {
   const { data: session, isPending } = useSession();
   const router = useRouter();
+
+  const userRole = (session?.user as { role?: string })?.role;
+  const userSubscribed = (session?.user as { subscribed?: boolean })?.subscribed ?? false;
+  const isStudentUnsubscribed = userRole === "student" && !userSubscribed;
 
   const [scenarios, setScenarios] = useState<Scenario[]>([]);
   const [bestScores, setBestScores] = useState<Record<string, number>>({});
@@ -184,11 +189,12 @@ export default function ScenariosPage() {
             .map((scenario, index) => {
             const best = bestScores[scenario.id];
             const hasBest = best !== undefined;
+            const isLocked = isStudentUnsubscribed && !scenario.freeToView;
 
             return (
               <div
                 key={scenario.id}
-                className={`group relative rounded-xl border bg-card overflow-hidden hover:border-detective-amber/50 hover:shadow-lg hover:shadow-detective-amber/5 transition-all duration-200 hover:rotate-0 hover:-translate-y-1 flex flex-col ${index % 2 !== 0 ? "rotate-[-0.5deg]" : ""} ${hasBest ? "border-emerald-600/30 bg-emerald-50 dark:bg-emerald-950/40 dark:border-emerald-500/30" : ""}`}
+                className={`group relative rounded-xl border bg-card overflow-hidden hover:border-detective-amber/50 hover:shadow-lg hover:shadow-detective-amber/5 transition-all duration-200 hover:rotate-0 hover:-translate-y-1 flex flex-col ${index % 2 !== 0 ? "rotate-[-0.5deg]" : ""} ${hasBest ? "border-emerald-600/30 bg-emerald-50 dark:bg-emerald-950/40 dark:border-emerald-500/30" : ""} ${isLocked ? "opacity-80" : ""}`}
               >
                 {/* Amber top bar */}
                 <div className="h-1 bg-gradient-to-r from-detective-amber/60 via-detective-amber to-detective-amber/60" />
@@ -204,15 +210,22 @@ export default function ScenariosPage() {
                     <div className="flex items-center gap-0.5">
                       {renderDifficultyStars(scenario.difficulty)}
                     </div>
-                    {hasBest ? (
-                      <span className="shrink-0 inline-flex items-center gap-1 text-xs font-bold border border-detective-amber/60 text-detective-amber bg-detective-amber/12 rounded-full px-2.5 py-0.5 animate-tick-in">
-                        ✓ {best}/20
-                      </span>
-                    ) : (
-                      <span className="shrink-0 inline-flex items-center text-xs text-foreground/60 border border-border rounded-full px-2.5 py-0.5">
-                        Unsolved
-                      </span>
-                    )}
+                    <div className="flex items-center gap-1.5">
+                      {isStudentUnsubscribed && scenario.freeToView && (
+                        <span className="shrink-0 inline-flex items-center text-xs font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 rounded-full px-2 py-0.5">
+                          Free
+                        </span>
+                      )}
+                      {hasBest ? (
+                        <span className="shrink-0 inline-flex items-center gap-1 text-xs font-bold border border-detective-amber/60 text-detective-amber bg-detective-amber/12 rounded-full px-2.5 py-0.5 animate-tick-in">
+                          ✓ {best}/20
+                        </span>
+                      ) : (
+                        <span className="shrink-0 inline-flex items-center text-xs text-foreground/60 border border-border rounded-full px-2.5 py-0.5">
+                          Unsolved
+                        </span>
+                      )}
+                    </div>
                   </div>
 
                   {/* Title */}
@@ -226,17 +239,30 @@ export default function ScenariosPage() {
                   </p>
 
                   {/* CTA */}
-                  <Button
-                    asChild
-                    size="sm"
-                    className="w-full gap-1.5 group-hover:gap-2.5 transition-all bg-detective-amber text-white dark:text-detective-slate hover:bg-detective-amber/90 font-semibold"
-                  >
-                    <Link href={`/scenarios/${scenario.id}`}>
-                      {hasBest && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" />}
-                      {hasBest ? "Re-investigate" : "Investigate"}
-                      <ChevronRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </Button>
+                  {isLocked ? (
+                    <Button
+                      asChild
+                      size="sm"
+                      className="w-full gap-1.5 transition-all bg-muted text-muted-foreground font-semibold hover:bg-muted/80"
+                    >
+                      <Link href={`/subscribe?from=/scenarios/${scenario.id}`}>
+                        <Lock className="h-3.5 w-3.5" />
+                        Subscribe to Investigate
+                      </Link>
+                    </Button>
+                  ) : (
+                    <Button
+                      asChild
+                      size="sm"
+                      className="w-full gap-1.5 group-hover:gap-2.5 transition-all bg-detective-amber text-white dark:text-detective-slate hover:bg-detective-amber/90 font-semibold"
+                    >
+                      <Link href={`/scenarios/${scenario.id}`}>
+                        {hasBest && <CheckCircle2 className="h-3.5 w-3.5 text-emerald-300" />}
+                        {hasBest ? "Re-investigate" : "Investigate"}
+                        <ChevronRight className="h-3.5 w-3.5" />
+                      </Link>
+                    </Button>
+                  )}
                 </div>
               </div>
             );

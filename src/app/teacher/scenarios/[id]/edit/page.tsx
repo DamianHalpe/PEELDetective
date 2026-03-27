@@ -17,6 +17,7 @@ interface ScenarioResponse {
   correctCulprit: string;
   difficulty: number;
   published: boolean;
+  freeToView: boolean;
 }
 
 export default function EditScenarioPage() {
@@ -57,6 +58,7 @@ export default function EditScenarioPage() {
           correctCulprit: data.correctCulprit,
           difficulty: data.difficulty,
           published: data.published,
+          freeToView: data.freeToView ?? false,
         });
       } catch {
         setFetchError("Failed to load scenario");
