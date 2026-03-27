@@ -77,7 +77,10 @@ export async function POST(req: Request) {
   try {
     const evaluateResponse = await fetch(evaluateUrl, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "X-Internal-Secret": process.env.BETTER_AUTH_SECRET ?? "",
+      },
       body: JSON.stringify({
         responseText: data.responseText,
         scenario: {

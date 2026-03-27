@@ -13,6 +13,8 @@ export async function GET(_req: Request, { params }: RouteParams) {
   }
 
   const { id } = await params;
+  const role = session.user.role as string;
+  const isTeacherOrAdmin = role === "teacher" || role === "admin";
 
   const [found] = await db
     .select()
@@ -21,6 +23,15 @@ export async function GET(_req: Request, { params }: RouteParams) {
 
   if (!found) {
     return Response.json({ error: "Scenario not found" }, { status: 404 });
+  }
+
+  // Students may only access published scenarios and must not see the correct culprit
+  if (!isTeacherOrAdmin) {
+    if (!found.published) {
+      return Response.json({ error: "Scenario not found" }, { status: 404 });
+    }
+    const { correctCulprit: _omit, ...studentView } = found;
+    return Response.json(studentView);
   }
 
   return Response.json(found);

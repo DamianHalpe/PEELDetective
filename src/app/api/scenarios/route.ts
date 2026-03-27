@@ -13,13 +13,27 @@ export async function GET() {
   const role = session.user.role as string;
   const isTeacherOrAdmin = role === "teacher" || role === "admin";
 
-  // Students only see published scenarios; teachers/admins see all
-  const scenarios = isTeacherOrAdmin
-    ? await db.select().from(schema.scenario)
-    : await db
-        .select()
-        .from(schema.scenario)
-        .where(eq(schema.scenario.published, true));
+  if (isTeacherOrAdmin) {
+    const scenarios = await db.select().from(schema.scenario);
+    return Response.json(scenarios);
+  }
+
+  // Students only see published scenarios, and must not receive the correct culprit
+  const scenarios = await db
+    .select({
+      id: schema.scenario.id,
+      title: schema.scenario.title,
+      crimeDescription: schema.scenario.crimeDescription,
+      suspects: schema.scenario.suspects,
+      clues: schema.scenario.clues,
+      difficulty: schema.scenario.difficulty,
+      createdBy: schema.scenario.createdBy,
+      published: schema.scenario.published,
+      createdAt: schema.scenario.createdAt,
+      updatedAt: schema.scenario.updatedAt,
+    })
+    .from(schema.scenario)
+    .where(eq(schema.scenario.published, true));
 
   return Response.json(scenarios);
 }

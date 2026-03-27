@@ -1,4 +1,4 @@
-import { eq, and, sql, countDistinct, count } from "drizzle-orm";
+import { eq, and, inArray, countDistinct, count } from "drizzle-orm";
 import * as schema from "./schema";
 import type { PostgresJsDatabase } from "drizzle-orm/postgres-js";
 
@@ -126,9 +126,7 @@ export async function awardBadges(
   const newBadges = await db
     .select({ name: schema.badge.name })
     .from(schema.badge)
-    .where(
-      sql`${schema.badge.id} IN ${newBadgeIds}`,
-    );
+    .where(inArray(schema.badge.id, newBadgeIds));
 
   return newBadges.map((b) => b.name);
 }

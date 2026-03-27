@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { desc, eq, count } from "drizzle-orm";
+import { and, desc, eq, count } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
@@ -15,7 +15,7 @@ export async function GET() {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Fetch top 10 users by points along with their evaluated submission count
+  // Fetch top 10 students by points along with their evaluated submission count
   const topStudents = await db
     .select({
       name: schema.user.name,
@@ -26,7 +26,10 @@ export async function GET() {
     .from(schema.user)
     .leftJoin(
       schema.submission,
-      eq(schema.user.id, schema.submission.studentId),
+      and(
+        eq(schema.user.id, schema.submission.studentId),
+        eq(schema.submission.status, "evaluated"),
+      ),
     )
     .where(eq(schema.user.role, "student"))
     .groupBy(schema.user.id, schema.user.name, schema.user.nickname, schema.user.points)

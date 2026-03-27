@@ -110,25 +110,34 @@ export const scenario = pgTable("scenario", {
   updatedAt: timestamp("updated_at").notNull().defaultNow(),
 });
 
-export const submission = pgTable("submission", {
-  id: text("id").primaryKey(),
-  studentId: text("student_id").notNull().references(() => user.id, { onDelete: "cascade" }),
-  scenarioId: text("scenario_id").notNull().references(() => scenario.id, { onDelete: "cascade" }),
-  responseText: text("response_text").notNull(),
-  scorePoint: integer("score_point"),
-  scoreEvidence: integer("score_evidence"),
-  scoreExplain: integer("score_explain"),
-  scoreLink: integer("score_link"),
-  totalScore: integer("total_score"),
-  feedbackJson: jsonb("feedback_json"), // { point, evidence, explain, link }
-  grammarFlagsJson: jsonb("grammar_flags_json"), // string[]
-  modelAnswer: text("model_answer"),
-  teacherOverrideScore: integer("teacher_override_score"),
-  teacherOverrideNote: text("teacher_override_note"),
-  status: text("status").notNull().default("pending"), // "pending" | "evaluated" | "failed"
-  submittedAt: timestamp("submitted_at").notNull().defaultNow(),
-  aiEvaluatedAt: timestamp("ai_evaluated_at"),
-});
+export const submission = pgTable(
+  "submission",
+  {
+    id: text("id").primaryKey(),
+    studentId: text("student_id").notNull().references(() => user.id, { onDelete: "cascade" }),
+    scenarioId: text("scenario_id").notNull().references(() => scenario.id, { onDelete: "cascade" }),
+    responseText: text("response_text").notNull(),
+    scorePoint: integer("score_point"),
+    scoreEvidence: integer("score_evidence"),
+    scoreExplain: integer("score_explain"),
+    scoreLink: integer("score_link"),
+    totalScore: integer("total_score"),
+    feedbackJson: jsonb("feedback_json"), // { point, evidence, explain, link }
+    grammarFlagsJson: jsonb("grammar_flags_json"), // string[]
+    modelAnswer: text("model_answer"),
+    teacherOverrideScore: integer("teacher_override_score"),
+    teacherOverrideNote: text("teacher_override_note"),
+    status: text("status").notNull().default("pending"), // "pending" | "evaluated" | "failed"
+    submittedAt: timestamp("submitted_at").notNull().defaultNow(),
+    aiEvaluatedAt: timestamp("ai_evaluated_at"),
+  },
+  (table) => [
+    index("submission_student_id_idx").on(table.studentId),
+    index("submission_scenario_id_idx").on(table.scenarioId),
+    index("submission_status_idx").on(table.status),
+    index("submission_student_scenario_idx").on(table.studentId, table.scenarioId),
+  ]
+);
 
 export const badge = pgTable("badge", {
   id: text("id").primaryKey(),

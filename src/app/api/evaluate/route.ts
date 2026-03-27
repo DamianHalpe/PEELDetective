@@ -44,6 +44,12 @@ Return ONLY valid JSON (no markdown code blocks) in this exact format:
 }`;
 
 export async function POST(req: Request) {
+  // This endpoint is internal-only. Callers must present the shared secret.
+  const secret = process.env.BETTER_AUTH_SECRET;
+  if (!secret || req.headers.get("X-Internal-Secret") !== secret) {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   let body: unknown;
   try {
     body = await req.json();
@@ -146,6 +152,13 @@ ${data.responseText}`;
         { status: 502 }
       );
     }
+
+    // Clamp scores to the 0-5 range to guard against out-of-range AI responses
+    const clamp = (n: number) => Math.max(0, Math.min(5, Math.round(n)));
+    parsed.scores.point = clamp(parsed.scores.point);
+    parsed.scores.evidence = clamp(parsed.scores.evidence);
+    parsed.scores.explain = clamp(parsed.scores.explain);
+    parsed.scores.link = clamp(parsed.scores.link);
 
     return Response.json(parsed);
   } catch (error) {
