@@ -26,6 +26,17 @@ export default async function AdminPage() {
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          <Link href="/admin/users">
+            <Card className="border-detective-amber/20 hover:border-detective-amber/60 transition-colors cursor-pointer">
+              <CardHeader>
+                <div className="rounded-lg bg-detective-amber/10 p-2 w-fit mb-2">
+                  <Users className="h-5 w-5 text-detective-amber" />
+                </div>
+                <CardTitle className="text-lg">User Management</CardTitle>
+                <CardDescription>Manage teachers and student accounts</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
           <Link href="/admin/teachers">
             <Card className="border-detective-amber/20 hover:border-detective-amber/60 transition-colors cursor-pointer">
               <CardHeader>
@@ -37,14 +48,14 @@ export default async function AdminPage() {
               </CardHeader>
             </Card>
           </Link>
-          <Link href="/teacher/students">
+          <Link href="/admin/students">
             <Card className="border-detective-amber/20 hover:border-detective-amber/60 transition-colors cursor-pointer">
               <CardHeader>
                 <div className="rounded-lg bg-detective-amber/10 p-2 w-fit mb-2">
                   <GraduationCap className="h-5 w-5 text-detective-amber" />
                 </div>
                 <CardTitle className="text-lg">Students</CardTitle>
-                <CardDescription>Manage and deactivate student accounts</CardDescription>
+                <CardDescription>Search, edit, and manage student accounts</CardDescription>
               </CardHeader>
             </Card>
           </Link>

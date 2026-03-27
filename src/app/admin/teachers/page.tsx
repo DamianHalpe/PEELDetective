@@ -1,8 +1,10 @@
 import { headers } from "next/headers";
+import Link from "next/link";
 import { redirect } from "next/navigation";
 import { eq } from "drizzle-orm";
-import { Users } from "lucide-react";
+import { ArrowLeft, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import {
   Card,
   CardContent,
@@ -21,6 +23,7 @@ import {
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
+import { AdminUserActions } from "../_components/AdminUserActions";
 import { AddTeacherDialog } from "./_components/AddTeacherDialog";
 
 export const metadata = { title: "Manage Teachers — Admin" };
@@ -36,6 +39,7 @@ export default async function AdminTeachersPage() {
       name: schema.user.name,
       email: schema.user.email,
       nickname: schema.user.nickname,
+      banned: schema.user.banned,
       createdAt: schema.user.createdAt,
     })
     .from(schema.user)
@@ -47,11 +51,19 @@ export default async function AdminTeachersPage() {
       <div className="container mx-auto p-6 space-y-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Manage Teachers</h1>
-            <p className="text-muted-foreground mt-1">
-              Create and view teacher accounts
-            </p>
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm" asChild>
+              <Link href="/admin/users">
+                <ArrowLeft className="mr-1 h-4 w-4" />
+                Back
+              </Link>
+            </Button>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Manage Teachers</h1>
+              <p className="text-muted-foreground mt-1">
+                Create and manage teacher accounts
+              </p>
+            </div>
           </div>
           <AddTeacherDialog />
         </div>
@@ -78,6 +90,7 @@ export default async function AdminTeachersPage() {
                     <TableHead>Email</TableHead>
                     <TableHead>Nickname</TableHead>
                     <TableHead className="text-right">Joined</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -98,6 +111,14 @@ export default async function AdminTeachersPage() {
                           month: "short",
                           day: "numeric",
                         })}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <AdminUserActions
+                          userId={teacher.id}
+                          userName={teacher.name}
+                          userRole="teacher"
+                          isBanned={teacher.banned}
+                        />
                       </TableCell>
                     </TableRow>
                   ))}

@@ -30,11 +30,11 @@
 ### 3. Admin: Full User Management
 > Admins can currently only create/view teachers. Need student management and the ability to edit/delete any user. (Spec §3.3, Feature #23)
 
-- [ ] Create `/admin/students` page listing all students with search/filter
-- [ ] Add edit user dialog (change role, reset password, suspend/unsuspend) accessible from both teacher and student admin lists
-- [ ] Add delete user action with confirmation dialog
-- [ ] Add `/admin/users` overview page linking to teachers and students sub-sections
-- [ ] Restrict all admin actions to `admin` role server-side
+- [x] Create `/admin/students` page listing all students with search/filter
+- [x] Add edit user dialog (change role, reset password, suspend/unsuspend) accessible from both teacher and student admin lists
+- [x] Add delete user action with confirmation dialog
+- [x] Add `/admin/users` overview page linking to teachers and students sub-sections
+- [x] Restrict all admin actions to `admin` role server-side
 
 ---
 
