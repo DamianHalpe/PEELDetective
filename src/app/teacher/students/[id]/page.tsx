@@ -25,97 +25,12 @@ import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
 import { StudentActionsBar } from "./_components/StudentActionsBar";
 import { SubmissionsTable } from "./_components/SubmissionsTable";
+import { ScoreTrendChart } from "@/components/ScoreTrendChart";
 
 export const metadata = { title: "Student Detail" };
 
 type PageProps = { params: Promise<{ id: string }> };
 
-/**
- * Renders a simple SVG sparkline showing score trend for the last N submissions.
- * Each bar represents one submission's effective score out of 20.
- */
-function ScoreSparkline({
-  scores,
-}: {
-  scores: (number | null)[];
-}) {
-  // Filter to only numeric scores and take the last 10
-  const numericScores = scores
-    .filter((s): s is number => s !== null)
-    .slice(-10);
-
-  if (numericScores.length < 2) {
-    return (
-      <p className="text-sm text-muted-foreground italic">
-        Not enough data for trend
-      </p>
-    );
-  }
-
-  const maxScore = 20;
-  const width = 200;
-  const height = 60;
-  const padding = 4;
-  const usableWidth = width - padding * 2;
-  const usableHeight = height - padding * 2;
-
-  // Build SVG polyline points
-  const points = numericScores
-    .map((score, i) => {
-      const x =
-        padding + (i / (numericScores.length - 1)) * usableWidth;
-      const y =
-        padding + usableHeight - (score / maxScore) * usableHeight;
-      return `${x},${y}`;
-    })
-    .join(" ");
-
-  return (
-    <svg
-      width={width}
-      height={height}
-      viewBox={`0 0 ${width} ${height}`}
-      className="inline-block"
-      aria-label="Score trend sparkline"
-    >
-      {/* Grid line at 50% (score 10) */}
-      <line
-        x1={padding}
-        y1={padding + usableHeight / 2}
-        x2={width - padding}
-        y2={padding + usableHeight / 2}
-        stroke="currentColor"
-        strokeOpacity={0.1}
-        strokeDasharray="4 2"
-      />
-      {/* The trend line */}
-      <polyline
-        points={points}
-        fill="none"
-        stroke="oklch(0.75 0.18 75)"
-        strokeWidth={2}
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-      {/* Dots at each data point */}
-      {numericScores.map((score, i) => {
-        const x =
-          padding + (i / (numericScores.length - 1)) * usableWidth;
-        const y =
-          padding + usableHeight - (score / maxScore) * usableHeight;
-        return (
-          <circle
-            key={i}
-            cx={x}
-            cy={y}
-            r={3}
-            fill="oklch(0.75 0.18 75)"
-          />
-        );
-      })}
-    </svg>
-  );
-}
 
 export default async function StudentDetailPage({ params }: PageProps) {
   const session = await auth.api.getSession({ headers: await headers() });
@@ -168,20 +83,13 @@ export default async function StudentDetailPage({ params }: PageProps) {
     (s) => s.status === "evaluated"
   );
 
-  const scores = evaluatedSubmissions.map(
-    (s) => s.teacherOverrideScore ?? s.totalScore
-  );
-
-  const numericScores = scores.filter((s): s is number => s !== null);
+  const numericScores = evaluatedSubmissions
+    .map((s) => s.teacherOverrideScore ?? s.totalScore)
+    .filter((s): s is number => s !== null);
   const averageScore =
     numericScores.length > 0
-      ? (numericScores.reduce((a, b) => a + b, 0) / numericScores.length).toFixed(
-          1
-        )
+      ? (numericScores.reduce((a, b) => a + b, 0) / numericScores.length).toFixed(1)
       : "--";
-
-  // For sparkline, we want chronological order (oldest first)
-  const chronologicalScores = [...scores].reverse();
 
   // Fetch subscription history for this student
   const subscriptionHistory = await db
@@ -295,16 +203,28 @@ export default async function StudentDetailPage({ params }: PageProps) {
           </Card>
         </div>
 
-        {/* Score trend sparkline */}
+        {/* Score trend chart */}
         <Card className="border-detective-amber/20">
           <CardHeader>
             <CardTitle>Score Trend</CardTitle>
             <CardDescription>
-              Performance across the last 10 evaluated submissions
+              Performance across evaluated submissions — toggle PEEL elements to compare
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <ScoreSparkline scores={chronologicalScores} />
+            <ScoreTrendChart
+              data={evaluatedSubmissions.slice().reverse().map((s) => ({
+                date: new Date(s.submittedAt).toLocaleDateString("en-US", {
+                  month: "short",
+                  day: "numeric",
+                }),
+                total: s.teacherOverrideScore ?? s.totalScore,
+                point: s.scorePoint,
+                evidence: s.scoreEvidence,
+                explain: s.scoreExplain,
+                link: s.scoreLink,
+              }))}
+            />
           </CardContent>
         </Card>
 

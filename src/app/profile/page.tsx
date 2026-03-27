@@ -34,6 +34,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSession, updateUser } from "@/lib/auth-client";
+import { ScoreTrendChart } from "@/components/ScoreTrendChart";
 
 // --- Types ---
 
@@ -41,6 +42,10 @@ interface ProfileSubmission {
   id: string;
   scenarioId: string;
   scenarioTitle: string;
+  scorePoint: number | null;
+  scoreEvidence: number | null;
+  scoreExplain: number | null;
+  scoreLink: number | null;
   totalScore: number | null;
   teacherOverrideScore: number | null;
   status: string;
@@ -343,6 +348,39 @@ export default function ProfilePage() {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Score Trend Chart */}
+        {evaluatedSubmissions.length >= 2 && (() => {
+          const chartData = [...evaluatedSubmissions]
+            .reverse()
+            .map((s) => ({
+              date: new Date(s.submittedAt).toLocaleDateString("en-US", {
+                month: "short",
+                day: "numeric",
+              }),
+              total: s.teacherOverrideScore ?? s.totalScore,
+              point: s.scorePoint,
+              evidence: s.scoreEvidence,
+              explain: s.scoreExplain,
+              link: s.scoreLink,
+            }));
+          return (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <TrendingUp className="h-5 w-5 text-detective-amber" />
+                  Score Trend
+                </CardTitle>
+                <CardDescription>
+                  Your score history across evaluated submissions
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <ScoreTrendChart data={chartData} />
+              </CardContent>
+            </Card>
+          );
+        })()}
 
         {/* Nickname */}
         <Card>

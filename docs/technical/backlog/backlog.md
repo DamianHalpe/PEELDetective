@@ -43,11 +43,11 @@
 ### 4. Score Trend Chart
 > Visual score-over-time chart on the student profile page and on the teacher's individual student view. (Spec §4.5, §4.10)
 
-- [ ] Install a chart library (e.g. `recharts` or `shadcn` chart primitive) if not already present
-- [ ] Build a `ScoreTrendChart` component that accepts an array of `{ date, total, point, evidence, explain, link }` data points
-- [ ] Add chart to `/profile` page below the submission history table
-- [ ] Add the same chart to `/teacher/students/[id]` page
-- [ ] Show total score line by default; allow toggling individual PEEL element lines
+- [x] Install a chart library (e.g. `recharts` or `shadcn` chart primitive) if not already present
+- [x] Build a `ScoreTrendChart` component that accepts an array of `{ date, total, point, evidence, explain, link }` data points
+- [x] Add chart to `/profile` page below the submission history table
+- [x] Add the same chart to `/teacher/students/[id]` page
+- [x] Show total score line by default; allow toggling individual PEEL element lines
 
 ---
 
