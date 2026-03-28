@@ -240,6 +240,15 @@ export default async function ScenarioSubmissionsPage({
               Export CSV
             </a>
           </Button>
+          <Button variant="outline" asChild>
+            <a
+              href={`/api/export?type=scenario&scenarioId=${id}&format=pdf`}
+              download
+            >
+              <Download className="mr-2 h-4 w-4" />
+              Download PDF
+            </a>
+          </Button>
         </div>
 
         {/* PEEL Aggregate Stats */}

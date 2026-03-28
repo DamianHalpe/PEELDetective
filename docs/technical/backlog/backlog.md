@@ -76,9 +76,9 @@
 ### 7. PDF Export
 > Spec says "PDF or CSV" for progress reports; only CSV is currently implemented. (Spec §4.5, Feature #13)
 
-- [ ] Add a PDF generation utility (e.g. `@react-pdf/renderer` or `puppeteer`)
-- [ ] Add `format=pdf` query param support to `GET /api/export`
-- [ ] Add "Download PDF" button alongside existing "Download CSV" buttons in teacher views
+- [x] Add a PDF generation utility (e.g. `@react-pdf/renderer` or `puppeteer`)
+- [x] Add `format=pdf` query param support to `GET /api/export`
+- [x] Add "Download PDF" button alongside existing "Download CSV" buttons in teacher views
 
 ---
 

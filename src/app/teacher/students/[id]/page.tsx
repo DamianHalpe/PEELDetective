@@ -153,6 +153,15 @@ export default async function StudentDetailPage({ params }: PageProps) {
                 Export CSV
               </a>
             </Button>
+            <Button variant="outline" asChild>
+              <a
+                href={`/api/export?type=student&studentId=${id}&format=pdf`}
+                download
+              >
+                <Download className="mr-2 h-4 w-4" />
+                Download PDF
+              </a>
+            </Button>
           </div>
         </div>
 
