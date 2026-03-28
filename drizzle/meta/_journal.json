@@ -64,6 +64,13 @@
       "when": 1774700000000,
       "tag": "0008_token_usage",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1774800000000,
+      "tag": "0009_leaderboard_columns",
+      "breakpoints": true
     }
   ]
 }

@@ -73,6 +73,10 @@ export const auth = betterAuth({
         type: "string",
         required: false,
       },
+      leaderboardEnabled: {
+        type: "boolean",
+        defaultValue: true,
+      },
     },
   },
 })

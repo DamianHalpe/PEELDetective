@@ -94,6 +94,10 @@ async function schemaAlreadyApplied(client, tag) {
         (await columnExists(client, "user", "subscribed"))
       );
 
+    case "0009_leaderboard_columns":
+      // Adds leaderboard_enabled to school and user tables
+      return columnExists(client, "user", "leaderboard_enabled");
+
     default:
       // Unknown migration — don't auto-mark; let drizzle-kit handle it normally
       return false;
