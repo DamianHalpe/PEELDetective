@@ -5,6 +5,7 @@ import { pgTable, text, timestamp, boolean, index, integer, jsonb } from "drizzl
 export const school = pgTable("school", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
+  leaderboardEnabled: boolean("leaderboard_enabled").notNull().default(true),
   createdAt: timestamp("created_at").notNull().defaultNow(),
 });
 
@@ -31,6 +32,7 @@ export const user = pgTable(
     subscriptionPeriodEnd: timestamp("subscription_period_end"),
     themePreference: text("theme_preference").default("system"),
     customTheme: text("custom_theme"),
+    leaderboardEnabled: boolean("leaderboard_enabled").notNull().default(true),
   },
   (table) => [index("user_email_idx").on(table.email)]
 );

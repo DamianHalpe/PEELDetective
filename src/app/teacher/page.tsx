@@ -29,6 +29,7 @@ import {
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
+import { LeaderboardToggle } from "@/components/leaderboard-toggle";
 
 export const metadata = { title: "Teacher Dashboard" };
 
@@ -42,6 +43,14 @@ export default async function TeacherDashboardPage() {
   if (role !== "teacher" && role !== "admin") {
     redirect("/dashboard");
   }
+
+  // Fetch teacher's leaderboard setting from their own user record
+  const [teacherUser] = await db
+    .select({ leaderboardEnabled: schema.user.leaderboardEnabled })
+    .from(schema.user)
+    .where(eq(schema.user.id, session.user.id));
+
+  const leaderboardEnabled = teacherUser?.leaderboardEnabled ?? true;
 
   // Fetch all submissions joined with student info
   const allSubmissions = await db
@@ -161,7 +170,8 @@ export default async function TeacherDashboardPage() {
               Overview of student performance across all scenarios
             </p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
+            <LeaderboardToggle initialEnabled={leaderboardEnabled} />
             <Button variant="outline" asChild>
               <Link href="/teacher/scenarios">
                 <BookOpen className="mr-2 h-4 w-4" />

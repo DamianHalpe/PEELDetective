@@ -8,11 +8,23 @@ import * as schema from "@/lib/schema";
  * GET /api/leaderboard
  * Returns the top 10 students ranked by points, including their
  * total evaluated submission count.
+ * Returns [] if any teacher has disabled the leaderboard.
  */
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Check if any teacher has disabled the leaderboard
+  const disabledTeachers = await db
+    .select({ id: schema.user.id })
+    .from(schema.user)
+    .where(and(eq(schema.user.role, "teacher"), eq(schema.user.leaderboardEnabled, false)))
+    .limit(1);
+
+  if (disabledTeachers.length > 0) {
+    return Response.json([]);
   }
 
   // Fetch top 10 students by points along with their evaluated submission count

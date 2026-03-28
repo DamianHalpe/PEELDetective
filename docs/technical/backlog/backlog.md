@@ -54,10 +54,10 @@
 ### 5. Teacher-Configurable Leaderboard Toggle
 > Teachers should be able to disable the leaderboard for their class for privacy or competition reasons. (Spec Feature #20)
 
-- [ ] Add `leaderboardEnabled` boolean column to `school` or `user` (teacher) table via Drizzle migration
-- [ ] Add toggle UI in teacher settings or teacher dashboard header
-- [ ] Update `GET /api/leaderboard` to respect the setting — return empty/hidden when disabled
-- [ ] Hide leaderboard panel on `/scenarios` page when disabled for the student's school/teacher
+- [x] Add `leaderboardEnabled` boolean column to `school` or `user` (teacher) table via Drizzle migration
+- [x] Add toggle UI in teacher settings or teacher dashboard header
+- [x] Update `GET /api/leaderboard` to respect the setting — return empty/hidden when disabled
+- [x] Hide leaderboard panel on `/scenarios` page when disabled for the student's school/teacher
 
 ---
 
