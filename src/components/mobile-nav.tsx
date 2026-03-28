@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { Menu, X } from "lucide-react";
+import { Menu, X, Folder, BookOpen, LayoutDashboard, ClipboardList, Star, GraduationCap, ShieldCheck } from "lucide-react";
 
 interface MobileNavProps {
   showTeacher: boolean;
@@ -30,23 +30,26 @@ export function MobileNav({ showTeacher, showAdmin, showSubscribe, showDashboard
           <Link
             href="/scenarios"
             onClick={() => setOpen(false)}
-            className="block px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
           >
+            <Folder className="h-4 w-4" />
             Cases
           </Link>
           <Link
             href="/learn"
             onClick={() => setOpen(false)}
-            className="block px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+            className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
           >
+            <BookOpen className="h-4 w-4" />
             PEEL Guide
           </Link>
           {showDashboard && (
             <Link
               href="/dashboard"
               onClick={() => setOpen(false)}
-              className="block px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+              className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
             >
+              <LayoutDashboard className="h-4 w-4" />
               Dashboard
             </Link>
           )}
@@ -54,8 +57,9 @@ export function MobileNav({ showTeacher, showAdmin, showSubscribe, showDashboard
             <Link
               href="/submissions"
               onClick={() => setOpen(false)}
-              className="block px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+              className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
             >
+              <ClipboardList className="h-4 w-4" />
               My Results
             </Link>
           )}
@@ -63,8 +67,9 @@ export function MobileNav({ showTeacher, showAdmin, showSubscribe, showDashboard
             <Link
               href="/subscribe"
               onClick={() => setOpen(false)}
-              className="block px-3 py-2 rounded-md text-sm font-semibold text-detective-amber hover:text-detective-amber/80 hover:bg-detective-amber/10 transition-all"
+              className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-semibold text-detective-amber hover:text-detective-amber/80 hover:bg-detective-amber/10 transition-all"
             >
+              <Star className="h-4 w-4" />
               Subscribe
             </Link>
           )}
@@ -72,8 +77,9 @@ export function MobileNav({ showTeacher, showAdmin, showSubscribe, showDashboard
             <Link
               href="/teacher"
               onClick={() => setOpen(false)}
-              className="block px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+              className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
             >
+              <GraduationCap className="h-4 w-4" />
               Teacher
             </Link>
           )}
@@ -81,8 +87,9 @@ export function MobileNav({ showTeacher, showAdmin, showSubscribe, showDashboard
             <Link
               href="/admin"
               onClick={() => setOpen(false)}
-              className="block px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
+              className="flex items-center gap-2.5 px-3 py-2 rounded-md text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-all"
             >
+              <ShieldCheck className="h-4 w-4" />
               Admin
             </Link>
           )}

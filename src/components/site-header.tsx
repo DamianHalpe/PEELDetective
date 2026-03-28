@@ -6,6 +6,7 @@ import { UserProfile } from "@/components/auth/user-profile";
 import { MobileNav } from "@/components/mobile-nav";
 import { useSession } from "@/lib/auth-client";
 import { ModeToggle } from "./ui/mode-toggle";
+import { Folder, BookOpen, LayoutDashboard, ClipboardList, Star, GraduationCap, ShieldCheck } from "lucide-react";
 
 export function SiteHeader() {
   const pathname = usePathname();
@@ -60,57 +61,64 @@ export function SiteHeader() {
             <div className="hidden md:flex items-center gap-1 text-sm font-medium" role="group" aria-label="Navigation links">
               <Link
                 href="/scenarios"
-                className={linkClass("/scenarios")}
+                className={`${linkClass("/scenarios")} flex items-center gap-1.5`}
               >
+                <Folder className="h-3.5 w-3.5" />
                 Cases
               </Link>
               <Link
                 href="/learn"
-                className={linkClass("/learn")}
+                className={`${linkClass("/learn")} flex items-center gap-1.5`}
               >
+                <BookOpen className="h-3.5 w-3.5" />
                 PEEL Guide
               </Link>
               {role === "student" && (
                 <Link
                   href="/dashboard"
-                  className={linkClass("/dashboard")}
+                  className={`${linkClass("/dashboard")} flex items-center gap-1.5`}
                 >
+                  <LayoutDashboard className="h-3.5 w-3.5" />
                   Dashboard
                 </Link>
               )}
               {role === "student" && (
                 <Link
                   href="/submissions"
-                  className={linkClass("/submissions")}
+                  className={`${linkClass("/submissions")} flex items-center gap-1.5`}
                 >
+                  <ClipboardList className="h-3.5 w-3.5" />
                   My Results
                 </Link>
               )}
               {showSubscribe && (
                 <Link
                   href="/subscribe"
-                  className={`px-3 py-1.5 rounded-md transition-colors duration-150 ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-md transition-colors duration-150 ${
                     pathname.startsWith("/subscribe")
                       ? "text-detective-amber font-semibold bg-detective-amber/10"
                       : "text-detective-amber font-semibold hover:text-detective-amber/80 hover:bg-detective-amber/10"
                   }`}
                 >
+                  <Star className="h-3.5 w-3.5" />
                   Subscribe
                 </Link>
               )}
               {(role === "teacher" || role === "admin") && (
                 <Link
                   href="/teacher"
-                  className={linkClass("/teacher")}
+                  className={`${linkClass("/teacher")} flex items-center gap-1.5`}
                 >
+                  <GraduationCap className="h-3.5 w-3.5" />
                   Teacher
                 </Link>
               )}
               {role === "admin" && (
                 <Link
                   href="/admin"
-                  className={linkClass("/admin")}
+                  className={`${linkClass("/admin")} flex items-center gap-1.5`}
                 >
+                  <ShieldCheck className="h-3.5 w-3.5" />
                   Admin
                 </Link>
               )}
