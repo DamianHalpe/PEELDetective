@@ -1,7 +1,7 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { Users } from "lucide-react";
+import { Users, Zap } from "lucide-react";
 import {
   Card,
   CardDescription,
@@ -34,6 +34,17 @@ export default async function AdminPage() {
                 </div>
                 <CardTitle className="text-lg">User Management</CardTitle>
                 <CardDescription>Manage teachers and student accounts</CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+          <Link href="/admin/usage">
+            <Card className="border-detective-amber/20 hover:border-detective-amber/60 transition-colors cursor-pointer">
+              <CardHeader>
+                <div className="rounded-lg bg-detective-amber/10 p-2 w-fit mb-2">
+                  <Zap className="h-5 w-5 text-detective-amber" />
+                </div>
+                <CardTitle className="text-lg">AI Token Usage</CardTitle>
+                <CardDescription>Monitor usage and configure daily/monthly caps</CardDescription>
               </CardHeader>
             </Card>
           </Link>

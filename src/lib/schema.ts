@@ -130,6 +130,7 @@ export const submission = pgTable(
     modelAnswer: text("model_answer"),
     teacherOverrideScore: integer("teacher_override_score"),
     teacherOverrideNote: text("teacher_override_note"),
+    tokensUsed: integer("tokens_used"),
     status: text("status").notNull().default("pending"), // "pending" | "evaluated" | "failed"
     submittedAt: timestamp("submitted_at").notNull().defaultNow(),
     aiEvaluatedAt: timestamp("ai_evaluated_at"),
@@ -159,6 +160,14 @@ export const subscriptionHistory = pgTable("subscription_history", {
   amount: integer("amount"), // amount charged in cents (e.g. 1000 = $10.00); null or 0 = manual/free
   periodEnd: timestamp("period_end"), // subscription period end for this billing cycle
   createdAt: timestamp("created_at").notNull().defaultNow(),
+});
+
+export const usageConfig = pgTable("usage_config", {
+  id: text("id").primaryKey(), // single row: "default"
+  dailyCap: integer("daily_cap").notNull().default(100000),
+  monthlyCap: integer("monthly_cap").notNull().default(2000000),
+  updatedAt: timestamp("updated_at").notNull().defaultNow(),
+  updatedById: text("updated_by_id").references(() => user.id, { onDelete: "set null" }),
 });
 
 export const studentBadge = pgTable("student_badge", {

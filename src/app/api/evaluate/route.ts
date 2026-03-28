@@ -123,6 +123,7 @@ ${data.responseText}`;
 
     const apiJson = await apiResponse.json() as {
       choices: { message: { content: string } }[];
+      usage?: { prompt_tokens: number; completion_tokens: number; total_tokens: number };
     };
     console.log("[evaluate] full API response:", JSON.stringify(apiJson));
     const rawResponse = apiJson.choices?.[0]?.message?.content ?? "";
@@ -160,7 +161,9 @@ ${data.responseText}`;
     parsed.scores.explain = clamp(parsed.scores.explain);
     parsed.scores.link = clamp(parsed.scores.link);
 
-    return Response.json(parsed);
+    const tokensUsed = apiJson.usage?.total_tokens ?? 0;
+
+    return Response.json({ ...parsed, tokensUsed });
   } catch (error) {
     const message =
       error instanceof Error ? error.message : "Unknown evaluation error";

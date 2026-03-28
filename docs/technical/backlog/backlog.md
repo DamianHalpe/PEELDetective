@@ -94,11 +94,11 @@
 ### 9. AI Token Usage Tracking & Admin Cap
 > Per-submission token logging and an admin-configurable daily/monthly usage cap. (Spec §5 Cost Management)
 
-- [ ] Add `tokensUsed` integer column to `submission` table via Drizzle migration
-- [ ] Update `POST /api/evaluate` to capture and store token usage from the OpenRouter response
-- [ ] Create `usageConfig` settings table (or use admin config) with `dailyCap` and `monthlyCap` fields
-- [ ] Add usage cap enforcement in `POST /api/evaluate` — return 429 if cap exceeded
-- [ ] Add token usage summary to `/admin` dashboard (daily/monthly usage vs cap)
+- [x] Add `tokensUsed` integer column to `submission` table via Drizzle migration
+- [x] Update `POST /api/evaluate` to capture and store token usage from the OpenRouter response
+- [x] Create `usageConfig` settings table (or use admin config) with `dailyCap` and `monthlyCap` fields
+- [x] Add usage cap enforcement in `POST /api/evaluate` — return 429 if cap exceeded
+- [x] Add token usage summary to `/admin` dashboard (daily/monthly usage vs cap)
 
 ---
 

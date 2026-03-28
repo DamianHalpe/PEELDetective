@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { and, eq, max, ne, sql } from "drizzle-orm";
+import { and, eq, gte, max, ne, sql, sum } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { seedBadgesIfNeeded, awardBadges } from "@/lib/badges";
 import { db } from "@/lib/db";
@@ -15,6 +15,7 @@ interface EvaluateResult {
   };
   grammarFlags: string[];
   modelAnswer: string;
+  tokensUsed: number;
 }
 
 export async function POST(req: Request) {
@@ -53,6 +54,56 @@ export async function POST(req: Request) {
 
   if (!scenarioRecord) {
     return Response.json({ error: "Scenario not found" }, { status: 404 });
+  }
+
+  // Check AI token usage caps before proceeding
+  const [config] = await db
+    .select()
+    .from(schema.usageConfig)
+    .where(eq(schema.usageConfig.id, "default"));
+
+  const dailyCap = config?.dailyCap ?? 100000;
+  const monthlyCap = config?.monthlyCap ?? 2000000;
+
+  const nowForCap = new Date();
+  const startOfDay = new Date(nowForCap);
+  startOfDay.setUTCHours(0, 0, 0, 0);
+  const startOfMonth = new Date(nowForCap.getUTCFullYear(), nowForCap.getUTCMonth(), 1);
+
+  const [usageDay] = await db
+    .select({ total: sum(schema.submission.tokensUsed) })
+    .from(schema.submission)
+    .where(
+      and(
+        eq(schema.submission.status, "evaluated"),
+        gte(schema.submission.aiEvaluatedAt, startOfDay)
+      )
+    );
+
+  const [usageMonth] = await db
+    .select({ total: sum(schema.submission.tokensUsed) })
+    .from(schema.submission)
+    .where(
+      and(
+        eq(schema.submission.status, "evaluated"),
+        gte(schema.submission.aiEvaluatedAt, startOfMonth)
+      )
+    );
+
+  const dailyUsed = Number(usageDay?.total ?? 0);
+  const monthlyUsed = Number(usageMonth?.total ?? 0);
+
+  if (dailyUsed >= dailyCap) {
+    return Response.json(
+      { error: "Daily AI token cap reached. Please try again tomorrow." },
+      { status: 429 }
+    );
+  }
+  if (monthlyUsed >= monthlyCap) {
+    return Response.json(
+      { error: "Monthly AI token cap reached. Please contact your administrator." },
+      { status: 429 }
+    );
   }
 
   const submissionId = crypto.randomUUID();
@@ -128,6 +179,7 @@ export async function POST(req: Request) {
         feedbackJson: result.feedback,
         grammarFlagsJson: result.grammarFlags,
         modelAnswer: result.modelAnswer,
+        tokensUsed: result.tokensUsed || 0,
         status: "evaluated",
         aiEvaluatedAt: new Date(),
       })
