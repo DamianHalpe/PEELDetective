@@ -85,9 +85,9 @@
 ### 8. Embedded Video in PEEL Learning Module
 > Optional embedded video explaining the PEEL technique. (Spec §4.7)
 
-- [ ] Source or create a suitable PEEL explanation video (hosted on YouTube or similar)
-- [ ] Add video embed section to `/learn` page between the intro and element breakdowns
-- [ ] Make it optional/collapsible so the page remains usable without the video
+- [x] Source or create a suitable PEEL explanation video (hosted on YouTube or similar)
+- [x] Add video embed section to `/learn` page between the intro and element breakdowns
+- [x] Make it optional/collapsible so the page remains usable without the video
 
 ---
 

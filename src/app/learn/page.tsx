@@ -1,5 +1,6 @@
 import { BookOpen, Target, Search, Brain, Link2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { PeelVideoEmbed } from "@/components/peel-video-embed";
 import {
   Card,
   CardContent,
@@ -202,6 +203,11 @@ export default function LearnPage() {
         </p>
         <div className="mx-auto mt-6 h-px w-24 bg-gradient-to-r from-transparent via-detective-amber/60 to-transparent" />
       </div>
+
+      {/* Video embed — only rendered when PEEL_VIDEO_ID env var is set */}
+      {process.env.PEEL_VIDEO_ID && (
+        <PeelVideoEmbed videoId={process.env.PEEL_VIDEO_ID} />
+      )}
 
       {/* PEEL elements */}
       <div className="space-y-12">
