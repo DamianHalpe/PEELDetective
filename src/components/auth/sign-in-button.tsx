@@ -33,13 +33,13 @@ export function SignInButton() {
       const result = await signIn.email({
         email,
         password,
-        callbackURL: "/dashboard",
+        callbackURL: "/redirect",
       })
 
       if (result.error) {
         setError(result.error.message || "Failed to sign in")
       } else {
-        router.push("/dashboard")
+        router.push("/redirect")
         router.refresh()
       }
     } catch {
@@ -53,7 +53,7 @@ export function SignInButton() {
     setError("")
     await signIn.social({
       provider: "google",
-      callbackURL: "/dashboard",
+      callbackURL: "/redirect",
     })
   }
 
@@ -61,7 +61,7 @@ export function SignInButton() {
     setError("")
     await signIn.social({
       provider: "apple",
-      callbackURL: "/dashboard",
+      callbackURL: "/redirect",
     })
   }
 
@@ -69,7 +69,7 @@ export function SignInButton() {
     setError("")
     await signIn.social({
       provider: "facebook",
-      callbackURL: "/dashboard",
+      callbackURL: "/redirect",
     })
   }
 

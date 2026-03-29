@@ -9,12 +9,13 @@ import {
   CardTitle,
 } from "@/components/ui/card"
 import { auth } from "@/lib/auth"
+import { getRoleBasedRedirect } from "@/lib/session"
 
 export default async function RegisterPage() {
   const session = await auth.api.getSession({ headers: await headers() })
 
   if (session) {
-    redirect("/dashboard")
+    redirect(getRoleBasedRedirect((session.user as { role?: string }).role))
   }
 
   return (

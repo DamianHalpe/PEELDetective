@@ -48,6 +48,15 @@ export function isAdminOrSuperAdmin(role: string | undefined): boolean {
 }
 
 /**
+ * Returns the default dashboard path for a given role.
+ */
+export function getRoleBasedRedirect(role: string | undefined): string {
+  if (role === "teacher") return "/teacher";
+  if (role === "admin" || role === "super-admin") return "/admin";
+  return "/dashboard";
+}
+
+/**
  * Returns true if the user is a teacher/admin/super-admin (bypasses subscription gates)
  * or a subscribed student. Used in API routes to return JSON errors.
  */
