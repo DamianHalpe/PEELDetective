@@ -2,7 +2,7 @@ import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { eq, count } from "drizzle-orm";
-import { ArrowLeft, Users, GraduationCap } from "lucide-react";
+import { ArrowLeft, Users, GraduationCap, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -20,6 +20,12 @@ export default async function AdminUsersPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
   if ((session.user.role as string) !== "admin") redirect("/dashboard");
+
+  const adminRows = await db
+    .select({ adminCount: count() })
+    .from(schema.user)
+    .where(eq(schema.user.role, "admin"));
+  const adminCount = adminRows[0]?.adminCount ?? 0;
 
   const teacherRows = await db
     .select({ teacherCount: count() })
@@ -49,7 +55,7 @@ export default async function AdminUsersPage() {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 max-w-2xl">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 max-w-3xl">
           <Link href="/admin/teachers">
             <Card className="border-detective-amber/20 hover:border-detective-amber/60 transition-colors cursor-pointer h-full">
               <CardHeader>
@@ -73,6 +79,20 @@ export default async function AdminUsersPage() {
                 <CardTitle className="text-lg">Students</CardTitle>
                 <CardDescription>
                   {studentCount} student{studentCount !== 1 ? "s" : ""} — search, edit, suspend, and delete student accounts
+                </CardDescription>
+              </CardHeader>
+            </Card>
+          </Link>
+
+          <Link href="/admin/admins">
+            <Card className="border-detective-amber/20 hover:border-detective-amber/60 transition-colors cursor-pointer h-full">
+              <CardHeader>
+                <div className="rounded-lg bg-detective-amber/10 p-2 w-fit mb-2">
+                  <ShieldCheck className="h-5 w-5 text-detective-amber" />
+                </div>
+                <CardTitle className="text-lg">Admins</CardTitle>
+                <CardDescription>
+                  {adminCount} admin{adminCount !== 1 ? "s" : ""} — create and manage administrator accounts
                 </CardDescription>
               </CardHeader>
             </Card>
