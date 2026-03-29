@@ -40,7 +40,7 @@ export default async function TeacherDashboardPage() {
   }
 
   const role = session.user.role as string;
-  if (role !== "teacher" && role !== "admin") {
+  if (role !== "teacher" && role !== "admin" && role !== "super-admin") {
     redirect("/dashboard");
   }
 

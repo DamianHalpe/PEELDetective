@@ -37,7 +37,7 @@ export default function EditScenarioPage() {
       return;
     }
     const role = (session.user as { role?: string }).role;
-    if (role !== "teacher" && role !== "admin") {
+    if (role !== "teacher" && role !== "admin" && role !== "super-admin") {
       router.push("/dashboard");
       return;
     }
