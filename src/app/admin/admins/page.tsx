@@ -1,8 +1,9 @@
 import { headers } from "next/headers";
 import Link from "next/link";
 import { redirect } from "next/navigation";
-import { eq } from "drizzle-orm";
+import { inArray } from "drizzle-orm";
 import { ArrowLeft, ShieldCheck } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -22,6 +23,7 @@ import {
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
+import { isAdminOrSuperAdmin } from "@/lib/session";
 import { AdminUserActions } from "../_components/AdminUserActions";
 import { AddAdminDialog } from "./_components/AddAdminDialog";
 
@@ -30,18 +32,20 @@ export const metadata = { title: "Manage Admins — Admin" };
 export default async function AdminAdminsPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
-  if ((session.user.role as string) !== "admin") redirect("/dashboard");
+  const viewerRole = session.user.role as string;
+  if (!isAdminOrSuperAdmin(viewerRole)) redirect("/dashboard");
 
   const admins = await db
     .select({
       id: schema.user.id,
       name: schema.user.name,
       email: schema.user.email,
+      role: schema.user.role,
       banned: schema.user.banned,
       createdAt: schema.user.createdAt,
     })
     .from(schema.user)
-    .where(eq(schema.user.role, "admin"))
+    .where(inArray(schema.user.role, ["admin", "super-admin"]))
     .orderBy(schema.user.name);
 
   return (
@@ -63,7 +67,7 @@ export default async function AdminAdminsPage() {
               </p>
             </div>
           </div>
-          <AddAdminDialog />
+          {viewerRole === "super-admin" && <AddAdminDialog />}
         </div>
 
         {/* Admin table */}
@@ -71,14 +75,15 @@ export default async function AdminAdminsPage() {
           <CardHeader>
             <CardTitle>Administrators</CardTitle>
             <CardDescription>
-              {admins.length} admin{admins.length !== 1 ? "s" : ""} registered
+              {admins.length} admin{admins.length !== 1 ? "s" : ""}
+              {viewerRole !== "super-admin" && " — view only"}
             </CardDescription>
           </CardHeader>
           <CardContent>
             {admins.length === 0 ? (
               <div className="text-center py-12 text-muted-foreground">
                 <ShieldCheck className="h-10 w-10 mx-auto mb-3 opacity-40" />
-                <p>No admins yet. Add one to get started.</p>
+                <p>No admins yet.</p>
               </div>
             ) : (
               <Table>
@@ -86,8 +91,9 @@ export default async function AdminAdminsPage() {
                   <TableRow>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
                     <TableHead className="text-right">Joined</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
+                    {viewerRole === "super-admin" && <TableHead className="text-right">Actions</TableHead>}
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -95,6 +101,15 @@ export default async function AdminAdminsPage() {
                     <TableRow key={admin.id}>
                       <TableCell className="font-medium">{admin.name}</TableCell>
                       <TableCell className="text-muted-foreground">{admin.email}</TableCell>
+                      <TableCell>
+                        {admin.role === "super-admin" ? (
+                          <Badge className="bg-detective-amber/20 text-detective-amber border-detective-amber/40">
+                            Super Admin
+                          </Badge>
+                        ) : (
+                          <Badge variant="secondary">Admin</Badge>
+                        )}
+                      </TableCell>
                       <TableCell className="text-right text-muted-foreground text-sm">
                         {new Date(admin.createdAt).toLocaleDateString("en-US", {
                           year: "numeric",
@@ -102,14 +117,21 @@ export default async function AdminAdminsPage() {
                           day: "numeric",
                         })}
                       </TableCell>
-                      <TableCell className="text-right">
-                        <AdminUserActions
-                          userId={admin.id}
-                          userName={admin.name}
-                          userRole="admin"
-                          isBanned={admin.banned}
-                        />
-                      </TableCell>
+                      {viewerRole === "super-admin" && (
+                        <TableCell className="text-right">
+                          {admin.role === "super-admin" ? (
+                            <span className="text-xs text-muted-foreground">—</span>
+                          ) : (
+                            <AdminUserActions
+                              userId={admin.id}
+                              userName={admin.name}
+                              userRole={admin.role}
+                              isBanned={admin.banned}
+                              viewerRole="super-admin"
+                            />
+                          )}
+                        </TableCell>
+                      )}
                     </TableRow>
                   ))}
                 </TableBody>

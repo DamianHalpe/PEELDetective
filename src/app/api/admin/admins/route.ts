@@ -9,7 +9,7 @@ export async function POST(request: Request) {
   if (!session) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
   }
-  if ((session.user.role as string) !== "admin") {
+  if ((session.user.role as string) !== "super-admin") {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 

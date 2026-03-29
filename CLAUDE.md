@@ -55,7 +55,15 @@ Core tables:
 - Middleware (`src/proxy.ts`) protects `/teacher/*` and `/admin/*` routes via session cookie check; role enforcement happens server-side in pages/routes
 
 ### Role-Based Access
-Roles: `student` (default), `teacher`, `admin`. Role checks are done in individual pages/API routes, not middleware. Teacher pages redirect to `/dashboard` if the user is not `teacher` or `admin`.
+Roles: `student` (default), `teacher`, `admin`, `super-admin`. Role checks are done in individual pages/API routes, not middleware. Teacher pages redirect to `/dashboard` if the user is not `teacher` or `admin`.
+
+Role hierarchy:
+- `student` — can solve scenarios and view their own submissions
+- `teacher` — can manage scenarios, review submissions, access `/teacher/*`
+- `admin` — can manage teachers and students; access all `/admin/*` pages except admin management
+- `super-admin` — full access; the only role that can add, edit, or delete admin accounts; seeded via `pnpm seed:admin`
+
+The `isAdminOrSuperAdmin(role)` helper in `src/lib/session.ts` is the canonical check for admin-level access. Super-admin-only gates check `role === "super-admin"` directly.
 
 ### AI Evaluation Flow
 1. Student submits at `POST /api/submissions` — creates a `pending` submission in DB

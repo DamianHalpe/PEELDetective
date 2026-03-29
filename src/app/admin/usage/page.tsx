@@ -14,6 +14,7 @@ import {
 } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useSession } from "@/lib/auth-client";
 
 interface UsageData {
   dailyCap: number;
@@ -29,6 +30,8 @@ function formatTokens(n: number): string {
 }
 
 export default function AdminUsagePage() {
+  const { data: session } = useSession();
+  const isSuperAdmin = (session?.user as { role?: string })?.role === "super-admin";
   const [data, setData] = useState<UsageData | null>(null);
   const [dailyCap, setDailyCap] = useState("");
   const [monthlyCap, setMonthlyCap] = useState("");
@@ -128,7 +131,9 @@ export default function AdminUsagePage() {
             <CardHeader>
               <CardTitle className="text-base">Configure Caps</CardTitle>
               <CardDescription>
-                When a cap is reached, new AI evaluations return a 429 error until the period resets.
+                {isSuperAdmin
+                  ? "When a cap is reached, new AI evaluations return a 429 error until the period resets."
+                  : "Cap configuration is read-only. Only super-admins can modify these values."}
               </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -141,6 +146,8 @@ export default function AdminUsagePage() {
                   value={dailyCap}
                   onChange={(e) => setDailyCap(e.target.value)}
                   placeholder="100000"
+                  disabled={!isSuperAdmin || saving}
+                  readOnly={!isSuperAdmin}
                 />
               </div>
               <div className="space-y-2">
@@ -152,15 +159,19 @@ export default function AdminUsagePage() {
                   value={monthlyCap}
                   onChange={(e) => setMonthlyCap(e.target.value)}
                   placeholder="2000000"
+                  disabled={!isSuperAdmin || saving}
+                  readOnly={!isSuperAdmin}
                 />
               </div>
-              <Button
-                onClick={handleSave}
-                disabled={saving}
-                className="bg-detective-amber text-black hover:bg-detective-amber/90"
-              >
-                {saving ? "Saving…" : "Save Caps"}
-              </Button>
+              {isSuperAdmin && (
+                <Button
+                  onClick={handleSave}
+                  disabled={saving}
+                  className="bg-detective-amber text-black hover:bg-detective-amber/90"
+                >
+                  {saving ? "Saving…" : "Save Caps"}
+                </Button>
+              )}
             </CardContent>
           </Card>
         </div>

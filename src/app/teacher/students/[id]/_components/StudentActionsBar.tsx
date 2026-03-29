@@ -170,8 +170,8 @@ export function StudentActionsBar({
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Delete button - admin only */}
-      {viewerRole === "admin" && (
+      {/* Delete button - admin/super-admin only */}
+      {(viewerRole === "admin" || viewerRole === "super-admin") && (
         <AlertDialog>
           <AlertDialogTrigger asChild>
             <Button variant="destructive" size="sm" disabled={deleteLoading}>

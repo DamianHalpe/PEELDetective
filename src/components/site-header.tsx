@@ -104,7 +104,7 @@ export function SiteHeader() {
                   Subscribe
                 </Link>
               )}
-              {(role === "teacher" || role === "admin") && (
+              {(role === "teacher" || role === "admin" || role === "super-admin") && (
                 <Link
                   href="/teacher"
                   className={`${linkClass("/teacher")} flex items-center gap-1.5`}
@@ -113,7 +113,7 @@ export function SiteHeader() {
                   Teacher
                 </Link>
               )}
-              {role === "admin" && (
+              {(role === "admin" || role === "super-admin") && (
                 <Link
                   href="/admin"
                   className={`${linkClass("/admin")} flex items-center gap-1.5`}
@@ -126,7 +126,7 @@ export function SiteHeader() {
             <div className="flex items-center gap-3" role="group" aria-label="User actions">
               <UserProfile />
               <ModeToggle hasCustomTheme={!!customTheme} />
-              <MobileNav showTeacher={role === "teacher" || role === "admin"} showAdmin={role === "admin"} showSubscribe={showSubscribe} showDashboard={role === "student"} showSubmissions={role === "student"} />
+              <MobileNav showTeacher={role === "teacher" || role === "admin" || role === "super-admin"} showAdmin={role === "admin" || role === "super-admin"} showSubscribe={showSubscribe} showDashboard={role === "student"} showSubmissions={role === "student"} />
             </div>
           </div>
         </nav>

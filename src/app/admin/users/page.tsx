@@ -13,13 +13,15 @@ import {
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
+import { isAdminOrSuperAdmin } from "@/lib/session";
 
 export const metadata = { title: "User Management — Admin" };
 
 export default async function AdminUsersPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
-  if ((session.user.role as string) !== "admin") redirect("/dashboard");
+  const viewerRole = session.user.role as string;
+  if (!isAdminOrSuperAdmin(viewerRole)) redirect("/dashboard");
 
   const adminRows = await db
     .select({ adminCount: count() })
@@ -84,19 +86,21 @@ export default async function AdminUsersPage() {
             </Card>
           </Link>
 
-          <Link href="/admin/admins">
-            <Card className="border-detective-amber/20 hover:border-detective-amber/60 transition-colors cursor-pointer h-full">
-              <CardHeader>
-                <div className="rounded-lg bg-detective-amber/10 p-2 w-fit mb-2">
-                  <ShieldCheck className="h-5 w-5 text-detective-amber" />
-                </div>
-                <CardTitle className="text-lg">Admins</CardTitle>
-                <CardDescription>
-                  {adminCount} admin{adminCount !== 1 ? "s" : ""} — create and manage administrator accounts
-                </CardDescription>
-              </CardHeader>
-            </Card>
-          </Link>
+          {(viewerRole === "admin" || viewerRole === "super-admin") && (
+            <Link href="/admin/admins">
+              <Card className="border-detective-amber/20 hover:border-detective-amber/60 transition-colors cursor-pointer h-full">
+                <CardHeader>
+                  <div className="rounded-lg bg-detective-amber/10 p-2 w-fit mb-2">
+                    <ShieldCheck className="h-5 w-5 text-detective-amber" />
+                  </div>
+                  <CardTitle className="text-lg">Admins</CardTitle>
+                  <CardDescription>
+                    {adminCount} admin{adminCount !== 1 ? "s" : ""} — create and manage administrator accounts
+                  </CardDescription>
+                </CardHeader>
+              </Card>
+            </Link>
+          )}
         </div>
       </div>
     </div>

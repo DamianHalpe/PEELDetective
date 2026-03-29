@@ -23,6 +23,7 @@ import {
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
+import { isAdminOrSuperAdmin } from "@/lib/session";
 import { AdminUserActions } from "../_components/AdminUserActions";
 import { UserSearchForm } from "../_components/UserSearchForm";
 
@@ -35,7 +36,8 @@ export default async function AdminStudentsPage({
 }) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
-  if ((session.user.role as string) !== "admin") redirect("/dashboard");
+  const viewerRole = session.user.role as string;
+  if (!isAdminOrSuperAdmin(viewerRole)) redirect("/dashboard");
 
   const { q } = await searchParams;
   const searchTerm = q?.trim() ?? "";
@@ -201,6 +203,7 @@ export default async function AdminStudentsPage({
                           userName={student.name}
                           userRole="student"
                           isBanned={student.banned}
+                          viewerRole={viewerRole}
                         />
                       </TableCell>
                     </TableRow>

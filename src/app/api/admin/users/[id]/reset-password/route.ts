@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { user } from "@/lib/schema";
+import { isAdminOrSuperAdmin } from "@/lib/session";
 
 export async function POST(
   _request: Request,
@@ -10,7 +11,7 @@ export async function POST(
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
-  if ((session.user.role as string) !== "admin") {
+  if (!isAdminOrSuperAdmin(session.user.role as string)) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 

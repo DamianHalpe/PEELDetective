@@ -3,6 +3,9 @@ import { eq } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import { user } from "@/lib/schema";
+import { isAdminOrSuperAdmin } from "@/lib/session";
+
+const VALID_ROLES = ["student", "teacher", "admin", "super-admin"];
 
 export async function PATCH(
   request: Request,
@@ -10,11 +13,31 @@ export async function PATCH(
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
-  if ((session.user.role as string) !== "admin") {
+  const viewerRole = session.user.role as string;
+  if (!isAdminOrSuperAdmin(viewerRole)) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
   const { id } = await params;
+
+  // Fetch target user's current role
+  const [targetUser] = await db
+    .select({ role: user.role })
+    .from(user)
+    .where(eq(user.id, id))
+    .limit(1);
+
+  if (!targetUser) {
+    return Response.json({ error: "User not found" }, { status: 404 });
+  }
+
+  // Admins cannot edit other admins or super-admins — only super-admins can
+  if (
+    (targetUser.role === "admin" || targetUser.role === "super-admin") &&
+    viewerRole !== "super-admin"
+  ) {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
+  }
 
   let body: unknown;
   try {
@@ -34,10 +57,14 @@ export async function PATCH(
   }
 
   if (role !== undefined) {
-    if (!["student", "teacher", "admin"].includes(role as string)) {
+    if (!VALID_ROLES.includes(role as string)) {
       return Response.json({ error: "Invalid role" }, { status: 400 });
     }
-    if (id === session.user.id && role !== "admin") {
+    // Only super-admins can assign admin or super-admin roles
+    if ((role === "admin" || role === "super-admin") && viewerRole !== "super-admin") {
+      return Response.json({ error: "Only super-admins can assign elevated roles" }, { status: 403 });
+    }
+    if (id === session.user.id && role !== viewerRole) {
       return Response.json({ error: "You cannot change your own role" }, { status: 400 });
     }
     updates.role = role as string;
@@ -68,7 +95,8 @@ export async function DELETE(
 ) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
-  if ((session.user.role as string) !== "admin") {
+  const viewerRole = session.user.role as string;
+  if (!isAdminOrSuperAdmin(viewerRole)) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -76,6 +104,25 @@ export async function DELETE(
 
   if (id === session.user.id) {
     return Response.json({ error: "You cannot delete your own account" }, { status: 400 });
+  }
+
+  // Fetch target user's current role
+  const [targetUser] = await db
+    .select({ role: user.role })
+    .from(user)
+    .where(eq(user.id, id))
+    .limit(1);
+
+  if (!targetUser) {
+    return Response.json({ error: "User not found" }, { status: 404 });
+  }
+
+  // Admins cannot delete other admins or super-admins
+  if (
+    (targetUser.role === "admin" || targetUser.role === "super-admin") &&
+    viewerRole !== "super-admin"
+  ) {
+    return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
   await db.delete(user).where(eq(user.id, id));

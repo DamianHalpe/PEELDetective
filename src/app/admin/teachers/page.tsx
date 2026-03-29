@@ -23,6 +23,7 @@ import {
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
+import { isAdminOrSuperAdmin } from "@/lib/session";
 import { AdminUserActions } from "../_components/AdminUserActions";
 import { AddTeacherDialog } from "./_components/AddTeacherDialog";
 
@@ -31,7 +32,8 @@ export const metadata = { title: "Manage Teachers — Admin" };
 export default async function AdminTeachersPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
-  if ((session.user.role as string) !== "admin") redirect("/dashboard");
+  const viewerRole = session.user.role as string;
+  if (!isAdminOrSuperAdmin(viewerRole)) redirect("/dashboard");
 
   const teachers = await db
     .select({
@@ -118,6 +120,7 @@ export default async function AdminTeachersPage() {
                           userName={teacher.name}
                           userRole="teacher"
                           isBanned={teacher.banned}
+                          viewerRole={viewerRole}
                         />
                       </TableCell>
                     </TableRow>

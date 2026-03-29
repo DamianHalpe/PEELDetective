@@ -3,11 +3,12 @@ import { and, eq, gte, sum } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
+import { isAdminOrSuperAdmin } from "@/lib/session";
 
 export async function GET() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
-  if ((session.user as { role?: string }).role !== "admin") {
+  if (!isAdminOrSuperAdmin((session.user as { role?: string }).role)) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -55,7 +56,7 @@ export async function GET() {
 export async function PUT(req: Request) {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) return Response.json({ error: "Unauthorized" }, { status: 401 });
-  if ((session.user as { role?: string }).role !== "admin") {
+  if ((session.user as { role?: string }).role !== "super-admin") {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 

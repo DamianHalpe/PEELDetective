@@ -41,11 +41,18 @@ export async function getOptionalSession() {
 }
 
 /**
- * Returns true if the user is a teacher/admin (bypasses subscription gates)
+ * Returns true if the role is admin or super-admin.
+ */
+export function isAdminOrSuperAdmin(role: string | undefined): boolean {
+  return role === "admin" || role === "super-admin";
+}
+
+/**
+ * Returns true if the user is a teacher/admin/super-admin (bypasses subscription gates)
  * or a subscribed student. Used in API routes to return JSON errors.
  */
 export function isSubscribedOrStaff(user: { role?: string; subscribed?: boolean }): boolean {
-  if (user.role === "teacher" || user.role === "admin") return true;
+  if (user.role === "teacher" || user.role === "admin" || user.role === "super-admin") return true;
   return user.subscribed === true;
 }
 

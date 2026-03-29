@@ -14,7 +14,7 @@ export async function GET(_req: Request, { params }: RouteParams) {
 
   const { id } = await params;
   const role = session.user.role as string;
-  const isTeacherOrAdmin = role === "teacher" || role === "admin";
+  const isTeacherOrAdmin = role === "teacher" || role === "admin" || role === "super-admin";
 
   const [found] = await db
     .select()

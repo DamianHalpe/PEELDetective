@@ -28,15 +28,15 @@ async function main() {
 
   if (existing.length > 0) {
     const u = existing[0]!;
-    if (u.role === "admin") {
-      console.log(`✓ Admin account already exists: ${ADMIN_EMAIL}`);
+    if (u.role === "super-admin") {
+      console.log(`✓ Super-admin account already exists: ${ADMIN_EMAIL}`);
     } else {
-      // Upgrade existing user to admin
+      // Upgrade existing user to super-admin
       await db
         .update(user)
-        .set({ role: "admin" })
+        .set({ role: "super-admin" })
         .where(eq(user.email, ADMIN_EMAIL));
-      console.log(`✓ Upgraded existing user to admin: ${ADMIN_EMAIL}`);
+      console.log(`✓ Upgraded existing user to super-admin: ${ADMIN_EMAIL}`);
     }
     process.exit(0);
   }
@@ -55,16 +55,16 @@ async function main() {
     process.exit(1);
   }
 
-  // Set role to admin
+  // Set role to super-admin
   await db
     .update(user)
-    .set({ role: "admin", emailVerified: true })
+    .set({ role: "super-admin", emailVerified: true })
     .where(eq(user.id, response.user.id));
 
   console.log("✓ Super-admin account created successfully!\n");
   console.log(`  Email:    ${ADMIN_EMAIL}`);
   console.log(`  Password: ${ADMIN_PASSWORD}`);
-  console.log(`  Role:     admin`);
+  console.log(`  Role:     super-admin`);
   console.log("\n⚠  Change the password after first login!");
 
   process.exit(0);

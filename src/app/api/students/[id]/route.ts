@@ -13,7 +13,7 @@ export async function PATCH(request: Request, { params }: RouteParams) {
   }
 
   const role = session.user.role as string;
-  if (role !== "teacher" && role !== "admin") {
+  if (role !== "teacher" && role !== "admin" && role !== "super-admin") {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -37,8 +37,8 @@ export async function PATCH(request: Request, { params }: RouteParams) {
     return Response.json({ error: "User not found" }, { status: 404 });
   }
 
-  // Cannot ban a teacher or admin
-  if (targetUser.role === "teacher" || targetUser.role === "admin") {
+  // Cannot ban a teacher, admin, or super-admin via this route
+  if (targetUser.role === "teacher" || targetUser.role === "admin" || targetUser.role === "super-admin") {
     return Response.json(
       { error: "Cannot deactivate a teacher or admin account" },
       { status: 403 }
@@ -96,7 +96,7 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
   }
 
   const role = session.user.role as string;
-  if (role !== "admin") {
+  if (role !== "admin" && role !== "super-admin") {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -120,8 +120,8 @@ export async function DELETE(_request: Request, { params }: RouteParams) {
     return Response.json({ error: "User not found" }, { status: 404 });
   }
 
-  // Cannot delete a teacher or admin
-  if (targetUser.role === "teacher" || targetUser.role === "admin") {
+  // Cannot delete a teacher, admin, or super-admin via this route
+  if (targetUser.role === "teacher" || targetUser.role === "admin" || targetUser.role === "super-admin") {
     return Response.json(
       { error: "Cannot delete a teacher or admin account" },
       { status: 403 }

@@ -22,7 +22,7 @@ export const user = pgTable(
       .defaultNow()
       .$onUpdate(() => /* @__PURE__ */ new Date())
       .notNull(),
-    role: text("role").notNull().default("student"), // "student" | "teacher" | "admin"
+    role: text("role").notNull().default("student"), // "student" | "teacher" | "admin" | "super-admin"
     schoolId: text("school_id").references(() => school.id),
     points: integer("points").notNull().default(0),
     nickname: text("nickname").unique(),

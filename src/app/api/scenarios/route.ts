@@ -11,7 +11,7 @@ export async function GET() {
   }
 
   const role = session.user.role as string;
-  const isTeacherOrAdmin = role === "teacher" || role === "admin";
+  const isTeacherOrAdmin = role === "teacher" || role === "admin" || role === "super-admin";
 
   if (isTeacherOrAdmin) {
     const scenarios = await db.select().from(schema.scenario);

@@ -9,13 +9,15 @@ import {
   CardTitle,
 } from "@/components/ui/card";
 import { auth } from "@/lib/auth";
+import { isAdminOrSuperAdmin } from "@/lib/session";
 
 export const metadata = { title: "Admin Dashboard" };
 
 export default async function AdminPage() {
   const session = await auth.api.getSession({ headers: await headers() });
   if (!session) redirect("/login");
-  if ((session.user.role as string) !== "admin") redirect("/dashboard");
+  const viewerRole = session.user.role as string;
+  if (!isAdminOrSuperAdmin(viewerRole)) redirect("/dashboard");
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-detective-slate/10 to-background">

@@ -16,7 +16,7 @@ export async function GET(_req: Request, { params }: RouteParams) {
 
   // Teachers/admins can view any student; students can only view their own
   const role = session.user.role as string;
-  const isTeacherOrAdmin = role === "teacher" || role === "admin";
+  const isTeacherOrAdmin = role === "teacher" || role === "admin" || role === "super-admin";
   if (!isTeacherOrAdmin && session.user.id !== id) {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }

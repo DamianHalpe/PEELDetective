@@ -211,11 +211,13 @@ export default function ProfilePage() {
 
   // Role badge label
   const roleLabel =
-    (user as Record<string, unknown>).role === "teacher"
-      ? "Teacher"
+    (user as Record<string, unknown>).role === "super-admin"
+      ? "Super Admin"
       : (user as Record<string, unknown>).role === "admin"
         ? "Admin"
-        : "Student";
+        : (user as Record<string, unknown>).role === "teacher"
+          ? "Teacher"
+          : "Student";
 
   return (
     <div className="container max-w-4xl mx-auto py-8 px-4">

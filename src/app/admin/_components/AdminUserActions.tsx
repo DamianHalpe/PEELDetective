@@ -22,9 +22,10 @@ interface AdminUserActionsProps {
   userName: string;
   userRole: string;
   isBanned: boolean;
+  viewerRole?: string;
 }
 
-export function AdminUserActions({ userId, userName, userRole, isBanned }: AdminUserActionsProps) {
+export function AdminUserActions({ userId, userName, userRole, isBanned, viewerRole }: AdminUserActionsProps) {
   const router = useRouter();
   const [deleteLoading, setDeleteLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -58,6 +59,7 @@ export function AdminUserActions({ userId, userName, userRole, isBanned }: Admin
         userName={userName}
         userRole={userRole}
         isBanned={isBanned}
+        viewerRole={viewerRole}
       />
 
       <AlertDialog>

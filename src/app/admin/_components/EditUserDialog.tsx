@@ -21,9 +21,10 @@ interface EditUserDialogProps {
   userName: string;
   userRole: string;
   isBanned: boolean;
+  viewerRole?: string;
 }
 
-export function EditUserDialog({ userId, userName, userRole, isBanned }: EditUserDialogProps) {
+export function EditUserDialog({ userId, userName, userRole, isBanned, viewerRole }: EditUserDialogProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [name, setName] = useState(userName);
@@ -126,7 +127,8 @@ export function EditUserDialog({ userId, userName, userRole, isBanned }: EditUse
             >
               <option value="student">Student</option>
               <option value="teacher">Teacher</option>
-              <option value="admin">Admin</option>
+              {viewerRole === "super-admin" && <option value="admin">Admin</option>}
+              {viewerRole === "super-admin" && <option value="super-admin">Super Admin</option>}
             </select>
           </div>
 
