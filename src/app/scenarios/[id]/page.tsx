@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect, useState, useCallback, useRef } from "react";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import {
   Star,
@@ -47,6 +47,8 @@ interface SubmissionResponse {
   id: string;
   status: string;
 }
+
+type PanelId = "briefing" | "suspects" | "evidence";
 
 const peelElements = [
   {
@@ -93,6 +95,12 @@ const evalSteps = [
   { label: "Evaluating Link \u2014 tied back to the question?" },
 ];
 
+const panelDefs: { id: PanelId; label: string; Icon: typeof FileText }[] = [
+  { id: "briefing", label: "Crime Scene Briefing", Icon: FileText },
+  { id: "suspects", label: "Suspects", Icon: Users },
+  { id: "evidence", label: "Evidence Board", Icon: Search },
+];
+
 export default function InvestigatePage() {
   const { id } = useParams<{ id: string }>();
   const { data: session, isPending } = useSession();
@@ -117,6 +125,30 @@ export default function InvestigatePage() {
   const [evalStep, setEvalStep] = useState(0);
   const evalTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const formRef = useRef<HTMLDivElement | null>(null);
+
+  // Sliding panels state — ordered array of up to 2 open panel IDs
+  const [openPanels, setOpenPanels] = useState<PanelId[]>([]);
+
+  function togglePanel(panelId: PanelId) {
+    setOpenPanels((prev) => {
+      if (prev.includes(panelId)) {
+        return prev.filter((p) => p !== panelId);
+      }
+      if (prev.length >= 2) {
+        // Evict the oldest (index 0), add new at end
+        return [prev[1], panelId];
+      }
+      return [...prev, panelId];
+    });
+  }
+
+  function getPanelTransform(panelId: PanelId): string {
+    const idx = openPanels.indexOf(panelId);
+    if (idx === -1) return "translate-x-full";
+    // Older panel (index 0 when 2 panels open): shift left on desktop, overlap on mobile
+    if (idx === 0 && openPanels.length === 2) return "sm:-translate-x-[480px]";
+    return "translate-x-0";
+  }
 
   const fetchScenario = useCallback(async () => {
     try {
@@ -313,116 +345,118 @@ export default function InvestigatePage() {
           </div>
         </div>
 
-        {/* Two-column layout: scenario details */}
-        <div className="grid gap-8 md:grid-cols-3">
-          {/* Left panel: narrative content (2/3 width) */}
-          <div className="space-y-8 md:col-span-2">
-            {/* Crime Scene Briefing */}
-            <section>
-              <div className="relative mb-3 flex items-center gap-2">
-                <div className="absolute -left-3 top-1/2 h-px w-3 bg-detective-amber/40" />
-                <FileText className="h-4 w-4 text-detective-amber" />
-                <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
-                  Crime Scene Briefing
-                </h2>
-                <div className="ml-2 h-px flex-1 bg-detective-amber/35" />
-              </div>
-              <Card className="border-detective-amber/25 bg-card shadow-sm dark:bg-card">
-                <CardContent className="p-5">
-                  <div
-                    className="leading-relaxed text-card-foreground"
-                    dangerouslySetInnerHTML={{ __html: scenario.crimeDescription }}
-                  />
-                </CardContent>
-              </Card>
-            </section>
+        {/* Two-column layout: scenario details — hidden once writing starts */}
+        {!showForm && (
+          <div className="grid gap-8 md:grid-cols-3">
+            {/* Left panel: narrative content (2/3 width) */}
+            <div className="space-y-8 md:col-span-2">
+              {/* Crime Scene Briefing */}
+              <section>
+                <div className="relative mb-3 flex items-center gap-2">
+                  <div className="absolute -left-3 top-1/2 h-px w-3 bg-detective-amber/40" />
+                  <FileText className="h-4 w-4 text-detective-amber" />
+                  <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
+                    Crime Scene Briefing
+                  </h2>
+                  <div className="ml-2 h-px flex-1 bg-detective-amber/35" />
+                </div>
+                <Card className="border-detective-amber/25 bg-card shadow-sm dark:bg-card">
+                  <CardContent className="p-5">
+                    <div
+                      className="leading-relaxed text-card-foreground"
+                      dangerouslySetInnerHTML={{ __html: scenario.crimeDescription }}
+                    />
+                  </CardContent>
+                </Card>
+              </section>
 
-            {/* Suspects */}
-            <section>
-              <div className="relative mb-3 flex items-center gap-2">
-                <div className="absolute -left-3 top-1/2 h-px w-3 bg-detective-amber/40" />
-                <Users className="h-4 w-4 text-detective-amber" />
-                <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
-                  Suspects
-                </h2>
-                <div className="ml-2 h-px flex-1 bg-detective-amber/35" />
-              </div>
-              <div className="space-y-4">
-                {scenario.suspects.map((suspect, index) => (
-                  <Card key={index} className="hover:border-detective-amber/50 transition-colors duration-200">
-                    <CardContent className="p-4 flex gap-4 items-start">
-                      {/* Suspect thumbnail */}
-                      {suspect.imageUrl ? (
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setLightboxUrl(suspect.imageUrl!);
-                            setLightboxName(suspect.name);
-                          }}
-                          className="shrink-0 w-20 h-20 rounded overflow-hidden border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-detective-amber"
-                          aria-label={`View full photo of ${suspect.name}`}
-                        >
-                          <Image
-                            src={suspect.imageUrl}
-                            alt={suspect.name}
-                            width={64}
-                            height={64}
-                            className="w-full h-full object-cover"
-                          />
-                        </button>
-                      ) : (
-                        <div className="shrink-0 w-20 h-20 rounded border border-border bg-muted flex items-center justify-center">
-                          <User className="h-7 w-7 text-muted-foreground/40" />
+              {/* Suspects */}
+              <section>
+                <div className="relative mb-3 flex items-center gap-2">
+                  <div className="absolute -left-3 top-1/2 h-px w-3 bg-detective-amber/40" />
+                  <Users className="h-4 w-4 text-detective-amber" />
+                  <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
+                    Suspects
+                  </h2>
+                  <div className="ml-2 h-px flex-1 bg-detective-amber/35" />
+                </div>
+                <div className="space-y-4">
+                  {scenario.suspects.map((suspect, index) => (
+                    <Card key={index} className="hover:border-detective-amber/50 transition-colors duration-200">
+                      <CardContent className="p-4 flex gap-4 items-start">
+                        {/* Suspect thumbnail */}
+                        {suspect.imageUrl ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setLightboxUrl(suspect.imageUrl!);
+                              setLightboxName(suspect.name);
+                            }}
+                            className="shrink-0 w-20 h-20 rounded overflow-hidden border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-detective-amber"
+                            aria-label={`View full photo of ${suspect.name}`}
+                          >
+                            <Image
+                              src={suspect.imageUrl}
+                              alt={suspect.name}
+                              width={64}
+                              height={64}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ) : (
+                          <div className="shrink-0 w-20 h-20 rounded border border-border bg-muted flex items-center justify-center">
+                            <User className="h-7 w-7 text-muted-foreground/40" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-semibold text-base leading-snug mb-1">
+                            {suspect.name}
+                          </p>
+                          <p className="text-sm leading-relaxed text-muted-foreground">
+                            {suspect.background}
+                          </p>
                         </div>
-                      )}
-                      <div className="min-w-0">
-                        <p className="font-semibold text-base leading-snug mb-1">
-                          {suspect.name}
-                        </p>
-                        <p className="text-sm leading-relaxed text-muted-foreground">
-                          {suspect.background}
-                        </p>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </div>
-            </section>
-          </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </section>
+            </div>
 
-          {/* Right panel: evidence board (1/3 width) */}
-          <div>
-            <div className="md:sticky md:top-6">
-              <div className="relative mb-3 flex items-center gap-2">
-                <div className="absolute -left-3 top-1/2 h-px w-3 bg-detective-amber/40" />
-                <Search className="h-4 w-4 text-detective-amber" />
-                <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
-                  Evidence Board
-                </h2>
-                <div className="ml-2 h-px flex-1 bg-detective-amber/35" />
-              </div>
-              <div className="space-y-3">
-                {scenario.clues.map((clue, index) => (
-                  <Card
-                    key={index}
-                    className="border border-detective-amber/30 rounded-lg bg-amber-50/60 dark:bg-amber-950/20"
-                  >
-                    <CardContent className="flex items-start gap-3 p-3">
-                      <Lightbulb className="h-4 w-4 shrink-0 text-detective-amber" />
-                      <p className="text-sm leading-relaxed">{clue}</p>
-                    </CardContent>
-                  </Card>
-                ))}
+            {/* Right panel: evidence board (1/3 width) */}
+            <div>
+              <div className="md:sticky md:top-6">
+                <div className="relative mb-3 flex items-center gap-2">
+                  <div className="absolute -left-3 top-1/2 h-px w-3 bg-detective-amber/40" />
+                  <Search className="h-4 w-4 text-detective-amber" />
+                  <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
+                    Evidence Board
+                  </h2>
+                  <div className="ml-2 h-px flex-1 bg-detective-amber/35" />
+                </div>
+                <div className="space-y-3">
+                  {scenario.clues.map((clue, index) => (
+                    <Card
+                      key={index}
+                      className="border border-detective-amber/30 rounded-lg bg-amber-50/60 dark:bg-amber-950/20"
+                    >
+                      <CardContent className="flex items-start gap-3 p-3">
+                        <Lightbulb className="h-4 w-4 shrink-0 text-detective-amber" />
+                        <p className="text-sm leading-relaxed">{clue}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               </div>
             </div>
           </div>
-        </div>
+        )}
 
-        {/* ── Writing Form Section (inline, shown on demand) ── */}
+        {/* ── Writing Form Section (full-width, shown on demand) ── */}
         {showForm && (
-          <div ref={formRef} className="mt-12 scroll-mt-6">
+          <div ref={formRef} className="scroll-mt-6">
             {/* Section divider */}
-            <div className="relative mb-8 flex items-center gap-2">
+            <div className="relative mb-6 flex items-center gap-2">
               <div className="absolute -left-3 top-1/2 h-px w-3 bg-detective-amber/40" />
               <Send className="h-4 w-4 text-detective-amber" />
               <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
@@ -431,159 +465,172 @@ export default function InvestigatePage() {
               <div className="ml-2 h-px flex-1 bg-detective-amber/35" />
             </div>
 
-            <p className="mb-6 text-sm text-muted-foreground">
+            <p className="mb-4 text-sm text-muted-foreground">
               Write your PEEL paragraph to identify the culprit and make your
-              case.
+              case. Open any panel below to review the briefing, suspects, or
+              evidence.
             </p>
 
-            <div className="grid gap-6 md:grid-cols-3">
-              {/* Writing area (2/3) */}
-              <div className="space-y-4 md:col-span-2">
-                <Textarea
-                  value={responseText}
-                  onChange={(e) => setResponseText(e.target.value)}
-                  placeholder="Write your PEEL paragraph here. Start with your Point — who is the culprit? Then provide Evidence from the clues, Explain how the evidence proves your case, and Link back to the scenario..."
-                  className="min-h-[360px] resize-y text-base leading-relaxed focus-visible:ring-detective-amber/40 focus-visible:border-detective-amber"
-                  disabled={submitting}
-                />
-                <p className="mt-1.5 text-xs text-muted-foreground">
-                  {(() => {
-                    const wc = responseText.trim() === "" ? 0 : responseText.trim().split(/\s+/).length;
-                    return (
-                      <>
-                        {wc} words &middot; {responseText.length} chars
-                        {wc > 0 && wc < 50 && (
-                          <span className="ml-2 text-detective-amber/80">
-                            &mdash; aim for 80&ndash;150 words for a complete response
-                          </span>
-                        )}
-                      </>
-                    );
-                  })()}
-                </p>
+            {/* Info panel toolbar */}
+            <div className="mb-5 flex flex-wrap gap-2">
+              {panelDefs.map(({ id: panelId, label, Icon }) => {
+                const isOpen = openPanels.includes(panelId);
+                return (
+                  <button
+                    key={panelId}
+                    type="button"
+                    onClick={() => togglePanel(panelId)}
+                    className={`inline-flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-detective-amber ${
+                      isOpen
+                        ? "border-detective-amber bg-detective-amber/10 text-detective-amber"
+                        : "border-border bg-card text-muted-foreground hover:border-detective-amber/50 hover:text-foreground"
+                    }`}
+                    aria-pressed={isOpen}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
 
-                {submitError && (
-                  <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
-                    {submitError}
-                  </div>
-                )}
-
-                {submitting && (
-                  <Card className="border-detective-amber/30 bg-card">
-                    <CardContent className="p-4">
-                      <div className="mb-3 flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin text-detective-amber" />
-                        <span className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
-                          AI Evaluation in Progress
+            {/* Full-width writing area */}
+            <div className="space-y-4">
+              <Textarea
+                value={responseText}
+                onChange={(e) => setResponseText(e.target.value)}
+                placeholder="Write your PEEL paragraph here. Start with your Point — who is the culprit? Then provide Evidence from the clues, Explain how the evidence proves your case, and Link back to the scenario..."
+                className="min-h-[360px] w-full resize-y text-base leading-relaxed focus-visible:ring-detective-amber/40 focus-visible:border-detective-amber"
+                disabled={submitting}
+              />
+              <p className="mt-1.5 text-xs text-muted-foreground">
+                {(() => {
+                  const wc = responseText.trim() === "" ? 0 : responseText.trim().split(/\s+/).length;
+                  return (
+                    <>
+                      {wc} words &middot; {responseText.length} chars
+                      {wc > 0 && wc < 50 && (
+                        <span className="ml-2 text-detective-amber/80">
+                          &mdash; aim for 80&ndash;150 words for a complete response
                         </span>
-                      </div>
-                      <div className="space-y-2">
-                        {evalSteps.map((step, i) => (
-                          <div
-                            key={i}
-                            className="flex items-center gap-2 text-sm"
+                      )}
+                    </>
+                  );
+                })()}
+              </p>
+
+              {submitError && (
+                <div className="rounded-md border border-destructive/30 bg-destructive/10 p-3 text-sm text-destructive">
+                  {submitError}
+                </div>
+              )}
+
+              {submitting && (
+                <Card className="border-detective-amber/30 bg-card">
+                  <CardContent className="p-4">
+                    <div className="mb-3 flex items-center gap-2">
+                      <Loader2 className="h-4 w-4 animate-spin text-detective-amber" />
+                      <span className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
+                        AI Evaluation in Progress
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {evalSteps.map((step, i) => (
+                        <div
+                          key={i}
+                          className="flex items-center gap-2 text-sm"
+                        >
+                          {i < evalStep ? (
+                            <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
+                          ) : i === evalStep ? (
+                            <Loader2 className="h-4 w-4 shrink-0 animate-spin text-detective-amber" />
+                          ) : (
+                            <div className="h-4 w-4 shrink-0 rounded-full border border-muted-foreground/30" />
+                          )}
+                          <span
+                            className={
+                              i <= evalStep
+                                ? "text-foreground"
+                                : "text-muted-foreground/70"
+                            }
                           >
-                            {i < evalStep ? (
-                              <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-500" />
-                            ) : i === evalStep ? (
-                              <Loader2 className="h-4 w-4 shrink-0 animate-spin text-detective-amber" />
-                            ) : (
-                              <div className="h-4 w-4 shrink-0 rounded-full border border-muted-foreground/30" />
-                            )}
-                            <span
-                              className={
-                                i <= evalStep
-                                  ? "text-foreground"
-                                  : "text-muted-foreground/70"
-                              }
-                            >
-                              {step.label}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </CardContent>
-                  </Card>
+                            {step.label}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </CardContent>
+                </Card>
+              )}
+
+              <Button
+                size="lg"
+                className="w-full shadow-md transition-shadow hover:shadow-lg"
+                onClick={handleSubmit}
+                disabled={submitting || !responseText.trim()}
+              >
+                {submitting ? (
+                  <>
+                    <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    Evaluating...
+                  </>
+                ) : (
+                  <>
+                    <Send className="mr-2 h-4 w-4" />
+                    Submit Case Report
+                  </>
                 )}
+              </Button>
+            </div>
 
-                <Button
-                  size="lg"
-                  className="w-full shadow-md transition-shadow hover:shadow-lg"
-                  onClick={handleSubmit}
-                  disabled={submitting || !responseText.trim()}
-                >
-                  {submitting ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Evaluating...
-                    </>
-                  ) : (
-                    <>
-                      <Send className="mr-2 h-4 w-4" />
-                      Submit Case Report
-                    </>
-                  )}
-                </Button>
-              </div>
-
-              {/* PEEL Guide sidebar (1/3) */}
-              <div className="md:sticky md:top-6 md:self-start">
-                {/* Mobile toggle */}
+            {/* PEEL Guide — below the writing area */}
+            <div className="mt-8">
+              {/* Toggle header */}
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
+                  PEEL Writing Guide
+                </h2>
                 <button
-                  className="mb-3 flex w-full items-center justify-between rounded-md border bg-card px-4 py-2 text-sm font-medium md:hidden"
+                  className="text-xs text-muted-foreground transition-colors hover:text-foreground flex items-center gap-1"
                   onClick={() => setGuideOpen((v) => !v)}
                 >
-                  <span>PEEL Writing Guide</span>
                   {guideOpen ? (
-                    <ChevronLeft className="h-4 w-4" />
+                    <>Hide <ChevronLeft className="h-3 w-3" /></>
                   ) : (
-                    <ChevronRight className="h-4 w-4" />
+                    <>Show <ChevronRight className="h-3 w-3" /></>
                   )}
                 </button>
-
-                {/* Desktop header */}
-                <div className="mb-3 hidden items-center justify-between md:flex">
-                  <h2 className="text-xs font-semibold uppercase tracking-widest text-detective-amber">
-                    PEEL Guide
-                  </h2>
-                  <button
-                    className="text-xs text-muted-foreground transition-colors hover:text-foreground"
-                    onClick={() => setGuideOpen((v) => !v)}
-                  >
-                    {guideOpen ? "Hide" : "Show"}
-                  </button>
-                </div>
-
-                {guideOpen && (
-                  <div className="space-y-3">
-                    {peelElements.map((el) => (
-                      <Card
-                        key={el.letter + el.name}
-                        className={`overflow-hidden border-l-4 ${el.borderColor}`}
-                      >
-                        <CardHeader className="p-3 pb-1">
-                          <CardTitle className="flex items-center gap-2 text-sm">
-                            <span
-                              className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold ${el.color}`}
-                            >
-                              {el.letter}
-                            </span>
-                            {el.name}
-                          </CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-3 pt-1">
-                          <p className="mb-1.5 text-xs leading-relaxed text-muted-foreground">
-                            {el.description}
-                          </p>
-                          <p className="rounded border border-border bg-muted px-2 py-1 text-xs italic text-muted-foreground">
-                            {el.example}
-                          </p>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                )}
               </div>
+
+              {guideOpen && (
+                <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
+                  {peelElements.map((el) => (
+                    <Card
+                      key={el.letter + el.name}
+                      className={`overflow-hidden border-l-4 ${el.borderColor}`}
+                    >
+                      <CardHeader className="p-3 pb-1">
+                        <CardTitle className="flex items-center gap-2 text-sm">
+                          <span
+                            className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-muted text-xs font-bold ${el.color}`}
+                          >
+                            {el.letter}
+                          </span>
+                          {el.name}
+                        </CardTitle>
+                      </CardHeader>
+                      <CardContent className="p-3 pt-1">
+                        <p className="mb-1.5 text-xs leading-relaxed text-muted-foreground">
+                          {el.description}
+                        </p>
+                        <p className="rounded border border-border bg-muted px-2 py-1 text-xs italic text-muted-foreground">
+                          {el.example}
+                        </p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         )}
@@ -606,10 +653,110 @@ export default function InvestigatePage() {
 
       <GuideCharacter />
 
+      {/* Sliding info panels — rendered for all 3, animated in/out */}
+      {showForm && panelDefs.map(({ id: panelId, label, Icon }) => {
+        const isOpen = openPanels.includes(panelId);
+        const transformClass = getPanelTransform(panelId);
+
+        return (
+          <div
+            key={panelId}
+            className={`fixed inset-y-0 right-0 z-50 flex w-full flex-col bg-background shadow-2xl border-l transition-transform duration-300 ease-in-out sm:w-[480px] ${transformClass}`}
+            aria-hidden={!isOpen}
+          >
+            {/* Panel header */}
+            <div className="flex shrink-0 items-center justify-between border-b px-5 py-4">
+              <div className="flex items-center gap-2">
+                <Icon className="h-4 w-4 text-detective-amber" />
+                <span className="text-sm font-semibold uppercase tracking-widest text-detective-amber">
+                  {label}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => togglePanel(panelId)}
+                className="rounded-sm text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-detective-amber"
+                aria-label={`Close ${label} panel`}
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Panel body */}
+            <div className="flex-1 overflow-y-auto p-5">
+              {panelId === "briefing" && (
+                <div
+                  className="leading-relaxed text-card-foreground"
+                  dangerouslySetInnerHTML={{ __html: scenario.crimeDescription }}
+                />
+              )}
+
+              {panelId === "suspects" && (
+                <div className="space-y-4">
+                  {scenario.suspects.map((suspect, index) => (
+                    <Card key={index} className="hover:border-detective-amber/50 transition-colors duration-200">
+                      <CardContent className="p-4 flex gap-4 items-start">
+                        {suspect.imageUrl ? (
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setLightboxUrl(suspect.imageUrl!);
+                              setLightboxName(suspect.name);
+                            }}
+                            className="shrink-0 w-20 h-20 rounded overflow-hidden border border-border focus:outline-none focus-visible:ring-2 focus-visible:ring-detective-amber"
+                            aria-label={`View full photo of ${suspect.name}`}
+                          >
+                            <Image
+                              src={suspect.imageUrl}
+                              alt={suspect.name}
+                              width={80}
+                              height={80}
+                              className="w-full h-full object-cover"
+                            />
+                          </button>
+                        ) : (
+                          <div className="shrink-0 w-20 h-20 rounded border border-border bg-muted flex items-center justify-center">
+                            <User className="h-7 w-7 text-muted-foreground/40" />
+                          </div>
+                        )}
+                        <div className="min-w-0">
+                          <p className="font-semibold text-base leading-snug mb-1">
+                            {suspect.name}
+                          </p>
+                          <p className="text-sm leading-relaxed text-muted-foreground">
+                            {suspect.background}
+                          </p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+
+              {panelId === "evidence" && (
+                <div className="space-y-3">
+                  {scenario.clues.map((clue, index) => (
+                    <Card
+                      key={index}
+                      className="border border-detective-amber/30 rounded-lg bg-amber-50/60 dark:bg-amber-950/20"
+                    >
+                      <CardContent className="flex items-start gap-3 p-3">
+                        <Lightbulb className="h-4 w-4 shrink-0 text-detective-amber" />
+                        <p className="text-sm leading-relaxed">{clue}</p>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })}
+
       {/* Suspect image lightbox */}
       {lightboxUrl && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4"
+          className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4"
           onClick={() => setLightboxUrl(null)}
           onKeyDown={(e) => e.key === "Escape" && setLightboxUrl(null)}
           role="dialog"
