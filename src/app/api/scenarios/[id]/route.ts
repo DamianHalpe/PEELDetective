@@ -44,7 +44,7 @@ export async function PUT(req: Request, { params }: RouteParams) {
   }
 
   const role = session.user.role as string;
-  if (role !== "teacher" && role !== "admin") {
+  if (role !== "teacher" && role !== "admin" && role !== "super-admin") {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -112,7 +112,7 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
   }
 
   const role = session.user.role as string;
-  if (role !== "teacher" && role !== "admin") {
+  if (role !== "teacher" && role !== "admin" && role !== "super-admin") {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 

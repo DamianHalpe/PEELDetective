@@ -46,7 +46,7 @@ export async function POST(req: Request) {
   }
 
   const role = session.user.role as string;
-  if (role !== "teacher" && role !== "admin") {
+  if (role !== "teacher" && role !== "admin" && role !== "super-admin") {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 

@@ -59,6 +59,15 @@ export function SiteHeader() {
           <div className="flex items-center gap-6">
             {/* Nav links */}
             <div className="hidden md:flex items-center gap-1 text-sm font-medium" role="group" aria-label="Navigation links">
+              {role === "student" && (
+                <Link
+                  href="/dashboard"
+                  className={`${linkClass("/dashboard")} flex items-center gap-1.5`}
+                >
+                  <LayoutDashboard className="h-3.5 w-3.5" />
+                  Dashboard
+                </Link>
+              )}
               <Link
                 href="/scenarios"
                 className={`${linkClass("/scenarios")} flex items-center gap-1.5`}
@@ -73,15 +82,6 @@ export function SiteHeader() {
                 <BookOpen className="h-3.5 w-3.5" />
                 PEEL Guide
               </Link>
-              {role === "student" && (
-                <Link
-                  href="/dashboard"
-                  className={`${linkClass("/dashboard")} flex items-center gap-1.5`}
-                >
-                  <LayoutDashboard className="h-3.5 w-3.5" />
-                  Dashboard
-                </Link>
-              )}
               {role === "student" && (
                 <Link
                   href="/submissions"

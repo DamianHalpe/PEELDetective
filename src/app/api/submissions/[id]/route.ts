@@ -1,5 +1,5 @@
 import { headers } from "next/headers";
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, eq, max, sql } from "drizzle-orm";
 import { auth } from "@/lib/auth";
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
@@ -57,7 +57,7 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
   }
 
   const role = session.user.role as string;
-  if (role !== "teacher" && role !== "admin") {
+  if (role !== "teacher" && role !== "admin" && role !== "super-admin") {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 
@@ -72,6 +72,32 @@ export async function DELETE(_req: Request, { params }: RouteParams) {
     return Response.json({ error: "Submission not found" }, { status: 404 });
   }
 
+  // Reclaim points earned by this submission.
+  // Points are only awarded for evaluated submissions, and only for improvements
+  // over the student's previous best on a given scenario. The scenario's total
+  // contribution to user.points equals the highest score ever achieved on it,
+  // so removing a submission may lower that ceiling.
+  if (deleted.status === "evaluated" && (deleted.totalScore ?? 0) > 0) {
+    const [newBest] = await db
+      .select({ best: max(schema.submission.totalScore) })
+      .from(schema.submission)
+      .where(
+        and(
+          eq(schema.submission.studentId, deleted.studentId),
+          eq(schema.submission.scenarioId, deleted.scenarioId),
+          eq(schema.submission.status, "evaluated"),
+        ),
+      );
+
+    const pointsToRemove = (deleted.totalScore ?? 0) - (newBest?.best ?? 0);
+    if (pointsToRemove > 0) {
+      await db
+        .update(schema.user)
+        .set({ points: sql`GREATEST(0, ${schema.user.points} - ${pointsToRemove})` })
+        .where(eq(schema.user.id, deleted.studentId));
+    }
+  }
+
   return Response.json({ success: true });
 }
 
@@ -82,7 +108,7 @@ export async function PATCH(req: Request, { params }: RouteParams) {
   }
 
   const role = session.user.role as string;
-  if (role !== "teacher" && role !== "admin") {
+  if (role !== "teacher" && role !== "admin" && role !== "super-admin") {
     return Response.json({ error: "Forbidden" }, { status: 403 });
   }
 

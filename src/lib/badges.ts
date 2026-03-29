@@ -58,9 +58,12 @@ export async function awardBadges(
   userId: string,
   submissionData: { totalScore: number },
 ) {
-  // Gather student statistics needed for badge evaluation
-  const [submissionStats] = await db
-    .select({ submissionCount: count() })
+  // Gather student statistics needed for badge evaluation (single query)
+  const [stats] = await db
+    .select({
+      submissionCount: count(),
+      scenarioCount: countDistinct(schema.submission.scenarioId),
+    })
     .from(schema.submission)
     .where(
       and(
@@ -69,18 +72,8 @@ export async function awardBadges(
       ),
     );
 
-  const [scenarioStats] = await db
-    .select({ scenarioCount: countDistinct(schema.submission.scenarioId) })
-    .from(schema.submission)
-    .where(
-      and(
-        eq(schema.submission.studentId, userId),
-        eq(schema.submission.status, "evaluated"),
-      ),
-    );
-
-  const submissionCount = submissionStats?.submissionCount ?? 0;
-  const scenarioCount = scenarioStats?.scenarioCount ?? 0;
+  const submissionCount = stats?.submissionCount ?? 0;
+  const scenarioCount = stats?.scenarioCount ?? 0;
   const { totalScore } = submissionData;
 
   // Determine which badge IDs should be awarded based on triggers

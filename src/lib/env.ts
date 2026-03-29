@@ -19,7 +19,7 @@ const serverEnvSchema = z.object({
 
   // AI
   OPENROUTER_API_KEY: z.string().optional(),
-  OPENROUTER_MODEL: z.string().default("openai/gpt-5-mini"),
+  OPENROUTER_MODEL: z.string().default("anthropic/claude-sonnet-4-5"),
 
   // Storage
   BLOB_READ_WRITE_TOKEN: z.string().optional(),
