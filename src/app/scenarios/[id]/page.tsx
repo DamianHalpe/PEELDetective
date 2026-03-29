@@ -136,7 +136,7 @@ export default function InvestigatePage() {
       }
       if (prev.length >= 2) {
         // Evict the oldest (index 0), add new at end
-        return [prev[1], panelId];
+        return [prev[1]!, panelId];
       }
       return [...prev, panelId];
     });
