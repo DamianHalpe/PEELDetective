@@ -22,7 +22,7 @@ interface AdminUserActionsProps {
   userName: string;
   userRole: string;
   isBanned: boolean;
-  viewerRole?: string;
+  viewerRole?: string | undefined;
 }
 
 export function AdminUserActions({ userId, userName, userRole, isBanned, viewerRole }: AdminUserActionsProps) {

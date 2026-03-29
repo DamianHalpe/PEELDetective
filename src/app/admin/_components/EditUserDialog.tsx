@@ -21,7 +21,7 @@ interface EditUserDialogProps {
   userName: string;
   userRole: string;
   isBanned: boolean;
-  viewerRole?: string;
+  viewerRole?: string | undefined;
 }
 
 export function EditUserDialog({ userId, userName, userRole, isBanned, viewerRole }: EditUserDialogProps) {
